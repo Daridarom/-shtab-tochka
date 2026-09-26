@@ -1,1 +1,10 @@
-document.getElementById('enter').onclick=()=>{document.getElementById('login').hidden=true;document.getElementById('cup').hidden=false;scrollTo(0,0)};
+// SECURITY: no client-side fake login. Until server-side authentication is connected,
+// the public GitHub Pages shell must not reveal or fetch any private Shtab data.
+const enter=document.getElementById('enter');
+const cup=document.getElementById('cup');
+if(cup) cup.hidden=true;
+if(enter){
+  enter.textContent='Авторизация готовится';
+  enter.disabled=true;
+  enter.setAttribute('aria-disabled','true');
+}
