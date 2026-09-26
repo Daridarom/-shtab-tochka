@@ -11,6 +11,6 @@ async function health(){try{const r=await fetch('/api/health',{cache:'no-store'}
   document.documentElement.classList.add('readonly-mode');
   const ua=navigator.userAgent||'';
   if(/MAX/i.test(ua)) document.documentElement.classList.add('max-miniapp');
-  const bridge=window.WebApp||window.MAX?.WebApp||window.MaxWebApp;
-  try{bridge?.ready?.();bridge?.expand?.();}catch(e){}
+  const bridge=window.WebApp;
+  try{bridge?.ready?.();}catch(e){}
 })();
