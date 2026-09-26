@@ -1,1 +1,24 @@
-export default async function handler(req,res){res.setHeader('Cache-Control','no-store');return res.status(200).json({metrics:{active:null,attention:null,done:null},systems:[['Vercel / ЦУП','ok','Защищён и доступен'],['GitHub / код','ok','Автодеплой работает'],['n8n','wait','Телеметрия ещё не подключена'],['Linux / AI Commander','wait','Телеметрия ещё не подключена'],['Росток / публикации','wait','Телеметрия ещё не подключена'],['Telegram / MAX','wait','Телеметрия ещё не подключена']],events:[['LIVE','Vercel Authentication защищает production','ok'],['LIVE','Интерфейс получает состояние через /api/state','ok'],['ДАЛЕЕ','Подключить ingest от n8n/Linux без публикации секретов','wait']]});}
+export default async function handler(req,res){
+res.setHeader('Cache-Control','no-store');
+return res.status(200).json({
+metrics:{active:null,attention:0,done:null},
+systems:[
+['Vercel / ЦУП','ok','Интерфейс доступен'],
+['GitHub / код','ok','Автодеплой работает'],
+['AI Commander','ok','Безопасный maintenance-контур отвечает'],
+['Росток / Telegram','ok','26.09 21:00 · пост 57 опубликован'],
+['Росток / MAX','ok','26.09 21:02 · job 165 доставлен'],
+['n8n','wait','Свежий сигнал ещё не подключён']
+],
+events:[
+['21:02','Росток → MAX: доставка подтверждена · job 165','ok'],
+['21:00','Росток → Telegram: публикация подтверждена · сообщение 57','ok'],
+['21:01','Очередь Ростка: 0 нерешённых · лимит 4/день','ok'],
+['27.09 09:00','Следующий подготовленный слот Ростка · job 135','wait']
+],
+inbox:[
+['Росток','Следующий слот: 27.09 · 09:00','ok'],
+['Росток','Ещё подготовлен материал на 13:00 · job 186','ok'],
+['n8n','Подключить свежую телеметрию','wait'],
+['Документы','Реестр синхронизации ещё не подключён','wait']
+]});}
