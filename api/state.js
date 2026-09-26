@@ -1,7 +1,8 @@
 export default async function handler(req,res){
 res.setHeader('Cache-Control','no-store');
 return res.status(200).json({
-metrics:{active:null,attention:0,done:null},
+metrics:{active:3,attention:2,done:2},
+projects:[['Привет, планета','Публикации работают · следующий слот 27.09 09:00','ok'],['AI-Штаб','Безопасный maintenance-контур отвечает','ok'],['Киноуроки','Работа продолжается','wait'],['Медиа / AI','Монтаж и автоматизация','wait'],['РЭО Крым','Экологические проекты','wait'],['РКО','Русское космическое общество','wait']],
 systems:[
 ['Vercel / ЦУП','ok','Интерфейс доступен'],
 ['GitHub / код','ok','Автодеплой работает'],
