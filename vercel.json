@@ -1,1 +1,8 @@
-{"rewrites":[{"source":"/max","destination":"/public/max/index.html"},{"source":"/max/","destination":"/public/max/index.html"}]}
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/max", "destination": "/max/index.html" },
+    { "source": "/max/", "destination": "/max/index.html" }
+  ]
+}
