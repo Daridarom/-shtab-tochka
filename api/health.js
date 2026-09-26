@@ -1,0 +1,1 @@
+export default function handler(req,res){res.setHeader('Cache-Control','no-store');res.status(200).json({ok:true,service:'shtab-tochka',mode:'protected',time:new Date().toISOString(),ingestConfigured:Boolean(process.env.INGEST_KEY),storageConfigured:Boolean(process.env.KV_REST_API_URL||process.env.REDIS_URL)});}
