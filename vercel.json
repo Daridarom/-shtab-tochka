@@ -1,1 +1,1 @@
-{"rewrites":[{"source":"/max","destination":"/max/index.html"},{"source":"/max/:path*","destination":"/max/index.html"}]}
+{"rewrites":[{"source":"/max","destination":"/public/max/index.html"},{"source":"/max/:path*","destination":"/public/max/index.html"}]}
