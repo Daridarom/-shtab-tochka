@@ -5,3 +5,4 @@ $$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classLi
 setInterval(()=>$('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}),1000);render();
 async function refresh(){try{const r=await fetch('/api/state',{cache:'no-store'});if(!r.ok)return;const d=await r.json();Object.assign(state,d);render();$('#updated').textContent='обновлено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}catch(e){}}
 refresh();setInterval(refresh,30000);
+async function health(){try{const r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)return;const h=await r.json();const msg=h.storageConfigured?'Хранилище подключено':h.ingestConfigured?'Ключ подключён · ждёт хранилище':'Настройка телеметрии';const row=state.systems.find(x=>x[0]==='Vercel / ЦУП');if(row){row[2]='Защищён · '+msg;}render();}catch(e){}}health();setInterval(health,30000);
