@@ -1,0 +1,1 @@
+document.getElementById('enter').onclick=()=>{document.getElementById('login').hidden=true;document.getElementById('cup').hidden=false;scrollTo(0,0)};
