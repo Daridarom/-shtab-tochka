@@ -6,3 +6,11 @@ setInterval(()=>$('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{h
 async function refresh(){try{const r=await fetch('/api/state',{cache:'no-store'});if(!r.ok)return;const d=await r.json();Object.assign(state,d);render();$('#updated').textContent='обновлено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}catch(e){}}
 refresh();setInterval(refresh,30000);
 async function health(){try{const r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)return;const h=await r.json();const msg=h.storageConfigured?'Хранилище подключено':h.ingestConfigured?'Ключ подключён · ждёт хранилище':'Настройка телеметрии';const row=state.systems.find(x=>x[0]==='Vercel / ЦУП');if(row){row[2]='Защищён · '+msg;}render();}catch(e){}}health();setInterval(health,30000);
+// MAX Mini App compatibility: safe read-only shell. No write actions are exposed.
+(function initMaxMiniApp(){
+  document.documentElement.classList.add('readonly-mode');
+  const ua=navigator.userAgent||'';
+  if(/MAX/i.test(ua)) document.documentElement.classList.add('max-miniapp');
+  const bridge=window.WebApp||window.MAX?.WebApp||window.MaxWebApp;
+  try{bridge?.ready?.();bridge?.expand?.();}catch(e){}
+})();
