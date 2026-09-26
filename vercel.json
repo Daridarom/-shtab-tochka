@@ -1,1 +1,11 @@
-{"rewrites":[{"source":"/max","destination":"/public/max/index.html"},{"source":"/max/","destination":"/public/max/index.html"}]}
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/", "destination": "https://daridarom.github.io/-shtab-tochka/index.html" },
+    { "source": "/app.js", "destination": "https://daridarom.github.io/-shtab-tochka/app.js" },
+    { "source": "/styles.css", "destination": "https://daridarom.github.io/-shtab-tochka/styles.css" },
+    { "source": "/max", "destination": "/max/index.html" },
+    { "source": "/max/", "destination": "/max/index.html" }
+  ]
+}
