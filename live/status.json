@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-27T15:43:37.171846+00:00",
+  "generated_at": "2026-09-27T15:45:30.161775+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -37,7 +37,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 19 с назад"
+      "detail": "Ожидают: 0 · проверка связи 18 с назад"
     },
     {
       "id": "rostok",
@@ -49,7 +49,7 @@
       "id": "publications",
       "title": "Публикации",
       "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: slot:2026-09-27T18:00, unit:privet-planeta-auto-dispatch.timer, unit:privet-planeta-auto-publish.timer, unit:privet-planeta-max-mirror.timer, unit:privet-planeta-publication-watchdog.timer"
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: publication_lock_hold, slot:2026-09-27T18:00, unit:privet-planeta-auto-dispatch.timer, unit:privet-planeta-auto-publish.timer, unit:privet-planeta-max-mirror.timer"
     }
   ],
   "workflows": [
