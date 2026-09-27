@@ -1,1 +1,1 @@
-{"cleanUrls":false,"rewrites":[{"source":"/max","destination":"/max/index.html"},{"source":"/max/","destination":"/max/index.html"}]}
+{"cleanUrls":false,"rewrites":[{"source":"/max","destination":"/index.html"},{"source":"/max/","destination":"/index.html"}]}
