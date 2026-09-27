@@ -26,3 +26,11 @@ export function useMaxColorScheme(){
  },[]);
  return s==='light'?'light':'dark';
 }
+
+const THEME_KEY='shtab.theme';
+export const THEME_ORDER=['dark','light','auto'];
+export function useThemeSetting(){
+ const [setting,setSetting]=useState(()=>{try{const v=localStorage.getItem(THEME_KEY);return THEME_ORDER.includes(v)?v:'dark';}catch(e){return 'dark';}});
+ const cycle=()=>{const next=THEME_ORDER[(THEME_ORDER.indexOf(setting)+1)%THEME_ORDER.length];try{localStorage.setItem(THEME_KEY,next);}catch(e){}setSetting(next);};
+ return [setting,cycle];
+}
