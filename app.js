@@ -8,9 +8,9 @@ async function refresh(){try{const r=await fetch('/api/state',{cache:'no-store'}
 refresh();setInterval(refresh,30000);
 async function health(){try{const r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)return;const h=await r.json();
  const upsert=(name,status,text)=>{const row=state.systems.find(x=>x[0]===name);if(row){row[1]=status;row[2]=text;}else state.systems.splice(2,0,[name,status,text]);};
+ state.systems=state.systems.filter(x=>x[0]!=='Облачное состояние'&&x[0]!=='Ingest / приём данных'&&x[0]!=='Redis / хранилище');
  upsert('ЦУП','ok','Интерфейс доступен');
- upsert('Облачное состояние',h.storageConfigured?'ok':'wait',h.storageConfigured?'Подключено':'Ждёт подключения');
- upsert('Обновление данных',h.ingestConfigured&&h.storageConfigured?'ok':'wait',h.ingestConfigured?(h.storageConfigured?'Работает автоматически':'Настраивается'):'Настраивается');
+ upsert('Обновление данных',h.liveConfigured?'ok':'wait',h.liveConfigured?'Работает автоматически · '+(h.ageSeconds??'?')+' с назад':'Нет свежих данных');
  render();}catch(e){}}health();setInterval(health,30000);
 // MAX Mini App compatibility: safe read-only shell. No write actions are exposed.
 (function initMaxMiniApp(){
