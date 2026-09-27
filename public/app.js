@@ -1,25 +1,5 @@
 import {loadState,moscowTime} from './live.js?v=1';
-const projectTree=[
- {id:'tochka',name:'Точка притяжения',desc:'Штаб, команда и проекты в Крыму',children:[
-   {id:'hq',name:'Штаб',desc:'Единый центр управления'},
-   {id:'alexander',name:'Александр Благов',desc:'Управляющий контур'},
-   {id:'polina',name:'Полина',desc:'Секретарь · поручения · документы'},
-   {id:'development',name:'Девелопмент Крым',desc:'Земельные и территориальные проекты',children:[
-     {id:'h45',name:'Горизонт 45 / Азгард',desc:'Бухта Космонавтов · туристический комплекс'},
-     {id:'elios',name:'Элиос',desc:'Земельный проект · СЭЗ и ЛПХ'},
-     {id:'blagodar',name:'Благодар',desc:'Земельный проект · ЛПХ'},
-     {id:'bospor',name:'Боспор',desc:'Клубный земельный формат'}
-   ]}
- ]},
- {id:'future',name:'О будущем',desc:'Образовательные и смысловые проекты',children:[
-   {id:'kinouroki',name:'Киноуроки',desc:'Фильмы · методика · образовательная система'}
- ]},
- {id:'rko',name:'РКО',desc:'Русское космическое общество · отдельное направление'},
- {id:'reo',name:'РЭО Крым',desc:'Российское экологическое общество · Крым'},
- {id:'media',name:'Медиа / AI',desc:'AI-студия · монтаж · автоматизация'},
- {id:'communities',name:'Центр сообществ',desc:'Заявки и взаимодействие'},
- {id:'personal',name:'Личный контур',desc:'Обучение и эксперименты'}
-];
+import {projectTree} from './projects.js?v=1';
 let projectPath=[];
 const state={operations:[],metrics:{active:null,attention:null,done:null},systems:[['ЦУП','ok','Интерфейс доступен']],projects:projectTree,events:[['Сейчас','ЦУП работает в режиме просмотра','ok']],inbox:[]};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
