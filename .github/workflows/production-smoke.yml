@@ -29,3 +29,7 @@ jobs:
           echo "APP_JS_HTTP=$js"
           test "$js" = "200"
           grep -q "nav button" /tmp/app.js
+          health=$(curl -L -sS -o /tmp/health.json -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/api/health)
+          echo "HEALTH_HTTP=$health"
+          cat /tmp/health.json
+          test "$health" = "200"
