@@ -5,8 +5,8 @@
 
 export const CDN_CACHE_SECONDS=300;
 export const LIVE_URLS=[
- 'https://raw.githubusercontent.com/Daridarom/-shtab-tochka/telemetry/live/status.json',
- 'https://raw.githubusercontent.com/Daridarom/-shtab-tochka/main/live/status.json'
+ 'https://raw.githubusercontent.com/Daridarom/shtab-tochka/telemetry/live/status.json',
+ 'https://raw.githubusercontent.com/Daridarom/shtab-tochka/main/live/status.json'
 ];
 
 // Нейтральное состояние, когда источник недоступен: без старых ошибок, похожих на текущие.

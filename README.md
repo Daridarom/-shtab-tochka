@@ -12,7 +12,7 @@
 ## Публикация
 
 - Хостинг: GitHub Pages, деплой через `.github/workflows/deploy-pages.yml` при каждом коммите в `main`, кроме телеметрических (`live/status.json`).
-- Адрес по умолчанию: `https://daridarom.github.io/-shtab-tochka/`, MAX-приложение: `https://daridarom.github.io/-shtab-tochka/max/`.
+- Адрес по умолчанию: `https://daridarom.github.io/shtab-tochka/`, MAX-приложение: `https://daridarom.github.io/shtab-tochka/max/`.
 - В настройках репозитория Settings → Pages источник должен быть «GitHub Actions» (workflow включает Pages сам при первом запуске, если у него хватает прав).
 - После деплоя запускается `production-smoke.yml`. Для своего домена задай переменную репозитория `SITE_URL`.
 
