@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "generated_at": "2026-09-27T13:25:12.137946+00:00",
+  "ttl_seconds": 120,
+  "cards": [
+    {
+      "id": "system",
+      "title": "Система",
+      "level": "ok",
+      "detail": "Канал управления: работает · процессы: работает · свободно 211.1 ГБ"
+    },
+    {
+      "id": "visual",
+      "title": "Ошибки визуала",
+      "level": "ok",
+      "detail": "0 сервисов в состоянии ошибки"
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "level": "ok",
+      "detail": "Получатель: работает · записей: 10"
+    },
+    {
+      "id": "max",
+      "title": "MAX",
+      "level": "ok",
+      "detail": "Получатель: работает · записей: 504"
+    },
+    {
+      "id": "drive",
+      "title": "Google Drive",
+      "level": "ok",
+      "detail": "Контекст проверен"
+    },
+    {
+      "id": "queue",
+      "title": "GitHub queue",
+      "level": "ok",
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+    },
+    {
+      "id": "rostok",
+      "title": "Росток",
+      "level": "ok",
+      "detail": "Сегодня: 2 из 4 · в очереди: 2 · следующий слот: сегодня 18:00 · всего опубликовано: 51 · готово: 6 · согласование: 1 · заблокировано: 41"
+    },
+    {
+      "id": "publications",
+      "title": "Публикации",
+      "level": "ok",
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "shtabHealth01",
+      "name": "Здоровье AI-Штаба",
+      "active": true,
+      "runtime_running": true,
+      "execution_recent": true,
+      "last_status": "success"
+    },
+    {
+      "id": "shtabIntake01",
+      "name": "Входящие Telegram и MAX",
+      "active": true,
+      "runtime_running": true,
+      "execution_recent": true,
+      "last_status": "success"
+    },
+    {
+      "id": "shtabPublications01",
+      "name": "Росток и публикации",
+      "active": true,
+      "runtime_running": true,
+      "execution_recent": true,
+      "last_status": "success"
+    }
+  ],
+  "failed_visual_count": 0,
+  "rostok": {
+    "published_today": 2,
+    "daily_limit": 4,
+    "unresolved": 0,
+    "next_slot": "2026-09-27T18:00+03:00",
+    "queue": 2,
+    "total_published": 51
+  },
+  "publication_unresolved": 0,
+  "publication_delivery_errors": 0
+}
