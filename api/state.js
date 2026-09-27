@@ -6,6 +6,6 @@ const fallback={
   events:[['26.09 21:02','Росток → MAX: последняя подтверждённая доставка · job 165','wait'],['26.09 21:00','Росток → Telegram: последняя подтверждённая публикация · сообщение 57','wait'],['Сейчас','Живой ingest ещё не подключён: данные ниже являются снимком, не LIVE','wait']],
   inbox:[['Телеметрия','Подключить постоянное хранилище и automation bypass','wait'],['n8n / Linux','Подключить heartbeat после настройки ingest','wait'],['Документы','Реестр синхронизации ещё не подключён','wait']]
 };
-function redisConfig(){return {url:process.env.KV_REST_API_URL||process.env.UPSTASH_REDIS_REST_URL,token:process.env.KV_REST_API_TOKEN||process.env.UPSTASH_REDIS_REST_TOKEN};}
+function redisConfig(){return {url:process.env.KV_REST_API_URL||process.env.UPSTASH_REDIS_REST_URL||process.env.STORAGE_REST_API_URL,token:process.env.KV_REST_API_TOKEN||process.env.UPSTASH_REDIS_REST_TOKEN||process.env.STORAGE_REST_API_TOKEN};}
 async function redis(cmd){const {url,token}=redisConfig();if(!url||!token)throw new Error('storage_not_configured');const r=await fetch(url,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(cmd)});if(!r.ok)throw new Error('storage_error_'+r.status);const j=await r.json();return j.result;}
 export default async function handler(req,res){res.setHeader('Cache-Control','no-store');try{const raw=await redis(['GET','shtab:state']);if(raw){const live=JSON.parse(raw);return res.status(200).json({...live,mode:'live'});}}catch(e){}return res.status(200).json(fallback);}
