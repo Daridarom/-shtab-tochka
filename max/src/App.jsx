@@ -1,36 +1,88 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState,useCallback} from 'react';
 import {Panel,Grid,Container,Flex,Typography} from '@maxhub/max-ui';
-import {loadState} from '../../public/live.js';
+import {startLive,describeMode,ageLabel,moscowTime} from '../../public/live.js';
 import {projectTree} from '../../public/projects.js';
-const initial={mode:'loading',metrics:{active:null,attention:null,done:null},systems:[],events:[],inbox:[]};
-function Row({dot,title,text,time}){return <Flex className="row" gap={10}><>{time!=null&&<time>{time}</time>}<span className={'dot '+dot}/><div><b>{title}</b>{text&&<small>{text}</small>}</div></></Flex>}
-function Empty({text}){return <p className="empty">{text}</p>}
+import {haptic,useBackButton} from './max.js';
+
+const TABS=[['home','Главная'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
+const store={get(k,d){try{return localStorage.getItem(k)??d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const initial={mode:'loading',metrics:{active:null,attention:null,done:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
+
+function Row({dot,title,text,time}){return <Flex className="row" gap={10}><>{time!=null&&<time>{time}</time>}<span className={'dot '+dot}/><div><b>{title}</b>{text&&<small>{text}</small>}</div></></Flex>;}
+function Empty({text}){return <p className="empty">{text}</p>;}
+function Card({title,aside,className='',children}){return <Container className={'card '+className}>{(title||aside)&&<div className="head"><Typography.Title variant="small-strong">{title}</Typography.Title>{aside&&<span className="aside">{aside}</span>}</div>}{children}</Container>;}
+function RefreshIcon(){return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>;}
+
+function Focus({s}){
+ const rows=s.focus.length?s.focus:[['wait','Получаем состояние штаба','']];
+ const bad=rows.filter(x=>x[0]!=='ok').length;
+ return <Card title="Нужно внимание" aside={bad?bad+' '+(bad===1?'пункт':bad<5?'пункта':'пунктов'):'всё спокойно'} className="span2 focus">
+  {rows.map((x,i)=><div className={'focusRow '+x[0]} key={i}><span className={'dot '+x[0]}/><div><b>{x[1]}</b>{x[2]&&<small>{x[2]}</small>}</div></div>)}
+ </Card>;
+}
+function Metrics({s}){
+ return <Grid cols={3} gap={8} className="span2">{[['Работает',s.metrics.active,'процессов'],['Внимание',s.metrics.attention,'пунктов'],['Сделано',s.metrics.done,'сегодня']].map(([k,v,d])=><Container className="metric" key={k}><Typography.Label variant="small">{k}</Typography.Label><div className="metricValue">{v??'—'}</div><small>{d}</small></Container>)}</Grid>;
+}
+function Rostok({r}){
+ if(!r)return null;
+ const stat=(k,v)=><div className="stat" key={k}><small>{k}</small><b>{v??'—'}</b></div>;
+ return <Card title="Росток · публикации" aside={r.unresolved?'есть неясные':'по плану'}>
+  <div className="stats">{stat('Сегодня',r.publishedToday!=null&&r.dailyLimit!=null?r.publishedToday+' из '+r.dailyLimit:r.publishedToday)}{stat('В очереди',r.queue)}{stat('Следующий слот',r.nextSlotLabel)}{stat('Всего опубликовано',r.totalPublished)}</div>
+ </Card>;
+}
+function Workflows({list}){
+ return <Card title="Автоматические процессы" aside={list.length?list.filter(w=>w[1]==='ok').length+' из '+list.length:''}>
+  {list.length?list.map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>):<Empty text="Список процессов появится после первого обновления"/>}
+ </Card>;
+}
+function Feed({events}){return <Card title="Оперативная лента">{events.length?events.map((x,i)=><Row key={i} time={x[0]} dot={x[2]} title={x[1]}/>):<Empty text="История появится после первого обновления"/>}</Card>;}
+function Systems({s}){
+ const bad=s.systems.filter(x=>x[1]!=='ok'),good=s.systems.filter(x=>x[1]==='ok');
+ if(!s.systems.length)return <Card title="Системы"><Empty text="Ждём первое обновление состояния"/></Card>;
+ return <>
+  {bad.length>0&&<Card title="Требуют внимания" aside={String(bad.length)}>{bad.map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>)}</Card>}
+  <Card title="Работают штатно" aside={String(good.length)}>{good.length?good.map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>):<Empty text="Пока ничего не подтверждено"/>}</Card>
+ </>;
+}
+function Inbox({s}){
+ return <Card title="Входящие" aside={s.inbox.length?String(s.inbox.length):''}>{s.inbox.length?s.inbox.map((x,i)=><Row key={i} dot={x[2]} title={x[0]} text={x[1]}/>):<Empty text={s.mode==='live'||s.mode==='stale'?'Критичных сигналов нет. Всё, что требует внимания, появится здесь.':'Список появится после первого обновления'}/>}</Card>;
+}
 function Projects(){
- const [path,setPath]=useState([]);
+ const [path,setPath]=useState(()=>{try{return JSON.parse(store.get('shtab.max.path','[]'))||[];}catch(e){return [];}});
+ useEffect(()=>{store.set('shtab.max.path',JSON.stringify(path));},[path]);
+ const back=useCallback(()=>{haptic('light');setPath(p=>p.slice(0,-1));},[]);
+ useBackButton(path.length>0,back);
  let nodes=projectTree,node=null;
- for(const id of path){node=nodes.find(x=>x.id===id);if(!node)break;nodes=node.children||[];}
- return <Container className="card">
-  {path.length>0&&<button type="button" className="back" onClick={()=>setPath(path.slice(0,-1))}>‹ Назад</button>}
+ for(const id of path){node=nodes.find(x=>x.id===id);if(!node){nodes=[];break;}nodes=node.children||[];}
+ return <Card className="projects">
+  {path.length>0&&<button type="button" className="back" onClick={back}>‹ Назад</button>}
   <Typography.Title variant="small-strong">{node?node.name:'Проекты'}</Typography.Title>
   {node?.desc&&<p className="desc">{node.desc}</p>}
   {nodes.length===0&&node&&<Empty text="Задачи, сроки и документы этого проекта подключаются отдельным слоем. Неподтверждённые данные здесь не показываются."/>}
-  {nodes.map((x,i)=><button type="button" className="project" key={x.id} onClick={()=>setPath([...path,x.id])}><span className="num">{String(i+1).padStart(2,'0')}</span><div><b>{x.name}</b><small>{x.desc||''}</small></div><i>{x.children?.length?'›':'•'}</i></button>)}
- </Container>;
+  {nodes.map((x,i)=><button type="button" className="project" key={x.id} onClick={()=>{haptic('select');setPath([...path,x.id]);}}><span className="num">{String(i+1).padStart(2,'0')}</span><div><b>{x.name}</b><small>{x.desc||''}</small></div><i>{x.children?.length?'›':'•'}</i></button>)}
+ </Card>;
 }
+
 export default function App(){
- const [s,setS]=useState(initial);const [tab,setTab]=useState('home');
- useEffect(()=>{let live=true;const load=()=>loadState().then(d=>live&&setS(d)).catch(()=>{});load();const id=setInterval(load,30000);return()=>{live=false;clearInterval(id)}},[]);
- const status=s.mode==='live'?'Данные свежие':s.mode==='stale'?'Данные устарели':s.mode==='offline'?'Нет связи с источником':'Получаем состояние…';
- return <Panel mode="secondary" className="shell">
-  <header><Typography.Label variant="small" className="eyebrow">ШТАБ.ТОЧКА · MAX</Typography.Label><Typography.Title variant="large-strong" className="title">Центр управления</Typography.Title><small className="status">{status}</small></header>
-  {tab==='home'&&<>
-   <Grid cols={3} gap={8}>{[['Сейчас',s.metrics.active],['Внимание',s.metrics.attention],['Сегодня',s.metrics.done]].map(([k,v])=><Container className="metric" key={k}><Typography.Label variant="small">{k}</Typography.Label><div className="metricValue">{v??'—'}</div></Container>)}</Grid>
-   <Container className="card"><Typography.Title variant="small-strong">Главное сейчас</Typography.Title>{s.systems.length?s.systems.slice(0,6).map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>):<Empty text="Ждём первое обновление состояния"/>}</Container>
-   <Container className="card"><Typography.Title variant="small-strong">Оперативная лента</Typography.Title>{s.events.length?s.events.map((x,i)=><Row key={i} time={x[0]} dot={x[2]} title={x[1]}/>):<Empty text="История появится после первого обновления"/>}</Container>
-  </>}
+ const [s,setS]=useState(initial);
+ const [tab,setTabState]=useState(()=>TABS.some(t=>t[0]===store.get('shtab.max.tab'))?store.get('shtab.max.tab'):'home');
+ const [busy,setBusy]=useState(false);
+ const [,setTick]=useState(0);
+ const live=useRef(null);
+ useEffect(()=>{live.current=startLive(d=>setS({...d,loadedAt:Date.now()}));const id=setInterval(()=>setTick(t=>t+1),1000);return()=>{live.current?.stop();clearInterval(id);};},[]);
+ const setTab=id=>{haptic('select');setTabState(id);store.set('shtab.max.tab',id);try{scrollTo({top:0});}catch(e){}};
+ const onRefresh=async()=>{if(busy)return;haptic('light');setBusy(true);try{await live.current?.refresh();}finally{setBusy(false);}};
+ const age=s.ageSeconds==null?null:s.ageSeconds+Math.max(0,Math.round((Date.now()-s.loadedAt)/1000));
+ const status=s.mode==='loading'?'Обновляем…':describeMode(s)+(age!=null?' · '+ageLabel(age):'')+(s.asOf?' · '+moscowTime(s.asOf):'');
+ return <Panel mode="secondary" className={'shell mode-'+s.mode}>
+  <header className="top">
+   <div><Typography.Label variant="small" className="eyebrow">ШТАБ.ТОЧКА · MAX</Typography.Label><Typography.Title variant="large-strong" className="title">Центр управления</Typography.Title><small className={'status '+s.mode}>{status}</small></div>
+   <button type="button" className={'refresh'+(busy||s.mode==='loading'?' spin':'')} onClick={onRefresh} aria-label="Обновить"><RefreshIcon/></button>
+  </header>
+  {tab==='home'&&<div className="home"><Focus s={s}/><Metrics s={s}/><Rostok r={s.rostok}/><Workflows list={s.workflows}/><Feed events={s.events}/></div>}
   {tab==='projects'&&<Projects/>}
-  {tab==='systems'&&<Container className="card"><Typography.Title variant="small-strong">Системы</Typography.Title>{s.systems.length?s.systems.map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>):<Empty text="Ждём первое обновление состояния"/>}</Container>}
-  {tab==='inbox'&&<Container className="card"><Typography.Title variant="small-strong">Входящие</Typography.Title>{s.inbox.length?s.inbox.map((x,i)=><Row key={i} dot={x[2]} title={x[0]} text={x[1]}/>):<Empty text={s.mode==='live'||s.mode==='stale'?'Критичных сигналов нет. Всё, что требует внимания, появится здесь.':'Список появится после первого обновления'}/>}</Container>}
-  <nav>{[['home','Главная'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']].map(([id,t])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{t}</button>)}</nav>
+  {tab==='systems'&&<div className="home"><Systems s={s}/></div>}
+  {tab==='inbox'&&<Inbox s={s}/>}
+  <nav>{TABS.map(([id,t])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{t}{id==='inbox'&&s.inbox.length>0&&<em className="badge">{s.inbox.length}</em>}</button>)}</nav>
  </Panel>;
 }

@@ -1,4 +1,4 @@
-import {loadState,moscowTime} from './live.js?v=1';
+import {startLive,describeMode,ageLabel,moscowTime} from './live.js?v=2';
 import {projectTree} from './projects.js?v=1';
 let projectPath=[];
 const state={operations:[],metrics:{active:null,attention:null,done:null},systems:[['ЦУП','ok','Интерфейс доступен']],projects:projectTree,events:[['Сейчас','ЦУП работает в режиме просмотра','ok']],inbox:[]};
@@ -15,19 +15,21 @@ function renderProjects(){
  box.innerHTML=head+nodes.map((x,i)=>`<article class="project-card" data-project="${x.id}"><span>${String(i+1).padStart(2,'0')}</span><div><b>${x.name}</b><small>${x.desc||''}</small></div><i>${x.children?.length?'›':'•'}</i></article>`).join('');
 }
 document.addEventListener('click',e=>{const back=e.target.closest('.project-back');if(back){projectPath.pop();renderProjects();return;}const card=e.target.closest('.project-card');if(!card)return;projectPath.push(card.dataset.project);renderProjects();scrollTo({top:0,behavior:'smooth'});});
-function render(){ const focus=$('#focusList');if(focus){const rows=[];if(state.metrics.attention!=null&&state.metrics.attention>0)rows.push(['attention',state.metrics.attention+' пункта требуют внимания']);const issues=state.systems.filter(x=>x[1]!=='ok').slice(0,3);issues.forEach(x=>rows.push([x[1],humanIssue(x)]));if(!rows.length&&state.metrics.active!=null)rows.push(['active','Критичных проблем нет · '+state.metrics.active+' процесса работают']);focus.innerHTML=(rows.length?rows:[['wait','Получаем состояние штаба']]).map(x=>`<div class="focus-row"><span class="dot ${x[0]==='attention'?'err':x[0]==='active'?'ok':x[0]}"></span><b>${x[1]}</b></div>`).join('');} $('#m-active').textContent=state.metrics.active??'—';$('#m-attn').textContent=state.metrics.attention??'—';$('#m-done').textContent=state.metrics.done??'—';$('#systems').innerHTML=state.systems.map(x=>`<div class="sys"><span class="dot ${x[1]}"></span><div><b>${x[0]}</b><small>${x[2]}</small></div></div>`).join('');$('#events').innerHTML=state.events.map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[2]}"></span><p>${x[1]}</p></div>`).join('');renderProjects();$('#inboxList').innerHTML=state.inbox.map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[2]}"></span><p>${x[1]}</p></div>`).join('');$('#flowList').innerHTML=state.systems.slice(2).map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[1]}"></span><p>${x[2]}</p></div>`).join('');}
+function render(){ const focus=$('#focusList');if(focus){const rows=state.focus&&state.focus.length?state.focus:[['wait','Получаем состояние штаба','']];focus.innerHTML=rows.map(x=>`<div class="focus-row"><span class="dot ${x[0]}"></span><div><b>${x[1]}</b>${x[2]?`<small>${x[2]}</small>`:''}</div></div>`).join('');} $('#m-active').textContent=state.metrics.active??'—';$('#m-attn').textContent=state.metrics.attention??'—';$('#m-done').textContent=state.metrics.done??'—';$('#systems').innerHTML=state.systems.map(x=>`<div class="sys"><span class="dot ${x[1]}"></span><div><b>${x[0]}</b><small>${x[2]}</small></div></div>`).join('');$('#events').innerHTML=state.events.map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[2]}"></span><p>${x[1]}</p></div>`).join('');renderProjects();$('#inboxList').innerHTML=state.inbox.map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[2]}"></span><p>${x[1]}</p></div>`).join('');$('#flowList').innerHTML=state.systems.slice(2).map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[1]}"></span><p>${x[2]}</p></div>`).join('');const wl=$('#workflowList');if(wl){const w=state.workflows||[];wl.innerHTML=w.length?w.map(x=>`<div class="event"><time>${x[0]}</time><span class="dot ${x[1]}"></span><p>${x[2]}</p></div>`).join(''):'<div class="event"><time>—</time><span class="dot wait"></span><p>Список процессов появится после обновления</p></div>';const wa=$('#wfAside');if(wa)wa.textContent=w.length?w.filter(x=>x[1]==='ok').length+' из '+w.length+' в норме':'';}const rc=$('#rostok');if(rc){const r=state.rostok;rc.hidden=!r;if(r){$('#rostokAside').textContent=r.unresolved?'есть неясные':'по плану';$('#rostokStats').innerHTML=[['Сегодня',r.publishedToday!=null&&r.dailyLimit!=null?r.publishedToday+' из '+r.dailyLimit:r.publishedToday],['В очереди',r.queue],['Следующий слот',r.nextSlotLabel],['Всего опубликовано',r.totalPublished]].map(x=>`<div class="stat"><small>${x[0]}</small><b>${x[1]??'—'}</b></div>`).join('');}}}
 $$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classList.toggle('active',x===b));$$('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));scrollTo({top:0,behavior:'smooth'});});
 setInterval(()=>$('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}),1000);render();
-async function refresh(){
- try{
-  const d=await loadState();
-  state.metrics=d.metrics;state.systems=[['ЦУП','ok','Интерфейс доступен'],...d.systems];state.events=d.events;state.inbox=d.inbox;state.mode=d.mode;
-  render();
-  $('#healthText').textContent=d.mode==='offline'?'НЕТ СВЯЗИ':'СВЯЗЬ ЕСТЬ';
-  $('#updated').textContent=d.mode==='live'?'Обновлено сейчас':d.mode==='stale'?'Данные устарели · '+moscowTime(d.asOf,true):'Нет связи с источником';
- }catch(e){}
+let loadedAt=Date.now();
+function apply(d){
+ state.metrics=d.metrics;state.systems=[['ЦУП','ok','Интерфейс доступен'],...d.systems];state.events=d.events;state.inbox=d.inbox;state.mode=d.mode;state.focus=d.focus;state.workflows=d.workflows;state.rostok=d.rostok;state.ageSeconds=d.ageSeconds;state.asOf=d.asOf;loadedAt=Date.now();
+ render();
+ $('#healthText').textContent=d.mode==='offline'?'НЕТ СВЯЗИ':d.mode==='loading'?'ПРОВЕРКА…':'СВЯЗЬ ЕСТЬ';
+ updatedLabel();
+ document.documentElement.dataset.mode=d.mode;
 }
-refresh();setInterval(refresh,30000);
+function updatedLabel(){const el=$('#updated');if(!el)return;if(state.mode==='loading'){el.textContent='Обновляем…';return;}const age=state.ageSeconds==null?null:state.ageSeconds+Math.max(0,Math.round((Date.now()-loadedAt)/1000));el.textContent=describeMode(state)+(age!=null?' · '+ageLabel(age):'')+(state.asOf?' · '+moscowTime(state.asOf):'');}
+setInterval(updatedLabel,1000);
+const live=startLive(apply);
+const refreshBtn=$('#refresh');if(refreshBtn)refreshBtn.onclick=async()=>{refreshBtn.classList.add('spin');try{window.WebApp?.HapticFeedback?.impactOccurred?.('light');}catch(e){}try{await live.refresh();}finally{refreshBtn.classList.remove('spin');}};
 // MAX Mini App compatibility: safe read-only shell. No write actions are exposed.
 (function initMaxMiniApp(){
   document.documentElement.classList.add('readonly-mode');
