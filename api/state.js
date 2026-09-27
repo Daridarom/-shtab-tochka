@@ -1,42 +1,22 @@
-const snapshot={
- mode:'snapshot',asOf:'2026-09-27T14:17:37+03:00',ttlSeconds:120,
- metrics:{active:3,attention:4,done:null},
- projects:[
-  ['AI-Штаб','Локальный ЦУП, collector и n8n работают','warn'],
-  ['Привет, планета','6 визуалов готовы · 1 на согласовании · 41 заблокирован','warn'],
-  ['Telegram','Получатель работает · 10 записей','ok'],
-  ['MAX','Получатель работает · 504 записи','ok'],
-  ['Google Drive','Свежесть контекста требует проверки','warn'],
-  ['Публикации','Неясная доставка 1 · ошибок доставки 0','err']
- ],
- systems:[
-  ['Система','warn','Канал управления работает · процессы работают'],
-  ['Ошибки визуала','err','3 сервиса в состоянии ошибки'],
-  ['Telegram','ok','Получатель работает · 10 записей'],
-  ['MAX','ok','Получатель работает · 504 записи'],
-  ['Google Drive','warn','Свежесть контекста требует проверки'],
-  ['GitHub queue','ok','Очередь 0 · связь свежая'],
-  ['Росток','warn','6 готово · 1 согласование · 41 заблокировано'],
-  ['Публикации','err','Неясная доставка 1 · ошибок доставки 0'],
-  ['n8n','ok','3 из 3 процессов: свежий успешный запуск'],
-  ['CUP collector','ok','Локальный снимок обновляется каждые 30 секунд']
- ],
- events:[
-  ['14:17','Состояние штаба обновлено','ok'],
-  ['14:17','Telegram и MAX работают','ok'],
-  ['14:17','Визуалы: 3 процесса требуют исправления','err'],
-  ['14:17','Публикации: 1 результат нужно проверить','err'],
-  ['14:17','Росток: 41 материал заблокирован · документы проверены','wait']
- ],
- inbox:[
-  ['Внимание','Проверить ошибки публикаций','err'],
-  ['Внимание','Разобрать failed visual-сервисы','err'],
-  ['Контроль','Проверить свежесть Google Drive','wait'],
-  ['Контроль','Проверить состояние Ростка','wait']
- ]
+// Neutral offline placeholder: shown only when the live projection cannot be fetched at all.
+// It must never carry stale error rows that look like current problems.
+const offline={
+ mode:'offline',asOf:null,ttlSeconds:120,
+ metrics:{active:null,attention:null,done:null},
+ projects:[],
+ systems:[['Обновление данных','wait','Нет связи с источником состояния']],
+ events:[['Сейчас','Состояние штаба недоступно: нет связи с источником','wait']],
+ inbox:[]
 };
 
-const LIVE_URL='https://raw.githubusercontent.com/Daridarom/-shtab-tochka/main/live/status.json';
+// Telemetry lives on the deploy-free `telemetry` branch; `main` is kept as a fallback for the transition.
+const LIVE_URLS=['https://raw.githubusercontent.com/Daridarom/-shtab-tochka/telemetry/live/status.json','https://raw.githubusercontent.com/Daridarom/-shtab-tochka/main/live/status.json'];
+async function fetchLive(agent){
+ for(const url of LIVE_URLS){
+   try{const r=await fetch(url+'?t='+Date.now(),{headers:{'User-Agent':agent}});if(r.ok){const raw=await r.json();if(raw&&raw.generated_at)return {raw,source:url.includes('/telemetry/')?'telemetry-branch':'main-branch'};}}catch(e){}
+ }
+ return null;
+}
 function level(x){return x==='error'?'err':x==='warn'||x==='unknown'?'wait':'ok';}
 function humanName(id,title){return ({system:'Компьютер штаба',visual:'Визуалы',drive:'Документы',queue:'Канал управления',rostok:'Росток',publications:'Публикации',telegram:'Telegram',max:'MAX'})[id]||title||id;}
 function toState(raw){
@@ -52,18 +32,24 @@ function toState(raw){
    ...issues.slice(0,4).map(c=>['Сейчас',humanName(c.id,c.title)+': '+(c.detail||'требует проверки'),level(c.level)])
  ];
  const inbox=issues.filter(c=>c.level==='error'||c.level==='warn').slice(0,6).map(c=>['Внимание',humanName(c.id,c.title)+': '+(c.detail||'требует проверки'),level(c.level)]);
- return {mode:'live',asOf:raw.generated_at,ttlSeconds:raw.ttl_seconds||120,metrics:{active,attention,done:null},systems,events,inbox};
+ const rostok=raw.rostok&&typeof raw.rostok==='object'?raw.rostok:{};
+ const done=Number.isFinite(rostok.published_today)?rostok.published_today:null;
+ return {mode:'live',asOf:raw.generated_at,ttlSeconds:raw.ttl_seconds||120,metrics:{active,attention,done},rostok:{publishedToday:done,dailyLimit:rostok.daily_limit??null,queue:rostok.queue??null,nextSlot:rostok.next_slot??null,totalPublished:rostok.total_published??null},systems,events,inbox};
 }
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store, max-age=0');
  try{
-   const r=await fetch(LIVE_URL+'?t='+Date.now(),{headers:{'User-Agent':'shtab-tochka'}});
-   if(r.ok){
-     const raw=await r.json();
+   const hit=await fetchLive('shtab-tochka');
+   if(hit){
+     const raw=hit.raw;
      const age=(Date.now()-Date.parse(raw.generated_at))/1000;
-     if(Number.isFinite(age)&&age<=Math.max(120,raw.ttl_seconds||120))return res.status(200).json(toState(raw));
-     return res.status(200).json({...snapshot,mode:'stale',asOf:raw.generated_at,staleSeconds:Math.round(age)});
+     const live=toState(raw);live.source=hit.source;
+     if(Number.isFinite(age)&&age<=Math.max(120,raw.ttl_seconds||120))return res.status(200).json(live);
+     // Stale projection: keep the last real data, but label it and flag the update channel.
+     const staleSeconds=Number.isFinite(age)?Math.round(age):null;
+     live.systems.unshift(['Обновление данных','wait',staleSeconds!=null?'Данные устарели · '+staleSeconds+' с назад':'Время последнего обновления неизвестно']);
+     return res.status(200).json({...live,mode:'stale',staleSeconds});
    }
  }catch(e){}
- return res.status(200).json(snapshot);
+ return res.status(200).json(offline);
 }

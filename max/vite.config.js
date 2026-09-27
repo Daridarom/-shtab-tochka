@@ -1,4 +1,6 @@
 import {defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
-import {resolve} from 'path';
-export default defineConfig({root:resolve(process.cwd(),'max'),base:'/max/',plugins:[react()],build:{outDir:resolve(process.cwd(),'public/max'),emptyOutDir:true}});
+import {dirname, resolve} from 'path';
+import {fileURLToPath} from 'url';
+const here=dirname(fileURLToPath(import.meta.url));
+export default defineConfig({root:here,base:'/max/',plugins:[react()],build:{outDir:resolve(here,'..','public','max'),emptyOutDir:true}});

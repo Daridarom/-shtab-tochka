@@ -4,7 +4,6 @@ on:
     branches: [main]
     paths:
       - 'max/**'
-      - 'package.json'
       - '.github/workflows/build-max.yml'
   workflow_dispatch:
 permissions:
@@ -13,14 +12,18 @@ jobs:
   build:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: max
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - name: Publish compiled MAX bundle
+        working-directory: .
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
