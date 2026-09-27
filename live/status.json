@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "generated_at": "2026-09-27T11:38:47.131171+00:00",
+  "ttl_seconds": 120,
+  "cards": [
+    {
+      "id": "system",
+      "title": "Система",
+      "level": "warn",
+      "detail": "Канал управления: работает · процессы: работает · свободно 211.1 ГБ"
+    },
+    {
+      "id": "visual",
+      "title": "Ошибки визуала",
+      "level": "error",
+      "detail": "3 сервисов в состоянии ошибки"
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "level": "ok",
+      "detail": "Получатель: работает · записей: 10"
+    },
+    {
+      "id": "max",
+      "title": "MAX",
+      "level": "ok",
+      "detail": "Получатель: работает · записей: 504"
+    },
+    {
+      "id": "drive",
+      "title": "Google Drive",
+      "level": "warn",
+      "detail": "Контекст проверен"
+    },
+    {
+      "id": "queue",
+      "title": "GitHub queue",
+      "level": "ok",
+      "detail": "Ожидают: 0 · проверка связи 13 с назад"
+    },
+    {
+      "id": "rostok",
+      "title": "Росток",
+      "level": "warn",
+      "detail": "Готов визуал: 6 · на согласовании: 1 · заблокировано: 41"
+    },
+    {
+      "id": "publications",
+      "title": "Публикации",
+      "level": "error",
+      "detail": "Неясная доставка: 1 · ошибки доставки: 0"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "shtabHealth01",
+      "name": "Здоровье AI-Штаба",
+      "active": true,
+      "runtime_running": true,
+      "execution_recent": true,
+      "last_status": "success"
+    },
+    {
+      "id": "shtabIntake01",
+      "name": "Входящие Telegram и MAX",
+      "active": true,
+      "runtime_running": true,
+      "execution_recent": true,
+      "last_status": "success"
+    },
+    {
+      "id": "shtabPublications01",
+      "name": "Росток и публикации",
+      "active": true,
+      "runtime_running": true,
+      "execution_recent": true,
+      "last_status": "success"
+    }
+  ],
+  "failed_visual_count": 3,
+  "publication_unresolved": 1,
+  "publication_delivery_errors": 0
+}
