@@ -1,2 +1,5 @@
 node_modules/
 max/node_modules/
+# Сборка MAX-приложения делается в CI при деплое, в репозитории не хранится
+public/max/
+_site/

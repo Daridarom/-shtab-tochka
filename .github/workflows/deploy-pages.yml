@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+# Публикует папку public/ (панель ЦУП + собранное MAX-приложение) на GitHub Pages.
+# Телеметрические коммиты live/status.json деплой не запускают.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'live/status.json'
+      - 'README.md'
+      - 'docs/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: max/package-lock.json
+      - name: Install MAX UI dependencies
+        working-directory: max
+        run: npm ci --no-audit --no-fund
+      - name: Build MAX UI into public/max
+        working-directory: max
+        run: npm run build
+      - name: Assemble site
+        run: |
+          set -euo pipefail
+          rm -rf _site && mkdir _site
+          cp -R public/. _site/
+          touch _site/.nojekyll
+          test -f _site/index.html
+          test -f _site/live.js
+          test -f _site/max/index.html
+          ls _site/max/assets
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
