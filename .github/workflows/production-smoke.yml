@@ -25,3 +25,7 @@ jobs:
           echo
           test "$api" = "200"
           grep -q '"metrics"' /tmp/state.json
+          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/app.js?v=10)
+          echo "APP_JS_HTTP=$js"
+          test "$js" = "200"
+          grep -q "data-view" /tmp/app.js
