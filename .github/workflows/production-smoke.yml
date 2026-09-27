@@ -26,10 +26,13 @@ jobs:
           test "$api" = "200"
           grep -q '"metrics"' /tmp/state.json
           grep -q '"mode":"live"' /tmp/state.json
-          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/app.js?v=10)
+          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/app.js?v=11)
           echo "APP_JS_HTTP=$js"
           test "$js" = "200"
           grep -q "nav button" /tmp/app.js
+          grep -q "projectTree" /tmp/app.js
+          grep -q "Горизонт 45 / Азгард" /tmp/app.js
+          grep -q "Элиос" /tmp/app.js
           health=$(curl -L -sS -o /tmp/health.json -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/api/health)
           echo "HEALTH_HTTP=$health"
           cat /tmp/health.json
