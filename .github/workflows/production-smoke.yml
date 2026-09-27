@@ -21,8 +21,8 @@ jobs:
           get(){ curl -L -sS -o "$2" -w "%{http_code}" --max-time 30 "$1"; }
           code=$(get "$base" /tmp/body.html); echo "ROOT_HTTP=$code"; test "$code" = "200"
           grep -q "Центр управления" /tmp/body.html
-          grep -q "app.js?v=13" /tmp/body.html
-          grep -q "styles.css?v=9" /tmp/body.html
+          grep -q "app.js?v=14" /tmp/body.html
+          grep -q "styles.css?v=10" /tmp/body.html
           code=$(get "${base}app.js" /tmp/app.js); echo "APP_JS_HTTP=$code"; test "$code" = "200"
           grep -q "projectTree" /tmp/app.js
           grep -q "loadState" /tmp/app.js
@@ -31,6 +31,9 @@ jobs:
           grep -q "Элиос" /tmp/projects.js
           code=$(get "${base}live.js" /tmp/live.js); echo "LIVE_JS_HTTP=$code"; test "$code" = "200"
           grep -q "raw.githubusercontent.com/Daridarom/shtab-tochka/telemetry/live/status.json" /tmp/live.js
+          code=$(get "${base}manifest.webmanifest" /tmp/manifest.json); echo "MANIFEST_HTTP=$code"; test "$code" = "200"
+          grep -q "Штаб.Точка" /tmp/manifest.json
+          code=$(get "${base}icons/icon-192.png" /tmp/icon.png); echo "ICON_HTTP=$code"; test "$code" = "200"
           code=$(get "${base}max/" /tmp/max.html); echo "MAX_HTTP=$code"; test "$code" = "200"
           grep -q "Штаб.Точка MAX" /tmp/max.html
           asset=$(grep -o 'assets/index-[^"]*\.js' /tmp/max.html | head -1); test -n "$asset"
