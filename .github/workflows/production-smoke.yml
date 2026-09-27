@@ -2,6 +2,8 @@ name: production-smoke
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'live/status.json'
   workflow_dispatch:
 jobs:
   smoke:
@@ -17,13 +19,13 @@ jobs:
           echo "ROOT_HTTP=$code"
           test "$code" = "200"
           grep -q "Центр управления" /tmp/body.html
-          grep -q "app.js?v=11" /tmp/body.html
+          grep -q "app.js?v=12" /tmp/body.html
           grep -q "styles.css?v=9" /tmp/body.html
           api=$(curl -L -sS -o /tmp/state.json -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/api/state)
           echo "STATE_HTTP=$api"
           test "$api" = "200"
           grep -q '"metrics"' /tmp/state.json
-          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 'https://shtab-tochka.vercel.app/app.js?v=11')
+          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 'https://shtab-tochka.vercel.app/app.js?v=12')
           echo "APP_JS_HTTP=$js"
           test "$js" = "200"
           grep -q "projectTree" /tmp/app.js
