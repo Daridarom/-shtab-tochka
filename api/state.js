@@ -9,7 +9,14 @@ const offline={
  inbox:[]
 };
 
-const LIVE_URL='https://raw.githubusercontent.com/Daridarom/-shtab-tochka/main/live/status.json';
+// Telemetry lives on the deploy-free `telemetry` branch; `main` is kept as a fallback for the transition.
+const LIVE_URLS=['https://raw.githubusercontent.com/Daridarom/-shtab-tochka/telemetry/live/status.json','https://raw.githubusercontent.com/Daridarom/-shtab-tochka/main/live/status.json'];
+async function fetchLive(agent){
+ for(const url of LIVE_URLS){
+   try{const r=await fetch(url+'?t='+Date.now(),{headers:{'User-Agent':agent}});if(r.ok){const raw=await r.json();if(raw&&raw.generated_at)return {raw,source:url.includes('/telemetry/')?'telemetry-branch':'main-branch'};}}catch(e){}
+ }
+ return null;
+}
 function level(x){return x==='error'?'err':x==='warn'||x==='unknown'?'wait':'ok';}
 function humanName(id,title){return ({system:'Компьютер штаба',visual:'Визуалы',drive:'Документы',queue:'Канал управления',rostok:'Росток',publications:'Публикации',telegram:'Telegram',max:'MAX'})[id]||title||id;}
 function toState(raw){
@@ -32,11 +39,11 @@ function toState(raw){
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store, max-age=0');
  try{
-   const r=await fetch(LIVE_URL+'?t='+Date.now(),{headers:{'User-Agent':'shtab-tochka'}});
-   if(r.ok){
-     const raw=await r.json();
+   const hit=await fetchLive('shtab-tochka');
+   if(hit){
+     const raw=hit.raw;
      const age=(Date.now()-Date.parse(raw.generated_at))/1000;
-     const live=toState(raw);
+     const live=toState(raw);live.source=hit.source;
      if(Number.isFinite(age)&&age<=Math.max(120,raw.ttl_seconds||120))return res.status(200).json(live);
      // Stale projection: keep the last real data, but label it and flag the update channel.
      const staleSeconds=Number.isFinite(age)?Math.round(age):null;

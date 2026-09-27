@@ -1,3 +1,8 @@
 {
-  "ignoreCommand": "if git diff --quiet HEAD^ HEAD -- ':!live/status.json'; then exit 0; else exit 1; fi"
+  "ignoreCommand": "if git diff --quiet HEAD^ HEAD -- ':!live/status.json'; then exit 0; else exit 1; fi",
+  "git": {
+    "deploymentEnabled": {
+      "telemetry": false
+    }
+  }
 }
