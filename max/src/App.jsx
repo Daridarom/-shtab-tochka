@@ -6,22 +6,31 @@ import {haptic,useBackButton} from './max.js';
 
 const TABS=[['home','Главная'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
 const store={get(k,d){try{return localStorage.getItem(k)??d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
-const initial={mode:'loading',metrics:{active:null,attention:null,done:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
+const initial={mode:'loading',verdict:null,notice:null,metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
 
 function Row({dot,title,text,time}){return <Flex className="row" gap={10}><>{time!=null&&<time>{time}</time>}<span className={'dot '+dot}/><div><b>{title}</b>{text&&<small>{text}</small>}</div></></Flex>;}
 function Empty({text}){return <p className="empty">{text}</p>;}
 function Card({title,aside,className='',children}){return <Container className={'card '+className}>{(title||aside)&&<div className="head"><Typography.Title variant="small-strong">{title}</Typography.Title>{aside&&<span className="aside">{aside}</span>}</div>}{children}</Container>;}
 function RefreshIcon(){return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>;}
 
+function Issue({it}){
+ return <div className={'focusRow '+it.level}><span className={'dot '+it.level}/><div>
+  <b>{it.title}</b><small>{it.text}</small>
+  {it.action&&<em className="act"><span>Что сделать:</span> {it.action}</em>}
+  <i className="since">{it.sinceLabel}{it.sinceTime&&it.sinceLabel!=='только что замечено'?' · с '+it.sinceTime:''}</i>
+  {it.details&&<details><summary>Подробности</summary><p>{it.details}</p></details>}
+ </div></div>;
+}
 function Focus({s}){
- const rows=s.focus.length?s.focus:[['wait','Получаем состояние штаба','']];
- const bad=rows.filter(x=>x[0]!=='ok').length;
- return <Card title="Нужно внимание" aside={bad?bad+' '+(bad===1?'пункт':bad<5?'пункта':'пунктов'):'всё спокойно'} className="span2 focus">
-  {rows.map((x,i)=><div className={'focusRow '+x[0]} key={i}><span className={'dot '+x[0]}/><div><b>{x[1]}</b>{x[2]&&<small>{x[2]}</small>}</div></div>)}
+ const n=s.focus.length;
+ return <Card title="Нужно внимание" aside={n?n+' '+(n===1?'пункт':n<5?'пункта':'пунктов'):(s.mode==='loading'?'':'всё спокойно')} className={'span2 focus '+(s.verdict?.level||'')}>
+  {n?s.focus.map(it=><Issue key={it.key} it={it}/>):<div className="focusRow ok"><span className="dot ok"/><div><b>{s.mode==='loading'?'Получаем состояние штаба':'Критичных проблем нет'}</b>{s.mode!=='loading'&&s.metrics.active!=null&&<small>{s.metrics.active} из {s.metrics.total} процессов работают штатно</small>}</div></div>}
  </Card>;
 }
 function Metrics({s}){
- return <Grid cols={3} gap={8} className="span2">{[['Работает',s.metrics.active,'процессов'],['Внимание',s.metrics.attention,'пунктов'],['Сделано',s.metrics.done,'сегодня']].map(([k,v,d])=><Container className="metric" key={k}><Typography.Label variant="small">{k}</Typography.Label><div className="metricValue">{v??'—'}</div><small>{d}</small></Container>)}</Grid>;
+ const m=s.metrics;
+ const cells=[['Проблемы',m.problems??'—',m.problems?m.oldest:'нет'],['Сделано сегодня',m.done!=null?m.done+(m.dailyLimit?' из '+m.dailyLimit:''):'—','публикаций'],['Следующий слот',m.nextSlotLabel||'—','публикация']];
+ return <Grid cols={3} gap={8} className="span2">{cells.map(([k,v,d])=><Container className="metric" key={k}><Typography.Label variant="small">{k}</Typography.Label><div className="metricValue">{v}</div><small>{d}</small></Container>)}</Grid>;
 }
 function Rostok({r}){
  if(!r)return null;
@@ -45,7 +54,7 @@ function Systems({s}){
  </>;
 }
 function Inbox({s}){
- return <Card title="Входящие" aside={s.inbox.length?String(s.inbox.length):''}>{s.inbox.length?s.inbox.map((x,i)=><Row key={i} dot={x[2]} title={x[0]} text={x[1]}/>):<Empty text={s.mode==='live'||s.mode==='stale'?'Критичных сигналов нет. Всё, что требует внимания, появится здесь.':'Список появится после первого обновления'}/>}</Card>;
+ return <Card title="Входящие" aside={s.focus.length?String(s.focus.length):''}>{s.focus.length?s.focus.map(it=><Issue key={it.key} it={it}/>):<Empty text={s.mode==='live'||s.mode==='stale'?'Критичных сигналов нет. Всё, что требует внимания, появится здесь.':'Список появится после первого обновления'}/>}</Card>;
 }
 function Projects(){
  const [path,setPath]=useState(()=>{try{return JSON.parse(store.get('shtab.max.path','[]'))||[];}catch(e){return [];}});
@@ -79,10 +88,12 @@ export default function App(){
    <div><Typography.Label variant="small" className="eyebrow">ШТАБ.ТОЧКА · MAX</Typography.Label><Typography.Title variant="large-strong" className="title">Центр управления</Typography.Title><small className={'status '+s.mode}>{status}</small></div>
    <button type="button" className={'refresh'+(busy||s.mode==='loading'?' spin':'')} onClick={onRefresh} aria-label="Обновить"><RefreshIcon/></button>
   </header>
+  {s.verdict&&<div className={'verdict '+s.verdict.level}><span className={'dot '+s.verdict.level}/>{s.verdict.text}</div>}
+  {s.notice&&<div className={'notice '+s.notice.level}>{s.notice.text}</div>}
   {tab==='home'&&<div className="home"><Focus s={s}/><Metrics s={s}/><Rostok r={s.rostok}/><Workflows list={s.workflows}/><Feed events={s.events}/></div>}
   {tab==='projects'&&<Projects/>}
   {tab==='systems'&&<div className="home"><Systems s={s}/></div>}
   {tab==='inbox'&&<Inbox s={s}/>}
-  <nav>{TABS.map(([id,t])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{t}{id==='inbox'&&s.inbox.length>0&&<em className="badge">{s.inbox.length}</em>}</button>)}</nav>
+  <nav>{TABS.map(([id,t])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{t}{id==='inbox'&&s.focus.length>0&&<em className="badge">{s.focus.length}</em>}</button>)}</nav>
  </Panel>;
 }

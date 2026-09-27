@@ -40,11 +40,61 @@ function fixPlural(text){
  return String(text||'').replace(/(\d+)\s+сервисов в состоянии ошибки/g,(m,n)=>plural(+n,'сервис','сервиса','сервисов')+' в состоянии ошибки');
 }
 
+// ---------- язык управленца ----------
+const SINCE_KEY='shtab.issueSince.v1';
+const LS=()=>{try{return typeof localStorage!=='undefined'?localStorage:null;}catch(e){return null;}};
+export function durationLabel(ms){
+ const s=Math.max(0,Math.round(ms/1000));
+ if(s<90)return 'только что замечено';
+ if(s<3600)return 'уже '+Math.round(s/60)+' мин';
+ if(s<86400)return 'уже '+Math.round(s/3600)+' ч';
+ return 'уже '+Math.round(s/86400)+' дн';
+}
+// Запоминаем, когда карточка впервые стала жёлтой или красной (на этом устройстве).
+function trackSince(keys,now){
+ const ls=LS();let map={};try{map=JSON.parse(ls?.getItem(SINCE_KEY)||'{}')||{};}catch(e){}
+ const next={};
+ for(const [key,lv] of keys){const prev=map[key];next[key]=prev&&prev.level===lv&&Number.isFinite(prev.since)?prev:{level:lv,since:now};}
+ try{ls?.setItem(SINCE_KEY,JSON.stringify(next));}catch(e){}
+ return next;
+}
+function parseChecks(d){const m=/проверки:\s*(.+)$/i.exec(d);return m?m[1].split(/\s*,\s*/).filter(Boolean):[];}
+function humanCheck(code){
+ if(code==='publication_lock_hold')return 'удерживается блокировка публикации';
+ let m=/^slot:(.+)$/.exec(code);if(m)return 'слот '+slotLabel(m[1].length<=16?m[1]+':00+03:00':m[1]);
+ m=/^unit:(.+)$/.exec(code);if(m)return 'служба '+m[1].replace(/^privet-planeta-/,'').replace(/\.(timer|service)$/,'');
+ return code;
+}
+// Что случилось, что это значит для дела и что сделать. Техника уходит в «подробности».
+function explainCard(c){
+ const d=fixPlural(c.detail||'');const lv=level(c.level);
+ const it={level:lv,key:c.id,title:humanName(c.id,c.title),text:d||'требует проверки',action:null,details:null};
+ switch(c.id){
+  case 'visual':{const m=/(\d+)/.exec(d);const n=m?+m[1]:null;it.text=n!=null?plural(n,'сервис визуалов упал','сервиса визуалов упали','сервисов визуалов упали')+' и не сброшены. Новые визуалы могут не собираться':'Сервисы визуалов в ошибке';it.action='Сбросить ошибки через очередь штаба (reset-failed) или на машине штаба';it.details=d;break;}
+  case 'system':{const m=/свободно\s+([\d.,]+)\s*ГБ/i.exec(d);const free=m?parseFloat(m[1].replace(',','.')):null;
+   if(free!=null&&free<15){it.text='Мало места на диске: свободно '+free+' ГБ';it.action='Освободить место на машине штаба';}
+   else{it.text='Предупреждение из-за упавших сервисов визуалов. Канал управления и процессы работают';it.action='Уйдёт после сброса ошибок визуалов';}
+   it.details=d;break;}
+  case 'drive':it.text='Документы могли устареть: индекс Drive не подтверждён';it.action='Запустить обновление индекса (shtab-task-index) или проверить rclone';it.details=d;break;
+  case 'queue':it.text=/ожидают:\s*[1-9]/i.test(d)?'Задачи в очереди ждут исполнения':'Связь с исполнителем очереди потеряна';it.action='Проверить службу runner на машине штаба';it.details=d;break;
+  case 'telegram':case 'max':it.text='Получатель сообщений '+it.title+' не работает: входящие не собираются';it.action='Перезапустить получатель '+it.title;it.details=d;break;
+  case 'rostok':it.text='Росток сигналит '+(lv==='err'?'ошибку':'предупреждение')+', причина в сводке не указана';it.action='Открыть отчёт Ростка на машине штаба';it.details=d;break;
+  case 'publications':{const checks=parseChecks(d);
+   if(checks.length){it.text='Автопубликация остановлена проверкой: '+checks.map(humanCheck).join(', ');it.action='Проверить очередь публикаций. Если блокировка неожиданна, снять её';}
+   else{it.text='Есть неясные или ошибочные доставки';it.action='Проверить доставку последних публикаций';}
+   it.details=d;break;}
+  default:it.details=d;
+ }
+ return it;
+}
+function explainWorkflow(row,w){return {level:row[1],key:'wf:'+(w.id||w.name),title:'Процесс «'+row[0]+'»',text:row[2],action:'Открыть n8n и перезапустить процесс',details:null};}
+
 // ---------- нейтральные состояния ----------
 export function offlineState(){
  return {mode:'offline',source:null,asOf:null,ageSeconds:null,ttlSeconds:120,cached:false,
-  metrics:{active:null,attention:null,done:null},rostok:null,workflows:[],projects:[],
-  focus:[['wait','Нет связи с источником состояния','Проверьте сеть и повторите']],
+  verdict:{level:'wait',text:'Нет связи с источником'},notice:{level:'wait',text:'Нет связи с источником состояния. Проверьте сеть и повторите'},
+  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,workflows:[],projects:[],
+  focus:[],
   systems:[['Обновление данных','wait','Нет связи с источником состояния']],
   events:[['Сейчас','Состояние штаба недоступно: нет связи с источником','wait']],
   inbox:[]};
@@ -75,29 +125,36 @@ function workflowRow(w){
  return [w.name||w.id,'wait','Состояние неизвестно'];
 }
 
-export function toState(raw){
+export function toState(raw,now=Date.now()){
  const cards=Array.isArray(raw.cards)?raw.cards:[];
  const wfs=Array.isArray(raw.workflows)?raw.workflows:[];
  const active=wfs.filter(w=>w.active&&w.runtime_running&&w.execution_recent&&w.last_status==='success').length;
  const attention=cards.filter(c=>c.level==='warn'||c.level==='error'||c.level==='unknown').length;
  const systems=cards.map(c=>[humanName(c.id,c.title),level(c.level),fixPlural(c.detail)||'Нет подробностей']);
- const workflows=wfs.map(workflowRow);
+ const rows=wfs.map(workflowRow);
  if(wfs.length)systems.push(['Автоматические процессы',active===wfs.length?'ok':'wait',active+' из '+wfs.length+' работают штатно']);
+ // проблемы на языке управленца, с длительностью
+ const items=[...cards.filter(c=>level(c.level)!=='ok').map(explainCard),...rows.map((r,i)=>[r,wfs[i]]).filter(([r])=>r[1]!=='ok').map(([r,w])=>explainWorkflow(r,w))];
+ const since=trackSince(items.map(it=>[it.key,it.level]),now);
+ for(const it of items){const s=since[it.key];it.since=s?s.since:now;it.sinceLabel=durationLabel(now-it.since);it.sinceTime=moscowTime(it.since);}
+ items.sort((a,b)=>(a.level==='err'?0:1)-(b.level==='err'?0:1)||a.since-b.since);
+ const nErr=items.filter(x=>x.level==='err').length,nWarn=items.length-nErr;
+ const oldest=items.length?items.reduce((m,x)=>Math.min(m,x.since),Infinity):null;
+ const oldestLabel=oldest!=null?durationLabel(now-oldest):null;
+ const verdict=!items.length?{level:'ok',text:'Всё штатно'}:{level:nErr?'err':'wait',text:[nErr?plural(nErr,'ошибка','ошибки','ошибок'):null,nWarn?plural(nWarn,'предупреждение','предупреждения','предупреждений'):null].filter(Boolean).join(' · ')+(oldestLabel&&oldestLabel!=='только что замечено'?' · старейшая '+oldestLabel.replace('уже ',''):'')};
  const issues=cards.filter(c=>c.level!=='ok').sort((a,b)=>(a.level==='error'?0:1)-(b.level==='error'?0:1));
- // focus: [уровень, заголовок, короткое пояснение]; полный текст остаётся в systems.
- const focus=issues.map(c=>[level(c.level),humanName(c.id,c.title),short(fixPlural(c.detail)||'требует проверки')]);
- workflows.filter(w=>w[1]!=='ok').forEach(w=>focus.push([w[1],'Процесс «'+w[0]+'»',w[2]]));
- if(!focus.length)focus.push(['ok','Критичных проблем нет',plural(active,'процесс работает','процесса работают','процессов работают')+' штатно']);
  const events=[
   [moscowTime(raw.generated_at),'Состояние штаба обновлено автоматически','ok'],
   ...issues.slice(0,4).map(c=>['Сейчас',humanName(c.id,c.title)+': '+(fixPlural(c.detail)||'требует проверки'),level(c.level)])
  ];
- const inbox=issues.filter(c=>c.level==='error'||c.level==='warn').slice(0,6).map(c=>['Внимание',humanName(c.id,c.title)+': '+(fixPlural(c.detail)||'требует проверки'),level(c.level)]);
+ const inbox=items.map(it=>['Внимание',it.title+': '+it.text,it.level]);
  const r=raw.rostok&&typeof raw.rostok==='object'?raw.rostok:null;
  const done=r&&Number.isFinite(r.published_today)?r.published_today:null;
- const rostok=r?{publishedToday:done,dailyLimit:r.daily_limit??null,queue:r.queue??null,nextSlot:r.next_slot??null,nextSlotLabel:slotLabel(r.next_slot),totalPublished:r.total_published??null,unresolved:r.unresolved??null}:null;
+ const rostok=r?{publishedToday:done,dailyLimit:r.daily_limit??null,queue:r.queue??null,nextSlot:r.next_slot??null,nextSlotLabel:slotLabel(r.next_slot,now),totalPublished:r.total_published??null,unresolved:r.unresolved??null}:null;
  return {mode:'live',source:null,asOf:raw.generated_at,ageSeconds:null,ttlSeconds:raw.ttl_seconds||120,cached:false,
-  metrics:{active,attention,done},rostok,workflows,projects:[],focus,systems,events,inbox};
+  verdict,notice:null,
+  metrics:{active,total:wfs.length,attention,done,dailyLimit:rostok?rostok.dailyLimit:null,nextSlotLabel:rostok?rostok.nextSlotLabel:null,problems:items.length,oldest:oldestLabel},
+  rostok,workflows:rows,projects:[],focus:items,systems,events,inbox};
 }
 
 // ---------- кэш последнего состояния (localStorage, только безопасная проекция) ----------
@@ -105,7 +162,7 @@ function readCache(){try{const j=JSON.parse(localStorage.getItem(CACHE_KEY)||'nu
 function writeCache(raw,source){try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),raw,source}));}catch(e){}}
 
 function finish(raw,source,now,offline){
- const state=toState(raw);
+ const state=toState(raw,now);
  state.source=source;
  const age=(now-Date.parse(raw.generated_at))/1000;
  const ageSeconds=Number.isFinite(age)?Math.max(0,Math.round(age)):null;
@@ -114,14 +171,14 @@ function finish(raw,source,now,offline){
  if(offline){
   state.mode='offline';state.cached=true;
   state.systems.unshift(['Обновление данных','err','Нет связи · показаны данные от '+moscowTime(raw.generated_at,true)]);
-  state.focus.unshift(['err','Нет связи с источником','Показаны данные '+ageLabel(ageSeconds)]);
+  state.notice={level:'err',text:'Нет связи с источником. Показаны данные '+ageLabel(ageSeconds)};
  }else if(fresh){
   state.mode='live';
   state.systems.unshift(['Обновление данных','ok','Работает автоматически · '+ageLabel(ageSeconds)]);
  }else{
   state.mode='stale';
   state.systems.unshift(['Обновление данных','wait','Данные устарели · '+ageLabel(ageSeconds)]);
-  state.focus.unshift(['wait','Данные устарели','Обновлены '+ageLabel(ageSeconds)]);
+  state.notice={level:'wait',text:'Данные устарели, обновлены '+ageLabel(ageSeconds)};
  }
  return state;
 }
