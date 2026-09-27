@@ -8,14 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wait for Vercel
-        run: sleep 20
-      - name: Probe production root
+        run: sleep 5
+      - name: Probe production root and API
         shell: bash
         run: |
           set -euo pipefail
           code=$(curl -L -sS -o /tmp/body.html -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/)
-          echo "HTTP=$code"
-          head -c 500 /tmp/body.html || true
+          echo "ROOT_HTTP=$code"
+          head -c 300 /tmp/body.html || true
           echo
           test "$code" = "200"
           grep -q "Центр управления" /tmp/body.html
+          api=$(curl -L -sS -o /tmp/state.json -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/api/state)
+          echo "STATE_HTTP=$api"
+          head -c 500 /tmp/state.json || true
+          echo
+          test "$api" = "200"
+          grep -q '"metrics"' /tmp/state.json
