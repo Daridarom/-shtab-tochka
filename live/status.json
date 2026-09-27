@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-27T20:16:50.156033+00:00",
+  "generated_at": "2026-09-27T20:17:54.172878+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -49,7 +49,7 @@
       "id": "publications",
       "title": "Публикации",
       "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: publication_lock_hold, telegram-check:2026-09-27:URLError, unit:privet-planeta-auto-publish.timer"
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: publication_lock_hold, slot:2026-09-27T18:00, slot:2026-09-27T21:00, unit:privet-planeta-auto-publish.timer"
     }
   ],
   "workflows": [
