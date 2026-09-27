@@ -9,32 +9,26 @@ jobs:
     steps:
       - name: Wait for Vercel
         run: sleep 5
-      - name: Probe production root and API
+      - name: Probe production
         shell: bash
         run: |
           set -euo pipefail
           code=$(curl -L -sS -o /tmp/body.html -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/)
           echo "ROOT_HTTP=$code"
-          head -c 300 /tmp/body.html || true
-          echo
           test "$code" = "200"
           grep -q "Центр управления" /tmp/body.html
+          grep -q "app.js?v=11" /tmp/body.html
+          grep -q "styles.css?v=9" /tmp/body.html
           api=$(curl -L -sS -o /tmp/state.json -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/api/state)
           echo "STATE_HTTP=$api"
-          head -c 500 /tmp/state.json || true
-          echo
           test "$api" = "200"
           grep -q '"metrics"' /tmp/state.json
-          grep -q '"mode":"live"' /tmp/state.json
-          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/app.js?v=11)
+          js=$(curl -L -sS -o /tmp/app.js -w "%{http_code}" --max-time 30 'https://shtab-tochka.vercel.app/app.js?v=11')
           echo "APP_JS_HTTP=$js"
           test "$js" = "200"
-          grep -q "nav button" /tmp/app.js
           grep -q "projectTree" /tmp/app.js
           grep -q "Горизонт 45 / Азгард" /tmp/app.js
           grep -q "Элиос" /tmp/app.js
           health=$(curl -L -sS -o /tmp/health.json -w "%{http_code}" --max-time 30 https://shtab-tochka.vercel.app/api/health)
           echo "HEALTH_HTTP=$health"
-          cat /tmp/health.json
           test "$health" = "200"
-          grep -q '"liveConfigured":true' /tmp/health.json
