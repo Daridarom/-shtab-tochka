@@ -1,19 +1,19 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-27T16:34:28.160540+00:00",
+  "generated_at": "2026-09-27T16:35:32.652719+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
       "id": "system",
       "title": "Система",
-      "level": "warn",
+      "level": "ok",
       "detail": "Канал управления: работает · процессы: работает · свободно 210.7 ГБ"
     },
     {
       "id": "visual",
       "title": "Ошибки визуала",
-      "level": "error",
-      "detail": "1 сервисов в состоянии ошибки"
+      "level": "ok",
+      "detail": "0 сервисов в состоянии ошибки"
     },
     {
       "id": "telegram",
@@ -37,7 +37,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 13 с назад"
+      "detail": "Ожидают: 0 · проверка связи 4 с назад"
     },
     {
       "id": "rostok",
@@ -78,7 +78,7 @@
       "last_status": "success"
     }
   ],
-  "failed_visual_count": 1,
+  "failed_visual_count": 0,
   "rostok": {
     "published_today": 2,
     "daily_limit": 4,
