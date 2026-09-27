@@ -25,7 +25,9 @@ function toState(raw){
    ...issues.slice(0,4).map(c=>['Сейчас',humanName(c.id,c.title)+': '+(c.detail||'требует проверки'),level(c.level)])
  ];
  const inbox=issues.filter(c=>c.level==='error'||c.level==='warn').slice(0,6).map(c=>['Внимание',humanName(c.id,c.title)+': '+(c.detail||'требует проверки'),level(c.level)]);
- return {mode:'live',asOf:raw.generated_at,ttlSeconds:raw.ttl_seconds||120,metrics:{active,attention,done:null},systems,events,inbox};
+ const rostok=raw.rostok&&typeof raw.rostok==='object'?raw.rostok:{};
+ const done=Number.isFinite(rostok.published_today)?rostok.published_today:null;
+ return {mode:'live',asOf:raw.generated_at,ttlSeconds:raw.ttl_seconds||120,metrics:{active,attention,done},rostok:{publishedToday:done,dailyLimit:rostok.daily_limit??null,queue:rostok.queue??null,nextSlot:rostok.next_slot??null,totalPublished:rostok.total_published??null},systems,events,inbox};
 }
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store, max-age=0');
