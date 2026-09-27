@@ -1,25 +1,11 @@
-export default async function handler(req,res){
-res.setHeader('Cache-Control','no-store');
-return res.status(200).json({
-metrics:{active:3,attention:2,done:2},
-projects:[['Привет, планета','Публикации работают · следующий слот 27.09 09:00','ok'],['AI-Штаб','Безопасный maintenance-контур отвечает','ok'],['Киноуроки','Работа продолжается','wait'],['Медиа / AI','Монтаж и автоматизация','wait'],['РЭО Крым','Экологические проекты','wait'],['РКО','Русское космическое общество','wait']],
-systems:[
-['Vercel / ЦУП','ok','Интерфейс доступен'],
-['GitHub / код','ok','Автодеплой работает'],
-['AI Commander','ok','Безопасный maintenance-контур отвечает'],
-['Росток / Telegram','ok','26.09 21:00 · пост 57 опубликован'],
-['Росток / MAX','ok','26.09 21:02 · job 165 доставлен'],
-['n8n','wait','Свежий сигнал ещё не подключён']
-],
-events:[
-['21:02','Росток → MAX: доставка подтверждена · job 165','ok'],
-['21:00','Росток → Telegram: публикация подтверждена · сообщение 57','ok'],
-['21:01','Очередь Ростка: 0 нерешённых · лимит 4/день','ok'],
-['27.09 09:00','Следующий подготовленный слот Ростка · job 135','wait']
-],
-inbox:[
-['Росток','Следующий слот: 27.09 · 09:00','ok'],
-['Росток','Ещё подготовлен материал на 13:00 · job 186','ok'],
-['n8n','Подключить свежую телеметрию','wait'],
-['Документы','Реестр синхронизации ещё не подключён','wait']
-]});}
+const fallback={
+  mode:'snapshot',asOf:'2026-09-26T21:02:00+03:00',
+  metrics:{active:null,attention:null,done:null},
+  projects:[['Привет, планета','Последнее подтверждение: 26.09 · публикации Telegram/MAX','ok'],['AI-Штаб','Последнее подтверждение: maintenance-контур отвечал','ok'],['Киноуроки','Нет свежей телеметрии','wait'],['Медиа / AI','Нет свежей телеметрии','wait'],['РЭО Крым','Нет свежей телеметрии','wait'],['РКО','Нет свежей телеметрии','wait']],
+  systems:[['Vercel / ЦУП','ok','Защищённый production'],['GitHub / код','ok','Автодеплой работает'],['AI Commander','wait','Нужен свежий heartbeat'],['Росток / Telegram','wait','Последнее подтверждение 26.09 21:00'],['Росток / MAX','wait','Последнее подтверждение 26.09 21:02'],['n8n','wait','Нужен свежий heartbeat']],
+  events:[['26.09 21:02','Росток → MAX: последняя подтверждённая доставка · job 165','wait'],['26.09 21:00','Росток → Telegram: последняя подтверждённая публикация · сообщение 57','wait'],['Сейчас','Живой ingest ещё не подключён: данные ниже являются снимком, не LIVE','wait']],
+  inbox:[['Телеметрия','Подключить постоянное хранилище и automation bypass','wait'],['n8n / Linux','Подключить heartbeat после настройки ingest','wait'],['Документы','Реестр синхронизации ещё не подключён','wait']]
+};
+function redisConfig(){return {url:process.env.KV_REST_API_URL||process.env.UPSTASH_REDIS_REST_URL,token:process.env.KV_REST_API_TOKEN||process.env.UPSTASH_REDIS_REST_TOKEN};}
+async function redis(cmd){const {url,token}=redisConfig();if(!url||!token)throw new Error('storage_not_configured');const r=await fetch(url,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(cmd)});if(!r.ok)throw new Error('storage_error_'+r.status);const j=await r.json();return j.result;}
+export default async function handler(req,res){res.setHeader('Cache-Control','no-store');try{const raw=await redis(['GET','shtab:state']);if(raw){const live=JSON.parse(raw);return res.status(200).json({...live,mode:'live'});}}catch(e){}return res.status(200).json(fallback);}
