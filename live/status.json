@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-27T14:25:29.668184+00:00",
+  "generated_at": "2026-09-27T14:26:37.149523+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -30,14 +30,14 @@
     {
       "id": "drive",
       "title": "Google Drive",
-      "level": "warn",
-      "detail": "Свежесть контекста требует проверки · Индекс сохранён в облаке"
+      "level": "ok",
+      "detail": "Контекст проверен"
     },
     {
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 11 с назад"
+      "detail": "Ожидают: 0 · проверка связи 10 с назад"
     },
     {
       "id": "rostok",
