@@ -1,6 +1,7 @@
 name: Deploy to GitHub Pages
 # Публикует папку public/ (панель ЦУП + собранное MAX-приложение) на GitHub Pages.
 # Телеметрические коммиты live/status.json деплой не запускают.
+# Источник Pages: только «GitHub Actions» (Settings → Pages). Сборка «из ветки» выкладывает несобранные исходники поверх сайта.
 on:
   push:
     branches: [main]
