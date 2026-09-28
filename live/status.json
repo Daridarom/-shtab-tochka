@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T21:11:22.156300+00:00",
+  "generated_at": "2026-09-28T21:12:30.159313+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
       "id": "system",
       "title": "Система",
-      "level": "ok",
-      "detail": "Канал управления: работает · процессы: работает · свободно 204.3 ГБ"
+      "level": "warn",
+      "detail": "Канал управления: работает · процессы: работает · свободно 204.2 ГБ"
     },
     {
       "id": "visual",
@@ -37,7 +37,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 17 с назад"
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
@@ -59,7 +59,7 @@
       "active": true,
       "runtime_running": true,
       "execution_recent": true,
-      "last_status": "success"
+      "last_status": "running"
     },
     {
       "id": "shtabIntake01",
@@ -75,7 +75,7 @@
       "active": true,
       "runtime_running": true,
       "execution_recent": true,
-      "last_status": "success"
+      "last_status": "running"
     }
   ],
   "failed_visual_count": 0,
