@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T05:52:34.113971+00:00",
+  "generated_at": "2026-09-28T05:53:39.180767+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -13,7 +13,7 @@
       "id": "visual",
       "title": "Ошибки визуала",
       "level": "error",
-      "detail": "1 сервисов в состоянии ошибки"
+      "detail": "2 сервисов в состоянии ошибки"
     },
     {
       "id": "telegram",
@@ -78,7 +78,7 @@
       "last_status": "success"
     }
   ],
-  "failed_visual_count": 1,
+  "failed_visual_count": 2,
   "rostok": {
     "published_today": 0,
     "daily_limit": 4,
