@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T08:28:23.913887+00:00",
+  "generated_at": "2026-09-28T08:30:03.129919+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -13,7 +13,7 @@
       "id": "visual",
       "title": "Ошибки визуала",
       "level": "error",
-      "detail": "1 сервисов в состоянии ошибки"
+      "detail": "2 сервисов в состоянии ошибки"
     },
     {
       "id": "telegram",
@@ -37,13 +37,13 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+      "detail": "Ожидают: 0 · проверка связи 18 с назад"
     },
     {
       "id": "rostok",
       "title": "Росток",
       "level": "ok",
-      "detail": "Сегодня: 1 из 4 · в очереди: 2 · следующий слот: сегодня 13:00 · всего опубликовано: 54 · ожидают изображения: 6 · согласование: 1 · заблокировано: 45"
+      "detail": "Сегодня: 1 из 4 · в очереди: 3 · следующий слот: сегодня 13:00 · всего опубликовано: 54 · ожидают изображения: 5 · согласование: 1 · заблокировано: 45"
     },
     {
       "id": "publications",
@@ -78,13 +78,13 @@
       "last_status": "success"
     }
   ],
-  "failed_visual_count": 1,
+  "failed_visual_count": 2,
   "rostok": {
     "published_today": 1,
     "daily_limit": 4,
     "unresolved": 0,
     "next_slot": "2026-09-28T13:00+03:00",
-    "queue": 2,
+    "queue": 3,
     "total_published": 54
   },
   "publication_unresolved": 0,
