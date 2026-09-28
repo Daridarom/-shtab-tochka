@@ -7,7 +7,7 @@ import {haptic,useBackButton} from './max.js';
 import {startStarfield} from '../../public/starfield.js';
 import {orbitSVG,orbitNodes} from '../../public/orbit.js';
 
-const TABS=[['home','Главная'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
+const TABS=[['home','Сегодня'],['calendar','Календарь'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
 const store={get(k,d){try{return localStorage.getItem(k)??d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
 const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
 
@@ -77,6 +77,8 @@ function Documents({s}){
   {d.asOf&&<small className="since">Снимок панели: {moscowTime(d.asOf,true)} МСК. Это не время сохранения документов.</small>}
  </Card>;
 }
+function CalendarPreview(){return <Card title="Календарь" aside="защищённый слой"><Empty text="Подключение Google Calendar подтверждено. События будут поступать через приватный шлюз; названия, адреса, суммы и ссылки не публикуются в открытой телеметрии."/></Card>;}
+function CalendarScreen(){return <div className="home"><Card title="Сегодня" className="span2"><Empty text="Здесь появятся встречи и контрольные точки сегодняшнего дня после подключения приватного календарного шлюза."/></Card><Card title="Ближайшие 7 дней"><Empty text="Встречи · выезды · ВКС · контрольные точки"/></Card><Card title="Оплаты"><Empty text="Финансовые события показываются отдельно от встреч."/></Card><Card title="Связь с проектами" className="span2"><Empty text="Следующий слой: событие → проект → задача → документы. В публичный status.json приватные детали не передаются."/></Card></div>;}
 function Feed({events}){return <Card title="Текущий снимок">{events.length?events.map((x,i)=><Row key={i} time={x[0]} dot={x[2]} title={x[1]}/>):<Empty text="Сводка появится после первого обновления"/>}</Card>;}
 function Systems({s}){
  const bad=s.systems.filter(x=>x[1]!=='ok'),good=s.systems.filter(x=>x[1]==='ok');
@@ -130,7 +132,8 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
   </header>
   {s.verdict&&<div className={'verdict '+s.verdict.level}><span className={'dot '+s.verdict.level}/>{s.verdict.text}</div>}
   {s.notice&&<div className={'notice '+s.notice.level}>{s.notice.text}</div>}
-  {tab==='home'&&<div className="home"><OrbitCard s={s} onDocuments={()=>setTab('systems')}/><Focus s={s}/><Metrics s={s}/><Rostok r={s.rostok}/><Workflows list={s.workflows}/><Feed events={s.events}/></div>}
+  {tab==='home'&&<div className="home"><OrbitCard s={s} onDocuments={()=>setTab('systems')}/><Focus s={s}/><Metrics s={s}/><CalendarPreview/><Rostok r={s.rostok}/><Workflows list={s.workflows}/><Feed events={s.events}/></div>}
+  {tab==='calendar'&&<CalendarScreen/>}
   {tab==='projects'&&<Projects s={s}/>}
   {tab==='systems'&&<div className="home"><Documents s={s}/><Systems s={s}/></div>}
   {tab==='inbox'&&<Inbox s={s}/>}
