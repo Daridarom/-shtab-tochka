@@ -9,7 +9,10 @@
 # Перед отправкой отчёта удали из него серийные номера, если не хочешь ими делиться.
 
 $ErrorActionPreference = 'Continue'
-$out = Join-Path ([Environment]::GetFolderPath('Desktop')) ("pc-audit-{0}.txt" -f (Get-Date -Format 'yyyy-MM-dd_HH-mm'))
+$dir = [Environment]::GetFolderPath('Desktop')
+if (-not $dir -or -not (Test-Path $dir)) { $dir = $HOME }
+if (-not $dir -or -not (Test-Path $dir)) { $dir = (Get-Location).Path }
+$out = Join-Path $dir ("pc-audit-{0}.txt" -f (Get-Date -Format 'yyyy-MM-dd_HH-mm'))
 $lines = New-Object System.Collections.Generic.List[string]
 
 function Section($title) { $lines.Add(''); $lines.Add("=== $title ==="); }
@@ -21,7 +24,7 @@ function Try-Section($title, [scriptblock]$body) {
 function Fmt($obj) { ($obj | Format-List | Out-String).Trim() }
 
 Add ("Отчёт собран: {0}" -f (Get-Date))
-Add ("Администратор: {0}" -f ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+try { Add ("Администратор: {0}" -f ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) } catch { Add 'Администратор: n/a' }
 
 Try-Section 'МАТЕРИНСКАЯ ПЛАТА' {
     Add (Fmt (Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product, Version))
@@ -113,6 +116,11 @@ Try-Section 'БЛОК ПИТАНИЯ' {
     Add '  Программно не читается. Нужна фотография наклейки на БП (модель, мощность W, сертификат 80 PLUS).'
 }
 
-$lines | Set-Content -Path $out -Encoding UTF8
-Write-Host "Готово. Отчёт: $out"
-Write-Host "Открой файл, проверь, что нет лишних личных данных, и пришли его содержимое."
+try {
+    $lines | Set-Content -Path $out -Encoding UTF8
+    Write-Host "Готово. Отчёт: $out"
+    Write-Host "Открой файл, проверь, что нет лишних личных данных, и пришли его содержимое."
+} catch {
+    Write-Host "Не удалось сохранить файл ($($_.Exception.Message)). Вот отчёт целиком, скопируй его из окна:"
+    $lines | ForEach-Object { Write-Host $_ }
+}
