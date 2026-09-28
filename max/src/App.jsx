@@ -92,7 +92,7 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
    <div className="tools"><button type="button" className="theme" onClick={()=>{haptic('select');cycleTheme();}} aria-label={'Тема: '+({dark:'тёмная',light:'светлая',auto:'как в MAX'})[themeSetting]} title={'Тема: '+({dark:'тёмная',light:'светлая',auto:'как в MAX'})[themeSetting]}><ThemeIcon setting={themeSetting}/></button><button type="button" className={'refresh'+(busy||s.mode==='loading'?' spin':'')} onClick={onRefresh} aria-label="Обновить"><RefreshIcon/></button></div>
   </header>
   {s.notice&&<div className={'notice '+s.notice.level}>{s.notice.text}</div>}
-  {tab==='home'&&<Today s={s} priv={priv} go={setTab} openSheet={openSheet}/>}
+  {tab==='home'&&<Today s={s} priv={priv} go={setTab} openSheet={openSheet} age={age}/>}
   {tab==='calendar'&&<CalendarScreen priv={priv} openSheet={openSheet}/>}
   {tab==='projects'&&<ProjectsScreen s={s} priv={priv} tasks={tasks} view={view} setView={setView} project={project} openSheet={openSheet} changeTask={changeTask}/>}
   {tab==='systems'&&<SystemsScreen s={s} graph={graph} selected={node} onSelect={selectNode}/>}

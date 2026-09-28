@@ -73,12 +73,13 @@ export function EventSheet({e}){
 }
 
 // ---------- СЕГОДНЯ ----------
-export function Today({s,priv,go,openSheet}){
+export function Today({s,priv,go,openSheet,age}){
  const now=Date.now(),cal=priv.source,todayKey=M.dayKey(now);
  const next=M.nextEvent(priv.events,now);
  const later=M.eventsOfDay(priv.events,todayKey).filter(e=>e!==next&&Date.parse(e.start)>now);
  const actions=M.topActions(priv.tasks);
- const tel=M.telemetrySource(s);
+ // Возраст считаем так же, как в шапке, чтобы строки не расходились.
+ const tel={...M.telemetrySource(s),ageSeconds:age??s.ageSeconds??null};
  const calOn=cal.state!==M.SOURCE.NOT_CONNECTED;
  return <div className="home">
   <Card title="Ближайшее событие" className="span2 hero">
