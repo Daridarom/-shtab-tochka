@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T09:46:38.143331+00:00",
+  "generated_at": "2026-09-28T09:47:45.161460+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,8 +36,8 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 8 с назад"
+      "level": "warn",
+      "detail": "Ожидают: 0 · проверка связи 1 с назад"
     },
     {
       "id": "rostok",
