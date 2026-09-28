@@ -56,7 +56,7 @@ function Metrics({s}){
 function Rostok({r}){
  if(!r)return null;
  const stat=(k,v)=><div className="stat" key={k}><small>{k}</small><b>{v??'—'}</b></div>;
- return <Card title="Росток · публикации" aside={r.unresolved?'есть неясные':'по плану'}>
+ return <Card title="Росток · публикации" aside={r.statusLabel||'требует проверки'}>
   <div className="stats">{stat('Сегодня',r.publishedToday!=null&&r.dailyLimit!=null?r.publishedToday+' из '+r.dailyLimit:r.publishedToday)}{stat('В очереди',r.queue)}{stat('Следующий слот',r.nextSlotLabel)}{stat('Всего опубликовано',r.totalPublished)}</div>
  </Card>;
 }

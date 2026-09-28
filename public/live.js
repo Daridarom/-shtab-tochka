@@ -70,17 +70,17 @@ function explainCard(c){
  const d=fixPlural(c.detail||'');const lv=level(c.level);
  const it={level:lv,key:c.id,title:humanName(c.id,c.title),text:d||'требует проверки',action:null,details:null};
  switch(c.id){
-  case 'visual':{const m=/(\d+)/.exec(d);const n=m?+m[1]:null;it.text=n!=null?plural(n,'сервис визуалов упал','сервиса визуалов упали','сервисов визуалов упали')+' и не сброшены. Новые визуалы могут не собираться':'Сервисы визуалов в ошибке';it.action='Сбросить ошибки через очередь штаба (reset-failed) или на машине штаба';it.details=d;break;}
+  case 'visual':{const m=/(\d+)/.exec(d);const n=m?+m[1]:null;it.text=n!=null?plural(n,'задача подготовки изображения завершилась','задачи подготовки изображений завершились','задач подготовки изображений завершились')+' с ошибкой. Причину нужно проверить отдельно':'Подготовка изображений требует проверки';it.action='Проверить причину остановки, исправить её и повторить подготовку';it.details=d;break;}
   case 'system':{const m=/свободно\s+([\d.,]+)\s*ГБ/i.exec(d);const free=m?parseFloat(m[1].replace(',','.')):null;
    if(free!=null&&free<15){it.text='Мало места на диске: свободно '+free+' ГБ';it.action='Освободить место на машине штаба';}
-   else{it.text='Предупреждение из-за упавших сервисов визуалов. Канал управления и процессы работают';it.action='Уйдёт после сброса ошибок визуалов';}
+   else{it.text=d||'Работа компьютера требует проверки';it.action='Проверить доступность компьютера и автоматических процессов';}
    it.details=d;break;}
-  case 'drive':it.text='Документы могли устареть: индекс Drive не подтверждён';it.action='Запустить обновление индекса (shtab-task-index) или проверить rclone';it.details=d;break;
+  case 'drive':it.text='Свежесть документов пока не подтверждена';it.action='Проверить последнюю успешную синхронизацию и обновление списка документов';it.details=d;break;
   case 'queue':it.text=/ожидают:\s*[1-9]/i.test(d)?'Задачи в очереди ждут исполнения':'Связь с исполнителем очереди потеряна';it.action='Проверить службу runner на машине штаба';it.details=d;break;
   case 'telegram':case 'max':it.text='Получатель сообщений '+it.title+' не работает: входящие не собираются';it.action='Перезапустить получатель '+it.title;it.details=d;break;
   case 'rostok':it.text='Росток сигналит '+(lv==='err'?'ошибку':'предупреждение')+', причина в сводке не указана';it.action='Открыть отчёт Ростка на машине штаба';it.details=d;break;
   case 'publications':{const checks=parseChecks(d);
-   if(checks.length){it.text='Автопубликация остановлена проверкой: '+checks.map(humanCheck).join(', ');it.action='Проверить очередь публикаций. Если блокировка неожиданна, снять её';}
+   if(checks.length){it.text='Автопубликация остановлена проверкой: '+checks.map(humanCheck).join(', ');it.action='Проверить указанную причину и устранить её до публикации';}
    else{it.text='Есть неясные или ошибочные доставки';it.action='Проверить доставку последних публикаций';}
    it.details=d;break;}
   default:it.details=d;
@@ -150,7 +150,7 @@ export function toState(raw,now=Date.now()){
  const inbox=items.map(it=>['Внимание',it.title+': '+it.text,it.level]);
  const r=raw.rostok&&typeof raw.rostok==='object'?raw.rostok:null;
  const done=r&&Number.isFinite(r.published_today)?r.published_today:null;
- const rostok=r?{publishedToday:done,dailyLimit:r.daily_limit??null,queue:r.queue??null,nextSlot:r.next_slot??null,nextSlotLabel:slotLabel(r.next_slot,now),totalPublished:r.total_published??null,unresolved:r.unresolved??null}:null;
+ const rostok=r?{publishedToday:done,dailyLimit:r.daily_limit??null,queue:r.queue??null,statusLabel:r.unresolved?'нужна сверка доставки':level(cards.find(c=>c.id==='publications')?.level||'unknown')!=='ok'?'требует проверки':Number.isFinite(r.queue)&&r.queue>0?'есть готовые посты':'нет готовых постов',nextSlot:r.next_slot??null,nextSlotLabel:slotLabel(r.next_slot,now),totalPublished:r.total_published??null,unresolved:r.unresolved??null}:null;
  return {mode:'live',source:null,asOf:raw.generated_at,ageSeconds:null,ttlSeconds:raw.ttl_seconds||120,cached:false,
   verdict,notice:null,
   metrics:{active,total:wfs.length,attention,done,dailyLimit:rostok?rostok.dailyLimit:null,nextSlotLabel:rostok?rostok.nextSlotLabel:null,problems:items.length,oldest:oldestLabel},

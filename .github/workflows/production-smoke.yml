@@ -21,7 +21,7 @@ jobs:
           get(){ curl -L -sS -o "$2" -w "%{http_code}" --max-time 30 "$1"; }
           code=$(get "$base" /tmp/body.html); echo "ROOT_HTTP=$code"; test "$code" = "200"
           grep -q "Центр управления" /tmp/body.html
-          grep -q "app.js?v=16" /tmp/body.html
+          grep -q "app.js?v=17" /tmp/body.html
           grep -q "styles.css?v=12" /tmp/body.html
           code=$(get "${base}app.js" /tmp/app.js); echo "APP_JS_HTTP=$code"; test "$code" = "200"
           grep -q "projectTree" /tmp/app.js
