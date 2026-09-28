@@ -22,3 +22,18 @@ assert.equal(toState(empty).rostok.statusLabel,'нет готовых посто
 const unknown=structuredClone(raw);unknown.cards.pop();
 assert.equal(toState(unknown).rostok.statusLabel,'требует проверки');
 console.log('PASS: rejected visuals remain visible; publication labels respect blockers, empty queue and unknown state');
+
+const sectionSource=await readFile(new URL('../public/section-state.js',import.meta.url),'utf8');
+const {documentView,normalizeMaxState,channelViews}=await import('data:text/javascript;base64,'+Buffer.from(sectionSource).toString('base64'));
+const original={mode:'live',asOf:'2026-09-28T17:33:57Z',cards:[{id:'drive',level:'wait',detail:'Контекст проверен · Облачная копия индекса задач ожидает обновления'},{id:'max',level:'ok',detail:'Получатель: работает · записей: 518'}],focus:[{key:'drive',level:'wait',text:'Свежесть документов пока не подтверждена',since:123},{key:'visual',level:'err',text:'Ошибка'}]};
+const docs=documentView(original);
+assert.equal(docs.level,'wait');assert.match(docs.title,/индекс задач/);assert.match(docs.context,/подтверждает/);assert.match(docs.originals,/не проверяется/);
+const mapped=normalizeMaxState(original);
+assert.equal(mapped.focus[0].text,original.cards[0].detail);assert.equal(mapped.focus[0].level,'wait');assert.equal(mapped.focus[0].since,123);assert.deepEqual(mapped.focus[1],original.focus[1]);assert.equal(original.focus[0].text,'Свежесть документов пока не подтверждена');
+const green=documentView({...original,cards:[{id:'drive',level:'ok',detail:'Контекст проверен'}]});
+assert.equal(green.level,'ok');assert.match(green.originals,/не проверяется/);
+const offline=documentView({...original,mode:'offline'});assert.equal(offline.available,false);assert.equal(offline.level,'wait');assert.doesNotMatch(offline.detail,/Контекст проверен/);
+assert.equal(documentView({mode:'loading'}).available,false);assert.equal(documentView({...original,mode:'stale'}).stale,true);
+assert.equal(documentView({...original,cards:[{id:'drive',level:'unexpected'}]}).level,'wait');
+const channels=channelViews(original);assert.equal(channels[0].level,'wait');assert.equal(channels[1].detail,'Получатель: работает · записей: 518');assert.equal(channelViews({...original,mode:'offline'})[1].level,'wait');
+console.log('PASS: document warning remains yellow; exact source reason preserved; originals not inferred; offline is unknown; received records are not tasks');
