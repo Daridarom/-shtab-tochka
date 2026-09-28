@@ -27,7 +27,9 @@ jobs:
           cache: npm
           cache-dependency-path: max/package-lock.json
       - name: Check live state semantics
-        run: node tests/live-state.test.mjs
+        run: |
+          node tests/live-state.test.mjs
+          node tests/model.test.mjs
       - name: Install MAX UI dependencies
         working-directory: max
         run: npm ci --no-audit --no-fund
@@ -43,6 +45,7 @@ jobs:
           test -f _site/index.html
           test -f _site/live.js
           test -f _site/max/index.html
+          test -f _site/model.js
           ls _site/max/assets
       - name: Switch Pages source to GitHub Actions
         # Если сайт Pages настроен «из ветки», пробуем переключить его на деплой из Actions.

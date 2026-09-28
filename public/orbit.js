@@ -31,3 +31,26 @@ export function orbitNodes(state){
  if(state.workflows&&state.workflows.length){const bad=state.workflows.filter(w=>w[1]!=='ok');nodes.push({id:'workflows',title:'Автоматические процессы',level:bad.some(w=>w[1]==='err')?'err':bad.length?'wait':'ok',detail:(state.workflows.length-bad.length)+' из '+state.workflows.length+' работают штатно'});}
  return nodes;
 }
+// Живая схема Штаба (MAX): связи по реальному маршруту процессов. graph — из model.js schemeGraph().
+// Импульс рисуется только на работающих участках свежего снимка; на месте остановки — метка узла.
+const LABEL_SHORT={'ИИ-исполнители':'ИИ-исполн.'};
+export function schemeSVG(graph,{selected=null,width=360,height=400}={}){
+ const p=[`<svg class="scheme" viewBox="0 0 ${width} ${height}" role="group" aria-label="Живая схема штаба">`];
+ graph.edges.forEach((e,i)=>{
+  const d=`M${e.x1},${e.y1} L${e.x2},${e.y2}`;
+  p.push(`<path class="edge ${e.kind}" d="${d}"/>`);
+  if(e.kind==='flow')p.push(`<circle class="pulse" r="2.6"><animateMotion dur="3.2s" begin="${(i*0.45).toFixed(2)}s" repeatCount="indefinite" path="${d}"/></circle>`);
+ });
+ graph.nodes.forEach(n=>{
+  const r=n.hub?24:13,sel=selected===n.id;
+  const label=esc(LABEL_SHORT[n.title]||n.title),ly=n.hub?n.y+r+15:n.y+r+14;
+  p.push(`<g class="snode ${n.level}${n.stale?' stale':''}${sel?' selected':''}${n.hub?' hub':''}" data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(n.title)}: ${n.level==='ok'?'штатно':n.level==='wait'?'внимание':n.level==='err'?'ошибка':'не подтверждено'}">`+
+   `<circle class="tap" cx="${n.x}" cy="${n.y}" r="${Math.max(r+14,27)}"/>`+
+   (sel?`<circle class="ring" cx="${n.x}" cy="${n.y}" r="${r+6}"/>`:'')+
+   `<circle class="core" cx="${n.x}" cy="${n.y}" r="${r}"/>`+
+   (n.hub?`<text class="hubText" x="${n.x}" y="${n.y+4}" text-anchor="middle">ШТАБ</text>`:(n.level==='err'?`<text class="mark" x="${n.x}" y="${n.y+4}" text-anchor="middle">!</text>`:n.level==='none'?`<text class="mark" x="${n.x}" y="${n.y+4}" text-anchor="middle">?</text>`:''))+
+   (n.hub?'':`<text class="lbl" x="${n.x}" y="${ly}" text-anchor="middle">${label}</text>`)+`</g>`);
+ });
+ p.push('</svg>');
+ return p.join('');
+}

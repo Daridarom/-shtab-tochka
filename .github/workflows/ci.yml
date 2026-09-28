@@ -1,0 +1,37 @@
+name: CI
+# Проверка веток до слияния в main: тесты модели и сборка MAX-приложения. Ничего не публикует.
+on:
+  push:
+    branches-ignore: [main, telemetry]
+    paths-ignore:
+      - 'live/status.json'
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: max/package-lock.json
+      - name: Tests
+        run: |
+          node tests/live-state.test.mjs
+          node tests/model.test.mjs
+      - name: Build MAX UI
+        working-directory: max
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Check build output
+        run: |
+          set -euo pipefail
+          test -f public/max/index.html
+          js=$(ls public/max/assets/index-*.js | head -1)
+          grep -q "Живая схема Штаба" "$js"
+          grep -q "Окончание не указано" "$js"
+          if grep -q "__SHTAB_PRIVATE__" "$js"; then echo "::error::Тестовые данные разработки попали в сборку"; exit 1; fi

@@ -41,6 +41,9 @@ jobs:
           asset=$(grep -o 'assets/index-[^"]*\.js' /tmp/max.html | head -1); test -n "$asset"
           code=$(get "${base}max/$asset" /tmp/max.js); echo "MAX_JS_HTTP=$code"; test "$code" = "200"
           grep -q "raw.githubusercontent.com" /tmp/max.js
+          grep -q "Живая схема Штаба" /tmp/max.js
+          grep -q "Окончание не указано" /tmp/max.js
+          code=$(get "${base}model.js" /tmp/model.js); echo "MODEL_JS_HTTP=$code"; test "$code" = "200"
       - name: Probe telemetry source
         shell: bash
         run: |
@@ -52,6 +55,8 @@ jobs:
           done
           test -n "$found"
           echo "TELEMETRY_SOURCE=$found"
+          # Публичная телеметрия не должна нести приватные события, задачи и входящие
+          if grep -Eq '"(events|tasks|inbox)"[[:space:]]*:' /tmp/status.json; then echo "::error::В публичной телеметрии появились приватные разделы"; exit 1; fi
           gen=$(grep -o '"generated_at": *"[^"]*"' /tmp/status.json | head -1 | sed 's/.*: *"//;s/"$//')
           age=$(( $(date +%s) - $(date -d "$gen" +%s) ))
           echo "TELEMETRY_AGE_SECONDS=$age"
