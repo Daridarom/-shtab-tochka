@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T04:46:09.157489+00:00",
+  "generated_at": "2026-09-28T04:47:13.904386+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,20 +36,20 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "warn",
-      "detail": "Ожидают: 3 · проверка связи 1 с назад"
+      "level": "ok",
+      "detail": "Ожидают: 0 · проверка связи 16 с назад"
     },
     {
       "id": "rostok",
       "title": "Росток",
-      "level": "warn",
+      "level": "ok",
       "detail": "Сегодня: 0 из 4 · в очереди: 1 · следующий слот: сегодня 09:00 · всего опубликовано: 53 · готово: 2 · согласование: 1 · заблокировано: 43"
     },
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: publication_lock_hold, unit:privet-planeta-auto-publish.timer · отчёты проверок устарели"
+      "level": "ok",
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0"
     }
   ],
   "workflows": [
