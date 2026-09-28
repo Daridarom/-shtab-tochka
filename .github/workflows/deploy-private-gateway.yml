@@ -1,0 +1,58 @@
+name: Deploy private gateway (Yandex Cloud)
+# Выкладывает функцию защищённого слоя в Yandex Cloud при изменении её кода в main.
+# Ключей в GitHub нет: вход через федерацию (Workload Identity Federation) — GitHub получает
+# временный IAM-токен Яндекса только для этого репозитория и ветки main.
+# Пока переменные репозитория не заданы (Settings → Secrets and variables → Actions → Variables), шаг пропускается.
+#   YC_FOLDER_ID          — каталог default в облаке cloud-tochka
+#   YC_DEPLOY_SA_ID       — сервисный аккаунт для выкладки (роль functions.editor + iam.serviceAccounts.user)
+#   YC_GATEWAY_SA_ID      — сервисный аккаунт самой функции (читает бакет и секрет)
+#   YC_BUCKET             — закрытый бакет со снимком
+#   YC_ALLOWED_USER_IDS   — id владельца в MAX
+#   YC_MAX_TOKEN_SECRET   — ссылка на секрет Lockbox: <secret-id>/<version-id>/MAX_BOT_TOKEN
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloud/private-gateway/**'
+      - '.github/workflows/deploy-private-gateway.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: private-gateway
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: ${{ vars.YC_FOLDER_ID != '' && vars.YC_DEPLOY_SA_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests
+        run: node tests/private-layer.test.mjs
+      - name: Get IAM token via federation
+        id: iam
+        uses: docker://ghcr.io/yc-actions/yc-iam-token-fed:1.0.0
+        with:
+          yc-sa-id: ${{ vars.YC_DEPLOY_SA_ID }}
+      - name: Deploy function
+        uses: yc-actions/yc-sls-function@v5
+        with:
+          yc-iam-token: ${{ steps.iam.outputs.iam-token }}
+          folder-id: ${{ vars.YC_FOLDER_ID }}
+          function-name: shtab-private-gateway
+          runtime: nodejs22
+          entrypoint: index.handler
+          memory: 128Mb
+          execution-timeout: '5'
+          source-root: ./cloud/private-gateway
+          include: |
+            ./index.js
+          service-account: ${{ vars.YC_GATEWAY_SA_ID }}
+          public: true
+          environment: |
+            BUCKET=${{ vars.YC_BUCKET }}
+            ALLOWED_USER_IDS=${{ vars.YC_ALLOWED_USER_IDS }}
+            ALLOWED_ORIGIN=https://daridarom.github.io
+          secrets: |
+            MAX_BOT_TOKEN=${{ vars.YC_MAX_TOKEN_SECRET }}
