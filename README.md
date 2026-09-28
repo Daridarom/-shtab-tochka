@@ -41,6 +41,10 @@ cd max && npm ci && npm run build   # соберёт public/max
 python3 -m http.server 8080 -d public  # панель на http://localhost:8080/
 ```
 
+## Защищённый слой
+
+Приватные события, задачи и входящие — через Yandex Cloud, см. `docs/private-layer.md`.
+
 ## Проверка веток
 
 `.github/workflows/ci.yml` на каждой ветке кроме main: тесты модели и сборка MAX без публикации.

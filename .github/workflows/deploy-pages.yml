@@ -31,6 +31,7 @@ jobs:
         run: |
           node tests/live-state.test.mjs
           node tests/model.test.mjs
+          node tests/private-layer.test.mjs
       - name: Install MAX UI dependencies
         working-directory: max
         run: npm ci --no-audit --no-fund
