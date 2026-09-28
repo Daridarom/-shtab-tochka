@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T00:42:24.727482+00:00",
+  "generated_at": "2026-09-28T00:43:28.926241+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -49,7 +49,7 @@
       "id": "publications",
       "title": "Публикации",
       "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: publication_lock_hold, unit:privet-planeta-auto-publish.timer"
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: publication_lock_hold, unit:privet-planeta-auto-publish.timer · отчёты проверок устарели"
     }
   ],
   "workflows": [
