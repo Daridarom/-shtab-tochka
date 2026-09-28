@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T04:34:38.109394+00:00",
+  "generated_at": "2026-09-28T04:36:26.875187+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -13,7 +13,7 @@
       "id": "visual",
       "title": "Ошибки визуала",
       "level": "error",
-      "detail": "4 сервисов в состоянии ошибки"
+      "detail": "3 сервисов в состоянии ошибки"
     },
     {
       "id": "telegram",
@@ -36,8 +36,8 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "warn",
-      "detail": "Ожидают: 5 · проверка связи 0 с назад"
+      "level": "ok",
+      "detail": "Ожидают: 6 · проверка связи 3 с назад"
     },
     {
       "id": "rostok",
@@ -78,7 +78,7 @@
       "last_status": "success"
     }
   ],
-  "failed_visual_count": 4,
+  "failed_visual_count": 3,
   "rostok": {
     "published_today": 0,
     "daily_limit": 4,
