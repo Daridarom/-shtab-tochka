@@ -11,7 +11,7 @@ import {Today,CalendarScreen,ProjectsScreen,SystemsScreen,InboxScreen,EventSheet
 
 const TABS=[['home','Сегодня'],['calendar','Календарь'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
 const store={get(k,d){try{return localStorage.getItem(k)??d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},json(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v??d;}catch(e){return d;}}};
-const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
+const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,artifactRuntime:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
 const CHANGES_KEY='shtab.max.taskChanges.v1';
 
 function Starfield({theme}){const ref=useRef(null);useEffect(()=>{const h=startStarfield(ref.current,{theme});return()=>h.stop();},[theme]);return <canvas ref={ref} className="stars" aria-hidden="true"/>;}

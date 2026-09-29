@@ -37,3 +37,18 @@ assert.equal(documentView({mode:'loading'}).available,false);assert.equal(docume
 assert.equal(documentView({...original,cards:[{id:'drive',level:'unexpected'}]}).level,'wait');
 const channels=channelViews(original);assert.equal(channels[0].level,'wait');assert.equal(channels[1].detail,'Получатель: работает · записей: 518');assert.equal(channelViews({...original,mode:'offline'})[1].level,'wait');
 console.log('PASS: document warning remains yellow; exact source reason preserved; originals not inferred; offline is unknown; received records are not tasks');
+
+
+const proofRaw=structuredClone(raw);
+proofRaw.artifact_runtime={mode:'shadow',active:true,verified:1,blocked:1,pending_evidence:0,last_result:'blocked',last_stage:'evidence',updated_at:'2026-09-29T20:20:00Z'};
+const proofState=toState(proofRaw,Date.parse('2026-09-29T20:21:00Z'));
+assert.equal(proofState.artifactRuntime.mode,'shadow');
+assert.equal(proofState.artifactRuntime.blocked,1);
+assert.equal(proofState.artifactRuntime.lastResult,'blocked');
+assert.equal(proofState.artifactRuntime.lastStage,'evidence');
+const noProof=structuredClone(raw);delete noProof.artifact_runtime;
+assert.equal(toState(noProof).artifactRuntime,null);
+const badProof=structuredClone(raw);badProof.artifact_runtime={mode:'unexpected',active:false,last_result:'made-up',last_stage:'magic'};
+const normalizedBad=toState(badProof).artifactRuntime;
+assert.equal(normalizedBad.mode,'pilot');assert.equal(normalizedBad.active,false);assert.equal(normalizedBad.lastResult,'unknown');assert.equal(normalizedBad.lastStage,null);
+console.log('PASS: artifact runtime is optional, fail-closed and never turns unknown data green');

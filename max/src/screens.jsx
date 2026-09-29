@@ -32,6 +32,29 @@ function Rostok({r}){
   <div className="stats">{stat('Сегодня',r.publishedToday!=null&&r.dailyLimit!=null?r.publishedToday+' из '+r.dailyLimit:r.publishedToday)}{stat('В очереди',r.queue)}{stat('Следующий слот',r.nextSlotLabel)}{stat('Всего опубликовано',r.totalPublished)}</div>
  </Card>;
 }
+const PROOF_FLOW=[
+ ['01','Задача','фиксируем результат'],
+ ['02','Навык','выбираем способ'],
+ ['03','Артефакт','получаем объект'],
+ ['04','Проверка','собираем доказательства'],
+ ['05','Состояние','обновляем только после проверки']
+];
+function ProofFlow({runtime,mode}){
+ const sourceKnown=!!runtime&&['live','stale'].includes(mode);
+ const tone=!sourceKnown?'none':runtime.lastResult==='verified'?'ok':runtime.lastResult==='blocked'?'err':['pending','needs_more_evidence'].includes(runtime.lastResult)?'wait':'none';
+ const modeLabel=runtime?({pilot:'пилот',shadow:'теневой режим',canonical:'рабочий режим'}[runtime.mode]||runtime.mode):'статус не подключён';
+ const resultLabel=!sourceKnown?'Живой статус артефактов не подтверждён':runtime.lastResult==='verified'?'Последний результат подтверждён':runtime.lastResult==='blocked'?'Последний результат остановлен проверкой':['pending','needs_more_evidence'].includes(runtime.lastResult)?'Проверка ещё не завершена':'Итог не подтверждён источником';
+ const detail=!sourceKnown?'Цепочка показана как правило работы. Безопасный агрегат по артефактам пока не приходит в телеметрию, поэтому зелёный статус не рисуем.':runtime.lastResult==='verified'?'Состояние повышено только после наличия артефакта и доказательства проверки.':runtime.lastResult==='blocked'?'Проверка не дала перевести результат в «готово» — это штатная защита от ложного DONE.':['pending','needs_more_evidence'].includes(runtime.lastResult)?'До завершения проверки результат остаётся неподтверждённым.':'Источник не дал достаточных данных о последнем результате.';
+ const counts=[runtime?.verified!=null&&'подтверждено '+runtime.verified,runtime?.blocked!=null&&'заблокировано '+runtime.blocked,runtime?.pendingEvidence!=null&&'ждут проверки '+runtime.pendingEvidence].filter(Boolean);
+ const stageByNo={01:'task',02:'skill',03:'artifact',04:'evidence',05:'state'};
+ return <Card title="Контур доказуемой работы" aside={modeLabel} className="span2 proofCard">
+  <div className="proofFlow">{PROOF_FLOW.map(([n,t,d])=><div className={'proofStep'+(runtime?.lastStage&&runtime.lastStage===stageByNo[n]?' current':'')} key={n}><small>{n}</small><b>{t}</b><em>{d}</em></div>)}</div>
+  <div className={'proofState '+tone}><span className={'dot '+tone}/><div><b>{resultLabel}</b><small>{detail}</small></div></div>
+  {counts.length>0&&<div className="chips">{counts.map(x=><Chip key={x}>{x}</Chip>)}</div>}
+  <small className="since">{sourceKnown&&runtime.updatedAt?'Обновление контура: '+moscowTime(runtime.updatedAt,true)+' МСК':'Task → Skill → Artifact → Evidence → State'}</small>
+ </Card>;
+}
+
 function Workflows({list,id}){
  return <Card id={id} title="Автоматические процессы" aside={list.length?list.filter(w=>w[1]==='ok').length+' из '+list.length:''}>
   {list.length?list.map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>):<Empty text="Список процессов появится после первого обновления"/>}
@@ -173,7 +196,7 @@ export function ProjectsScreen({s,priv,tasks,view,setView,project,openSheet,chan
    <Seg label="Представление задач" value={view} onChange={setView} items={[['list','Список'],['board','Доска'],['matrix','Приоритеты']]}/>
    <SourceLine name="Реестр задач" src={priv.source} compact/>
   </div>
-  {node?.id==='rostok'&&<><Rostok r={s.rostok}/><Workflows list={s.workflows.filter(x=>/Росток|публикаци/i.test(x[0]))}/></>}
+  {node?.id==='rostok'&&<><Rostok r={s.rostok}/><ProofFlow runtime={s.artifactRuntime} mode={s.mode}/><Workflows list={s.workflows.filter(x=>/Росток|публикаци/i.test(x[0]))}/></>}
   {node?.id==='hq'&&<><Documents s={s}/><Workflows list={s.workflows}/></>}
   {body}
  </div>;
@@ -229,6 +252,7 @@ export function SystemsScreen({s,graph,selected,onSelect}){
  const bad=s.systems.filter(x=>x[1]!=='ok');
  return <div className="home">
   <SchemeCard graph={graph} selected={selected} onSelect={onSelect}/>
+  <ProofFlow runtime={s.artifactRuntime} mode={s.mode}/>
   <Signals s={s} className="span2"/>
   <Documents s={s}/>
   <Workflows id="workflows" list={s.workflows}/>

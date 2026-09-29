@@ -33,5 +33,6 @@ jobs:
           test -f public/max/index.html
           js=$(ls public/max/assets/index-*.js | head -1)
           grep -q "Живая схема Штаба" "$js"
+          grep -q "Контур доказуемой работы" "$js"
           grep -q "Окончание не указано" "$js"
           if grep -q "__SHTAB_PRIVATE__" "$js"; then echo "::error::Тестовые данные разработки попали в сборку"; exit 1; fi
