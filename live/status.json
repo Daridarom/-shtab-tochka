@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-29T22:31:32.651937+00:00",
+  "generated_at": "2026-09-29T22:32:39.162925+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -13,7 +13,7 @@
       "id": "visual",
       "title": "Визуалы",
       "level": "warn",
-      "detail": "1 задания ожидают возобновления генератора"
+      "detail": "2 задания ожидают возобновления генератора"
     },
     {
       "id": "telegram",
@@ -43,7 +43,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 1 с назад"
+      "detail": "Ожидают: 0 · проверка связи 10 с назад"
     },
     {
       "id": "rostok",
@@ -84,7 +84,7 @@
       "last_status": "success"
     }
   ],
-  "failed_visual_count": 1,
+  "failed_visual_count": 2,
   "rostok": {
     "published_today": 0,
     "daily_limit": 4,
