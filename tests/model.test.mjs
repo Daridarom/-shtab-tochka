@@ -5,7 +5,7 @@ const M=await load('model.js');
 
 // Источник: «не подключён» не выдаётся за пустой день; «свободно» только при LIVE.
 const none=M.emptyPrivate();
-assert.equal(none.source.state,'not_connected');
+assert.equal(none.source.state,'not_connected');assert.equal(none.calendarSource.state,'not_connected');assert.equal(none.taskSource.state,'not_connected');assert.equal(none.inboxSource.state,'not_connected');
 assert.equal(none.events.length+none.tasks.length+none.inbox.length,0);
 assert.doesNotMatch(M.emptyDayText(none.source),/свободн/i);
 assert.match(M.emptyDayText(none.source),/не подтверждено/);
@@ -15,7 +15,11 @@ const stale=M.sourceFromSnapshot('2026-09-28T19:42:00Z',120,now);
 assert.equal(stale.state,'stale');
 assert.equal(M.sourceNote('Календарь',stale),'Календарь не обновлялся 18 минут. Показан последний подтверждённый снимок');
 assert.equal(M.emptyDayText(stale),'Нет подтверждённых данных на этот день');
-assert.equal(M.fromPrivateSnapshot({schema:'x'}).source.state,'error');
+const brokenPrivate=M.fromPrivateSnapshot({schema:'x'});
+assert.equal(brokenPrivate.source.state,'error');assert.equal(brokenPrivate.calendarSource.state,'error');assert.equal(brokenPrivate.taskSource.state,'error');assert.equal(brokenPrivate.inboxSource.state,'error');
+const publicCal=M.fromPublicCalendar({schema:'calendar-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:21600,events:[{id:'g1',title:'Google событие',kind:'meeting',start:'2026-09-29T11:00:00+03:00',end:'2026-09-29T12:00:00+03:00',endConfirmed:true}]},now);
+assert.equal(publicCal.source.state,'live');assert.equal(publicCal.events.length,1);assert.equal(publicCal.events[0].title,'Google событие');
+assert.equal(M.fromPublicCalendar({schema:'unexpected'}).source.state,'error');
 
 // EVENT: окончание не выдумывается; оплата — не встреча.
 const ev=M.normalizeEvent({id:'e1',start:'2026-09-29T11:00:00+03:00',end:'2026-09-29T12:00:00+03:00',kind:'meeting',format:'online',joinUrl:'javascript:alert(1)'});
@@ -54,6 +58,9 @@ assert.equal(node('calendar').level,'none');assert.equal(node('telegram').level,
 assert.equal(node('visual').issue.action,'Проверить');
 assert.equal(edge('max','system').kind,'flow');assert.equal(edge('rostok','visual').kind,'stop err');assert.equal(edge('visual','publications').kind,'idle');
 assert.equal(edge('system','calendar').kind,'unknown');
+const withCalendar={...none,calendarSource:publicCal.source,events:publicCal.events};
+const gc=M.schemeGraph(state,withCalendar);
+assert.equal(gc.nodes.find(n=>n.id==='calendar').level,'ok');assert.equal(gc.nodes.find(n=>n.id==='projects').level,'none');assert.equal(gc.edges.find(e=>e.from==='system'&&e.to==='calendar').kind,'flow');
 const gs=M.schemeGraph({...state,mode:'stale'},none);assert.ok(!gs.edges.some(e=>e.kind==='flow'));
 const go=M.schemeGraph({...state,mode:'offline'},none);assert.ok(go.nodes.every(n=>n.level==='none'));
 const O=await load('orbit.js');
