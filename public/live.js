@@ -93,7 +93,7 @@ function explainWorkflow(row,w){return {level:row[1],key:'wf:'+(w.id||w.name),ti
 export function offlineState(){
  return {mode:'offline',source:null,asOf:null,ageSeconds:null,ttlSeconds:120,cached:false,
   verdict:{level:'wait',text:'Нет связи с источником'},notice:{level:'wait',text:'Нет связи с источником состояния. Проверьте сеть и повторите'},
-  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,workflows:[],projects:[],cards:[],
+  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,workflows:[],projects:[],cards:[],
   focus:[],
   systems:[['Обновление данных','wait','Нет связи с источником состояния']],
   events:[['Сейчас','Состояние штаба недоступно: нет связи с источником','wait']],
@@ -113,6 +113,26 @@ export async function fetchLive(urls=LIVE_URLS){
   }catch(e){return null;}
  }));
  return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
+}
+
+export function normalizeArtifactRuntime(raw){
+ const a=raw&&typeof raw.artifact_runtime==='object'&&!Array.isArray(raw.artifact_runtime)?raw.artifact_runtime:null;
+ if(!a)return null;
+ const norm=v=>String(v??'').trim().toLowerCase().replace(/[\s-]+/g,'_');
+ const n=v=>Number.isFinite(v)?Math.max(0,Math.trunc(v)):null;
+ const mode=norm(a.mode||a.phase||'pilot');
+ const result=norm(a.last_result||a.result||a.state||'unknown');
+ const stage=norm(a.last_stage||a.stage||'');
+ return {
+  mode:['pilot','shadow','canonical'].includes(mode)?mode:'pilot',
+  active:a.active===true,
+  verified:n(a.verified),
+  blocked:n(a.blocked),
+  pendingEvidence:n(a.pending_evidence??a.pendingEvidence),
+  lastResult:['verified','blocked','pending','needs_more_evidence','unknown'].includes(result)?result:'unknown',
+  lastStage:['task','skill','artifact','evidence','state'].includes(stage)?stage:null,
+  updatedAt:a.updated_at||a.updatedAt||null
+ };
 }
 
 function workflowRow(w){
@@ -149,12 +169,13 @@ export function toState(raw,now=Date.now()){
  ];
  const inbox=items.map(it=>['Внимание',it.title+': '+it.text,it.level]);
  const r=raw.rostok&&typeof raw.rostok==='object'?raw.rostok:null;
+ const artifactRuntime=normalizeArtifactRuntime(raw);
  const done=r&&Number.isFinite(r.published_today)?r.published_today:null;
  const rostok=r?{publishedToday:done,dailyLimit:r.daily_limit??null,queue:r.queue??null,statusLabel:r.unresolved?'нужна сверка доставки':level(cards.find(c=>c.id==='publications')?.level||'unknown')!=='ok'?'требует проверки':Number.isFinite(r.queue)&&r.queue>0?'есть готовые посты':'нет готовых постов',nextSlot:r.next_slot??null,nextSlotLabel:slotLabel(r.next_slot,now),totalPublished:r.total_published??null,unresolved:r.unresolved??null}:null;
  return {mode:'live',source:null,asOf:raw.generated_at,ageSeconds:null,ttlSeconds:raw.ttl_seconds||120,cached:false,
   verdict,notice:null,
   metrics:{active,total:wfs.length,attention,done,dailyLimit:rostok?rostok.dailyLimit:null,nextSlotLabel:rostok?rostok.nextSlotLabel:null,problems:items.length,oldest:oldestLabel},
-  rostok,workflows:rows,projects:[],focus:items,systems,events,inbox,
+  rostok,artifactRuntime,workflows:rows,projects:[],focus:items,systems,events,inbox,
   cards:cards.map(c=>({id:c.id,title:humanName(c.id,c.title),level:level(c.level),detail:fixPlural(c.detail)||''}))};
 }
 

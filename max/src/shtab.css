@@ -129,3 +129,15 @@ nav button{font-size:12px;padding:0 2px}
 .badge.wait{background:var(--wait);color:#1b1300}
 @media(min-width:768px){.col{flex-basis:calc(50% - 5px)}.matrix{grid-template-columns:1fr 1fr}.sheet{border-radius:22px;margin-bottom:24px;border-bottom:1px solid var(--border)}.sheetLayer{align-items:center}}
 @media(min-width:1024px){.col{flex-basis:calc(25% - 8px)}.board{overflow-x:visible}}
+
+
+/* ---- Task → Skill → Artifact → Evidence → State ---- */
+.proofCard{overflow:hidden}
+.proofFlow{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;padding:8px 0 4px;scroll-snap-type:x proximity}
+.proofStep{flex:0 0 136px;min-height:88px;padding:10px 11px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--card) 72%,transparent);scroll-snap-align:start}
+.proofStep small,.proofStep b,.proofStep em{display:block}.proofStep small{font-size:10px;color:var(--accent);letter-spacing:.08em}.proofStep b{margin-top:4px;font-size:14px}.proofStep em{margin-top:4px;font-size:11px;line-height:1.3;color:var(--muted);font-style:normal}
+.proofStep.current{border-color:var(--accent2);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent2) 25%,transparent)}
+.proofState{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 12px;border:1px solid var(--line);border-radius:14px}
+.proofState .dot{margin-top:5px}.proofState b,.proofState small{display:block}.proofState small{margin-top:3px;color:var(--muted);line-height:1.4}
+.proofState.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}.proofState.wait{border-color:color-mix(in srgb,var(--wait) 35%,var(--line))}.proofState.err{border-color:color-mix(in srgb,var(--err) 40%,var(--line))}
+@media(min-width:800px){.proofFlow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}.proofStep{min-width:0}}
