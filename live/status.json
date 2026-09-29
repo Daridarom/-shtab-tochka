@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-29T14:59:05.166654+00:00",
+  "generated_at": "2026-09-29T15:00:46.176813+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -37,19 +37,19 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 14 с назад"
+      "detail": "Ожидают: 0 · проверка связи 7 с назад"
     },
     {
       "id": "rostok",
       "title": "Росток",
-      "level": "ok",
-      "detail": "Сегодня: 2 из 4 · в очереди: 2 · следующий слот: сегодня 18:00 · всего опубликовано: 59 · ожидают изображения: 4 · согласование: 1 · заблокировано: 57"
+      "level": "warn",
+      "detail": "Сегодня: 2 из 4 · в очереди: 1 · следующий слот: сегодня 21:00 · ожидают сверки: 1 · всего опубликовано: 59 · ожидают изображения: 4 · согласование: 1 · заблокировано: 57"
     },
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "ok",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0"
+      "level": "error",
+      "detail": "Неясная доставка: 1 · ошибки доставки: 0"
     }
   ],
   "workflows": [
@@ -82,11 +82,11 @@
   "rostok": {
     "published_today": 2,
     "daily_limit": 4,
-    "unresolved": 0,
-    "next_slot": "2026-09-29T18:00+03:00",
-    "queue": 2,
+    "unresolved": 1,
+    "next_slot": "2026-09-29T21:00+03:00",
+    "queue": 1,
     "total_published": 59
   },
-  "publication_unresolved": 0,
+  "publication_unresolved": 1,
   "publication_delivery_errors": 0
 }
