@@ -4,13 +4,16 @@ export function documentView(state={}){
  const available=!!drive&&['live','stale'].includes(state.mode);
  const driveDetail=available?String(drive.detail||''):'Нет данных от источника';
  const indexAvailable=!!index&&['live','stale'].includes(state.mode);
- const indexDetail=indexAvailable?String(index.detail||''):'Состояние облачной копии индекса отдельно не подтверждено';
- const level=[drive?.level,index?.level].includes('err')?'err':[drive?.level,index?.level].includes('wait')?'wait':available?'ok':'wait';
+ const legacyIndexPending=!indexAvailable&&available&&/индекс/i.test(driveDetail)&&/ожида|retry|ошиб|не подтвержд/i.test(driveDetail);
+ const driveLevel=available&&['ok','wait','err'].includes(drive.level)?drive.level:'wait';
+ const indexLevel=indexAvailable&&['ok','wait','err'].includes(index.level)?index.level:legacyIndexPending?'wait':driveLevel==='ok'?'ok':'wait';
+ const indexDetail=indexAvailable?String(index.detail||''):legacyIndexPending?'Облачная копия индекса задач ожидает обновления':'Состояние облачной копии индекса отдельно не подтверждено';
+ const level=[driveLevel,indexLevel].includes('err')?'err':[driveLevel,indexLevel].includes('wait')?'wait':available?'ok':'wait';
  return {
   available,level,title:'Документы и индекс задач',
   detail:driveDetail,
-  driveLevel:available&&['ok','wait','err'].includes(drive.level)?drive.level:'wait',
-  indexLevel:indexAvailable&&['ok','wait','err'].includes(index.level)?index.level:'wait',
+  driveLevel,
+  indexLevel,
   context:/контекст проверен/i.test(driveDetail)?'Источник подтверждает контекст Google Drive':driveDetail,
   index:indexDetail,
   originals:'Сохранность каждого вложения на Диске и компьютере этим индикатором не проверяется.',
