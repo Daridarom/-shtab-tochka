@@ -97,7 +97,7 @@ function HarnessCard({s}){
  const artifactText=!artifact?'Агрегат артефактов и доказательств пока не приходит в телеметрию':artifact.lastResult==='verified'?'Последний результат подтверждён доказательствами':artifact.lastResult==='blocked'?'Проверка остановила перевод результата в готовое состояние':['pending','needs_more_evidence'].includes(artifact.lastResult)?'Есть результат, но проверка ещё не завершена':'Статус проверки не подтверждён';
  const layers=[
   ['01','Входы',channels,'MAX и Telegram · приём сигналов и сообщений'],
-  ['02','Контекст и состояние',cardTone(s,'drive'),(s.cards||[]).find(x=>x.id==='drive')?.detail||'Состояние контекста не подтверждено'],
+  ['02','Контекст и состояние',worstTone([cardTone(s,'drive'),cardTone(s,'task_index')]),[(s.cards||[]).find(x=>x.id==='drive')?.detail,(s.cards||[]).find(x=>x.id==='task_index')?.detail].filter(Boolean).join(' · ')||'Состояние контекста не подтверждено'],
   ['03','Навыки',cardTone(s,'skills'),(s.cards||[]).find(x=>x.id==='skills')?.detail||'Реестр активных навыков пока не включён в безопасную телеметрию'],
   ['04','Оркестрация',workflows,s.workflows?.length?s.workflows.filter(x=>x[1]==='ok').length+' из '+s.workflows.length+' процессов штатно':'Состояние процессов не подтверждено'],
   ['05','Исполнение',cardTone(s,'queue'),(s.cards||[]).find(x=>x.id==='queue')?.detail||'Канал исполнения не подтверждён'],
@@ -118,9 +118,10 @@ function Workflows({list,id}){
 }
 function Documents({s}){
  const d=documentView(s);
- return <Card id="documents" title="Документы" aside={d.stale?'последний снимок':!d.available?'нет данных':d.level==='ok'?'проверено источником':'нужно внимание'}>
-  <Row dot={d.available?d.level:'none'} title={d.title} text={d.detail}/>
-  <details><summary>Контекст, индекс и оригиналы — разные проверки</summary><p>{d.context}. {d.index}. {d.originals}</p></details>
+ return <Card id="documents" title="Документы и данные" aside={d.stale?'последний снимок':!d.available?'нет данных':d.level==='ok'?'штатно':'нужно внимание'}>
+  <Row dot={d.available?d.driveLevel:'none'} title="Google Drive · контекст" text={d.context}/>
+  <Row dot={d.indexLevel||'none'} title="Индекс задач · облачная копия" text={d.index}/>
+  <details><summary>Почему это две разные проверки</summary><p>{d.originals}</p></details>
   {d.asOf&&<small className="since">Снимок панели: {moscowTime(d.asOf,true)} МСК. Это не время сохранения документов.</small>}
  </Card>;
 }
