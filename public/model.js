@@ -53,7 +53,7 @@ export function fromPrivateSnapshot(raw,now=Date.now()){
 
 export function fromPublicCalendar(raw,now=Date.now()){
  if(!raw)return null;
- if(raw.schema!=='calendar-public-1')return {source:{state:SOURCE.ERROR,reason:'неизвестный формат календаря',ageSeconds:null,asOf:null},events:[]};
+ if(!['calendar-1','calendar-public-1'].includes(raw.schema))return {source:{state:SOURCE.ERROR,reason:'неизвестный формат календаря',ageSeconds:null,asOf:null},events:[]};
  const src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
  return {source:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean)};
 }
