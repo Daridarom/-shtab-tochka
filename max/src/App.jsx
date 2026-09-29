@@ -11,7 +11,7 @@ import {Today,CalendarScreen,ProjectsScreen,SystemsScreen,InboxScreen,EventSheet
 
 const TABS=[['home','Сегодня'],['calendar','Календарь'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
 const store={get(k,d){try{return localStorage.getItem(k)??d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},json(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v??d;}catch(e){return d;}}};
-const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,artifactRuntime:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
+const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,artifactRuntime:null,calendar:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
 const CHANGES_KEY='shtab.max.taskChanges.v1';
 
 function Starfield({theme}){const ref=useRef(null);useEffect(()=>{const h=startStarfield(ref.current,{theme});return()=>h.stop();},[theme]);return <canvas ref={ref} className="stars" aria-hidden="true"/>;}
@@ -24,11 +24,17 @@ function RefreshIcon(){return <svg width="20" height="20" viewBox="0 0 24 24" fi
 
 // Защищённый слой. Приватного канала пока нет — возвращаем «не подключён», без имитации синхронизации.
 // Только в режиме разработки можно подставить тестовый снимок через window.__SHTAB_PRIVATE__ (в сборку не попадает).
-function usePrivate(){
+function usePrivate(s){
  return useMemo(()=>{
-  if(import.meta.env.DEV&&typeof window!=='undefined'&&window.__SHTAB_PRIVATE__)return M.fromPrivateSnapshot(window.__SHTAB_PRIVATE__);
-  return M.emptyPrivate();
- },[]);
+  const base=import.meta.env.DEV&&typeof window!=='undefined'&&window.__SHTAB_PRIVATE__
+   ?M.fromPrivateSnapshot(window.__SHTAB_PRIVATE__)
+   :M.emptyPrivate();
+  const cal=s?.calendar;
+  if(!cal)return base;
+  const calendarSource=M.sourceFromSnapshot(cal.generated_at,cal.ttl_seconds||21600);
+  const events=(cal.events||[]).map(M.normalizeEvent).filter(Boolean);
+  return {...base,calendarSource,events};
+ },[s?.calendar]);
 }
 function findProject(id){const f=l=>{for(const x of l){if(x.id===id)return x;const r=x.children&&f(x.children);if(r)return r;}return null;};return id?f(projectTree):null;}
 
@@ -44,7 +50,7 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
  const [project,setProjectState]=useState(()=>{const p=store.get('shtab.max.project','');return findProject(p)?p:null;});
  const [changes,setChanges]=useState(()=>{const c=store.json(CHANGES_KEY,{});return c&&typeof c==='object'&&!Array.isArray(c)?c:{};});
  const live=useRef(null);
- const priv=usePrivate();
+ const priv=usePrivate(s);
  useEffect(()=>{live.current=startLive(d=>setS({...normalizeMaxState(d),loadedAt:Date.now()}));const id=setInterval(()=>setTick(t=>t+1),1000);return()=>{live.current?.stop();clearInterval(id);};},[]);
  const tasks=useMemo(()=>M.applyChanges(priv.tasks,changes),[priv.tasks,changes]);
  const graph=useMemo(()=>M.schemeGraph(s,priv),[s,priv]);
