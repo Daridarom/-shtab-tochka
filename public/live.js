@@ -8,7 +8,12 @@ export const LIVE_URLS=[
  'https://raw.githubusercontent.com/Daridarom/shtab-tochka/telemetry/live/status.json',
  'https://raw.githubusercontent.com/Daridarom/shtab-tochka/main/live/status.json'
 ];
+export const CALENDAR_URLS=[
+ 'https://raw.githubusercontent.com/Daridarom/shtab-tochka/telemetry/live/calendar.json',
+ 'https://raw.githubusercontent.com/Daridarom/shtab-tochka/main/live/calendar.json'
+];
 const CACHE_KEY='shtab.lastState.v1';
+const CALENDAR_CACHE_KEY='shtab.lastCalendar.v1';
 
 // ---------- вспомогательное ----------
 export function level(x){return x==='error'?'err':x==='warn'||x==='unknown'?'wait':'ok';}
@@ -94,7 +99,7 @@ function explainWorkflow(row,w){return {level:row[1],key:'wf:'+(w.id||w.name),ti
 export function offlineState(){
  return {mode:'offline',source:null,asOf:null,ageSeconds:null,ttlSeconds:120,cached:false,
   verdict:{level:'wait',text:'Нет связи с источником'},notice:{level:'wait',text:'Нет связи с источником состояния. Проверьте сеть и повторите'},
-  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,workflows:[],projects:[],cards:[],
+  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,calendar:null,workflows:[],projects:[],cards:[],
   focus:[],
   systems:[['Обновление данных','wait','Нет связи с источником состояния']],
   events:[['Сейчас','Состояние штаба недоступно: нет связи с источником','wait']],
@@ -111,6 +116,32 @@ export async function fetchLive(urls=LIVE_URLS){
    if(!raw||!raw.generated_at)return null;
    const ts=Date.parse(raw.generated_at);
    return {raw,ts:Number.isFinite(ts)?ts:0,source:url.includes('/telemetry/')?'telemetry-branch':'main-branch'};
+  }catch(e){return null;}
+ }));
+ return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
+}
+
+function normalizeCalendar(raw){
+ if(!raw||raw.schema!=='calendar-1'||!raw.generated_at||!Array.isArray(raw.events))return null;
+ const events=raw.events.map(e=>{
+  if(!e||!e.id||!e.start)return null;
+  return {
+   id:String(e.id),title:String(e.title||'Событие'),kind:e.kind||'other',start:e.start,end:e.end||null,
+   endConfirmed:!!e.endConfirmed,allDay:!!e.allDay,format:e.format||null,location:e.location||null,
+   project:e.project||null,source:'Google Calendar'
+  };
+ }).filter(Boolean);
+ return {schema:'calendar-1',generated_at:raw.generated_at,ttl_seconds:raw.ttl_seconds||21600,events};
+}
+export async function fetchCalendar(urls=CALENDAR_URLS){
+ const hits=await Promise.all(urls.map(async url=>{
+  try{
+   const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});
+   if(!r.ok)return null;
+   const raw=normalizeCalendar(await r.json());
+   if(!raw)return null;
+   const ts=Date.parse(raw.generated_at);
+   return {raw,ts:Number.isFinite(ts)?ts:0,source:url.includes('/telemetry/')?'telemetry-calendar':'main-calendar'};
   }catch(e){return null;}
  }));
  return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
@@ -183,6 +214,8 @@ export function toState(raw,now=Date.now()){
 // ---------- кэш последнего состояния (localStorage, только безопасная проекция) ----------
 function readCache(){try{const j=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');return j&&j.raw&&j.raw.generated_at?j:null;}catch(e){return null;}}
 function writeCache(raw,source){try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),raw,source}));}catch(e){}}
+function readCalendarCache(){try{const j=JSON.parse(localStorage.getItem(CALENDAR_CACHE_KEY)||'null');return j&&j.raw&&j.raw.generated_at?j:null;}catch(e){return null;}}
+function writeCalendarCache(raw,source){try{localStorage.setItem(CALENDAR_CACHE_KEY,JSON.stringify({savedAt:Date.now(),raw,source}));}catch(e){}}
 
 function finish(raw,source,now,offline){
  const state=toState(raw,now);
@@ -208,14 +241,20 @@ function finish(raw,source,now,offline){
 
 // Главная функция: возвращает экранное состояние в одном из режимов live / stale / offline.
 export async function loadState(now=Date.now()){
- const hit=await fetchLive();
- if(hit){writeCache(hit.raw,hit.source);return finish(hit.raw,hit.source,now,false);}
+ const [hit,calendarHit]=await Promise.all([fetchLive(),fetchCalendar()]);
+ let calendar=calendarHit?.raw||null;
+ if(calendarHit)writeCalendarCache(calendarHit.raw,calendarHit.source);
+ if(!calendar)calendar=readCalendarCache()?.raw||null;
+ if(hit){writeCache(hit.raw,hit.source);const state=finish(hit.raw,hit.source,now,false);state.calendar=calendar;return state;}
  const c=readCache();
- if(c)return finish(c.raw,c.source,now,true);
- return offlineState();
+ if(c){const state=finish(c.raw,c.source,now,true);state.calendar=calendar;return state;}
+ const state=offlineState();state.calendar=calendar;return state;
 }
 // Мгновенное состояние из кэша для первой отрисовки, пока идёт запрос.
-export function cachedState(now=Date.now()){const c=readCache();return c?finish(c.raw,c.source,now,true):null;}
+export function cachedState(now=Date.now()){
+ const c=readCache();if(!c)return null;
+ const state=finish(c.raw,c.source,now,true);state.calendar=readCalendarCache()?.raw||null;return state;
+}
 
 // Авто-обновление: сразу, по таймеру, при возврате на экран и при появлении сети.
 export function startLive(onState,{interval=30000}={}){
