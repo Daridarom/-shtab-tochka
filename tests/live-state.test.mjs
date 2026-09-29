@@ -59,3 +59,18 @@ assert.equal(safeCalendar.events[0].title,'Встреча');assert.equal(safeCal
 assert.equal('description' in safeCalendar.events[0],false);assert.equal('attendees' in safeCalendar.events[0],false);assert.equal('joinUrl' in safeCalendar.events[0],false);
 assert.equal(normalizeCalendar({schema:'wrong',generated_at:'x',events:[]}),null);
 console.log('PASS: calendar projection strips descriptions, attendees and links');
+
+
+const waitingVisual=structuredClone(raw);
+waitingVisual.cards[1]={id:'visual',level:'warn',detail:'2 задания ожидают возобновления генератора'};
+const waitingState=toState(waitingVisual,Date.parse('2026-09-30T00:30:00+03:00'));
+assert.equal(waitingState.focus[0].level,'wait');
+assert.match(waitingState.focus[0].text,/2 задания ожидают возобновления генератора/);
+assert.doesNotMatch(waitingState.focus[0].text,/с ошибкой/);
+
+const taskIndex=structuredClone(raw);
+taskIndex.cards=[taskIndex.cards[0],{id:'task_index',level:'warn',detail:'Локальный индекс работает · облачная копия ожидает обновления'},taskIndex.cards[2]];
+const taskIndexState=toState(taskIndex,Date.parse('2026-09-30T00:30:00+03:00'));
+assert.equal(taskIndexState.focus[0].title,'Индекс задач');
+assert.match(taskIndexState.focus[0].text,/Локальный индекс задач актуален/);
+console.log('PASS: waiting generator and cloud task index are described as warnings, not fabricated failures');
