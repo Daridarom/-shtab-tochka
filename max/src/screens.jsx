@@ -97,7 +97,7 @@ function HarnessCard({s}){
  const layers=[
   ['01','Входы',channels,'MAX и Telegram · приём сигналов и сообщений'],
   ['02','Контекст и состояние',cardTone(s,'drive'),(s.cards||[]).find(x=>x.id==='drive')?.detail||'Состояние контекста не подтверждено'],
-  ['03','Навыки','none','Реестр активных навыков пока не включён в безопасную телеметрию'],
+  ['03','Навыки',cardTone(s,'skills'),(s.cards||[]).find(x=>x.id==='skills')?.detail||'Реестр активных навыков пока не включён в безопасную телеметрию'],
   ['04','Оркестрация',workflows,s.workflows?.length?s.workflows.filter(x=>x[1]==='ok').length+' из '+s.workflows.length+' процессов штатно':'Состояние процессов не подтверждено'],
   ['05','Исполнение',cardTone(s,'queue'),(s.cards||[]).find(x=>x.id==='queue')?.detail||'Канал исполнения не подтверждён'],
   ['06','Артефакты и проверка',artifactTone,artifactText],
