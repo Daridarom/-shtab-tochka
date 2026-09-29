@@ -38,14 +38,29 @@ export function telemetrySource(s){
 // Сейчас приватного канала к ЦУП нет: возвращаем честное «не подключён», ничего не симулируем.
 // Когда канал появится, он должен вернуть снимок {schema:'private-1',generated_at,ttl_seconds,events[],tasks[],inbox[]}.
 export const PRIVATE_REASON='Защищённый канал для событий, задач и входящих ещё не настроен. В публичную телеметрию эти данные не передаются';
-export function emptyPrivate(){
- const src={state:SOURCE.NOT_CONNECTED,reason:PRIVATE_REASON,ageSeconds:null,asOf:null};
- return {source:src,events:[],tasks:[],inbox:[]};
+export function privateUnavailable(reason=PRIVATE_REASON,state=SOURCE.NOT_CONNECTED){
+ const src={state,reason,ageSeconds:null,asOf:null};
+ return {source:src,sources:{calendar:src,tasks:src,inbox:src},events:[],tasks:[],inbox:[]};
+}
+export function emptyPrivate(){return privateUnavailable();}
+function sectionSource(common,capabilities,key){
+ if(!capabilities||!(key in capabilities))return common; // обратная совместимость private-1
+ if(capabilities[key]===true)return common;
+ return {state:SOURCE.NOT_CONNECTED,reason:'Этот раздел ещё не подключён к защищённому каналу',ageSeconds:null,asOf:null};
 }
 export function fromPrivateSnapshot(raw,now=Date.now()){
- if(!raw||raw.schema!=='private-1')return {...emptyPrivate(),source:{state:SOURCE.ERROR,reason:'неизвестный формат снимка',ageSeconds:null,asOf:null}};
- const src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
- return {source:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean),tasks:(raw.tasks||[]).map(normalizeTask).filter(Boolean),inbox:(raw.inbox||[]).map(normalizeInbox).filter(Boolean)};
+ if(!raw||raw.schema!=='private-1')return privateUnavailable('неизвестный формат защищённого снимка',SOURCE.ERROR);
+ const common=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
+ const caps=raw.capabilities&&typeof raw.capabilities==='object'?raw.capabilities:null;
+ const sources={
+  calendar:sectionSource(common,caps,'calendar'),
+  tasks:sectionSource(common,caps,'tasks'),
+  inbox:sectionSource(common,caps,'inbox')
+ };
+ return {source:common,sources,
+  events:sources.calendar.state===SOURCE.NOT_CONNECTED?[]:(raw.events||[]).map(normalizeEvent).filter(Boolean),
+  tasks:sources.tasks.state===SOURCE.NOT_CONNECTED?[]:(raw.tasks||[]).map(normalizeTask).filter(Boolean),
+  inbox:sources.inbox.state===SOURCE.NOT_CONNECTED?[]:(raw.inbox||[]).map(normalizeInbox).filter(Boolean)};
 }
 
 // ---------- TASK ----------
