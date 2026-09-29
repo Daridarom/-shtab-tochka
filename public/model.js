@@ -37,16 +37,27 @@ export function telemetrySource(s){
 // ---------- защищённый слой ----------
 // Сейчас приватного канала к ЦУП нет: возвращаем честное «не подключён», ничего не симулируем.
 // Когда канал появится, он должен вернуть снимок {schema:'private-1',generated_at,ttl_seconds,events[],tasks[],inbox[]}.
-export const PRIVATE_REASON='Защищённый канал для событий, задач и входящих ещё не настроен. В публичную телеметрию эти данные не передаются';
+export const PRIVATE_REASON='Защищённый канал для задач и входящих ещё не настроен. В публичную телеметрию эти данные не передаются';
 export function emptyPrivate(){
  const src={state:SOURCE.NOT_CONNECTED,reason:PRIVATE_REASON,ageSeconds:null,asOf:null};
- return {source:src,calendarSource:src,events:[],tasks:[],inbox:[]};
+ return {source:src,calendarSource:src,taskSource:src,inboxSource:src,events:[],tasks:[],inbox:[]};
 }
 export function fromPrivateSnapshot(raw,now=Date.now()){
- if(!raw||raw.schema!=='private-1')return {...emptyPrivate(),source:{state:SOURCE.ERROR,reason:'неизвестный формат снимка',ageSeconds:null,asOf:null}};
+ if(!raw||raw.schema!=='private-1'){
+  const e={state:SOURCE.ERROR,reason:'неизвестный формат снимка',ageSeconds:null,asOf:null};
+  return {...emptyPrivate(),source:e,calendarSource:e,taskSource:e,inboxSource:e};
+ }
  const src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
- return {source:src,calendarSource:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean),tasks:(raw.tasks||[]).map(normalizeTask).filter(Boolean),inbox:(raw.inbox||[]).map(normalizeInbox).filter(Boolean)};
+ return {source:src,calendarSource:src,taskSource:src,inboxSource:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean),tasks:(raw.tasks||[]).map(normalizeTask).filter(Boolean),inbox:(raw.inbox||[]).map(normalizeInbox).filter(Boolean)};
 }
+
+export function fromPublicCalendar(raw,now=Date.now()){
+ if(!raw)return null;
+ if(raw.schema!=='calendar-public-1')return {source:{state:SOURCE.ERROR,reason:'неизвестный формат календаря',ageSeconds:null,asOf:null},events:[]};
+ const src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
+ return {source:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean)};
+}
+
 
 // ---------- TASK ----------
 // Статусы — коды реестра задач Штаба (HQ TASK INDEX / проектные TASKS). Колонки доски — только группировка,
@@ -188,7 +199,7 @@ export function schemeGraph(state={},priv=emptyPrivate()){
   let level='none',detail='Состояние не подтверждено источником';
   if(d.card==='workflows'){if(known&&wf.length){const bad=wf.filter(w=>w[1]!=='ok');level=bad.some(w=>w[1]==='err')?'err':bad.length?'wait':'ok';detail=(wf.length-bad.length)+' из '+wf.length+' процессов работают штатно';}}
   else if(d.card){const c=cards[d.card];if(known&&c){level=['ok','wait','err'].includes(c.level)?c.level:'none';detail=c.detail||'Нет подробностей';}}
-  else{const src=d.id==='calendar'?(priv.calendarSource||priv.source):priv.source;level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
+  else{const src=d.id==='calendar'?(priv.calendarSource||priv.source):(priv.taskSource||priv.source);level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
   const issue=(state.focus||[]).find(f=>f.key===d.card||(d.card==='workflows'&&String(f.key).startsWith('wf:')));
   return {...d,level,detail,stale:state.mode==='stale',issue:issue?{text:issue.text,action:issue.action||null}:null,related:RELATED[d.id]||[]};
  });
