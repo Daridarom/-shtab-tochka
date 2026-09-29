@@ -196,7 +196,7 @@ export function schemeGraph(state={},priv=emptyPrivate()){
   let level='none',detail='Состояние не подтверждено источником';
   if(d.card==='workflows'){if(known&&wf.length){const bad=wf.filter(w=>w[1]!=='ok');level=bad.some(w=>w[1]==='err')?'err':bad.length?'wait':'ok';detail=(wf.length-bad.length)+' из '+wf.length+' процессов работают штатно';}}
   else if(d.card){const c=cards[d.card];if(known&&c){level=['ok','wait','err'].includes(c.level)?c.level:'none';detail=c.detail||'Нет подробностей';}}
-  else{const src=priv.source;level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
+  else{const src=d.id==='calendar'?(priv.sources?.calendar||priv.source):(priv.sources?.tasks||priv.source);level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR||src.state===SOURCE.OFFLINE?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
   const issue=(state.focus||[]).find(f=>f.key===d.card||(d.card==='workflows'&&String(f.key).startsWith('wf:')));
   return {...d,level,detail,stale:state.mode==='stale',issue:issue?{text:issue.text,action:issue.action||null}:null,related:RELATED[d.id]||[]};
  });
