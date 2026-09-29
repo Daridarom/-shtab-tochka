@@ -29,11 +29,9 @@ function usePrivate(s){
   const base=import.meta.env.DEV&&typeof window!=='undefined'&&window.__SHTAB_PRIVATE__
    ?M.fromPrivateSnapshot(window.__SHTAB_PRIVATE__)
    :M.emptyPrivate();
-  const cal=s?.calendar;
+  const cal=M.fromPublicCalendar(s?.calendar);
   if(!cal)return base;
-  const calendarSource=M.sourceFromSnapshot(cal.generated_at,cal.ttl_seconds||21600);
-  const events=(cal.events||[]).map(M.normalizeEvent).filter(Boolean);
-  return {...base,calendarSource,events};
+  return {...base,calendarSource:cal.source,events:cal.events};
  },[s?.calendar]);
 }
 function findProject(id){const f=l=>{for(const x of l){if(x.id===id)return x;const r=x.children&&f(x.children);if(r)return r;}return null;};return id?f(projectTree):null;}
