@@ -60,3 +60,33 @@ jobs:
           gen=$(grep -o '"generated_at": *"[^"]*"' /tmp/status.json | head -1 | sed 's/.*: *"//;s/"$//')
           age=$(( $(date +%s) - $(date -d "$gen" +%s) ))
           echo "TELEMETRY_AGE_SECONDS=$age"
+
+      - name: Probe safe calendar projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          found=""
+          for b in telemetry main; do
+            code=$(curl -L -sS -o /tmp/calendar.json -w "%{http_code}" --max-time 30 "https://raw.githubusercontent.com/Daridarom/shtab-tochka/$b/live/calendar.json?t=$(date +%s)") || code=000
+            if [ "$code" = "200" ] && grep -q '"schema": *"calendar-1"' /tmp/calendar.json; then found="$b"; break; fi
+          done
+          test -n "$found"
+          echo "CALENDAR_SOURCE=$found"
+          python3 - <<'PY'
+          import json
+          p='/tmp/calendar.json'
+          data=json.load(open(p,encoding='utf-8'))
+          assert data.get('schema')=='calendar-1'
+          assert data.get('generated_at')
+          assert isinstance(data.get('events'),list)
+          allowed_top={'schema','generated_at','ttl_seconds','events'}
+          assert set(data)<=allowed_top, set(data)-allowed_top
+          allowed_event={'id','title','kind','start','end','endConfirmed','allDay','format','location','project'}
+          forbidden={'description','attendees','joinUrl','url','web_link','hangout_link','organizer','email'}
+          for e in data['events']:
+              assert isinstance(e,dict)
+              assert e.get('id') and e.get('start')
+              assert not (set(e)&forbidden), set(e)&forbidden
+              assert set(e)<=allowed_event, set(e)-allowed_event
+          print('CALENDAR_EVENTS=',len(data['events']))
+          PY
