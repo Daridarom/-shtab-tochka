@@ -1,10 +1,11 @@
 import {useEffect,useRef,useState,useCallback,useMemo} from 'react';
 import {Panel,Typography} from '@maxhub/max-ui';
 import {startLive,describeMode,ageLabel,moscowTime} from '../../public/live.js';
+import {startPrivate} from '../../public/private.js';
 import {normalizeMaxState} from '../../public/section-state.js';
 import {projectTree} from '../../public/projects.js';
 import * as M from '../../public/model.js';
-import {haptic,useBackButton} from './max.js';
+import {bridge,haptic,useBackButton} from './max.js';
 import {startStarfield} from '../../public/starfield.js';
 import {Sheet} from './ui.jsx';
 import {Today,CalendarScreen,ProjectsScreen,SystemsScreen,InboxScreen,EventSheet,TaskSheet,ProjectPicker,NodeSheet,InboxSheet} from './screens.jsx';
@@ -22,13 +23,17 @@ function ThemeIcon({setting}){
 }
 function RefreshIcon(){return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>;}
 
-// Защищённый слой. Приватного канала пока нет — возвращаем «не подключён», без имитации синхронизации.
-// Только в режиме разработки можно подставить тестовый снимок через window.__SHTAB_PRIVATE__ (в сборку не попадает).
+// Защищённый слой: отдельный сервер, доступ только после проверки подписанных initData от MAX.
+// Приватные данные не кэшируем в localStorage.
 function usePrivate(){
- return useMemo(()=>{
-  if(import.meta.env.DEV&&typeof window!=='undefined'&&window.__SHTAB_PRIVATE__)return M.fromPrivateSnapshot(window.__SHTAB_PRIVATE__);
-  return M.emptyPrivate();
+ const [state,setState]=useState(()=>M.privateUnavailable('Подключаем защищённый слой',M.SOURCE.SYNCING));
+ const ctl=useRef(null);
+ useEffect(()=>{
+  if(import.meta.env.DEV&&typeof window!=='undefined'&&window.__SHTAB_PRIVATE__){setState(M.fromPrivateSnapshot(window.__SHTAB_PRIVATE__));return;}
+  ctl.current=startPrivate(setState,{getInitData:()=>bridge()?.initData||'',interval:60000});
+  return()=>ctl.current?.stop();
  },[]);
+ return [state,ctl];
 }
 function findProject(id){const f=l=>{for(const x of l){if(x.id===id)return x;const r=x.children&&f(x.children);if(r)return r;}return null;};return id?f(projectTree):null;}
 
@@ -44,7 +49,7 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
  const [project,setProjectState]=useState(()=>{const p=store.get('shtab.max.project','');return findProject(p)?p:null;});
  const [changes,setChanges]=useState(()=>{const c=store.json(CHANGES_KEY,{});return c&&typeof c==='object'&&!Array.isArray(c)?c:{};});
  const live=useRef(null);
- const priv=usePrivate();
+ const [priv,privateLive]=usePrivate();
  useEffect(()=>{live.current=startLive(d=>setS({...normalizeMaxState(d),loadedAt:Date.now()}));const id=setInterval(()=>setTick(t=>t+1),1000);return()=>{live.current?.stop();clearInterval(id);};},[]);
  const tasks=useMemo(()=>M.applyChanges(priv.tasks,changes),[priv.tasks,changes]);
  const graph=useMemo(()=>M.schemeGraph(s,priv),[s,priv]);
@@ -72,7 +77,7 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
  },[setTab]);
  const selectNode=id=>{setNode(id);setSheet({kind:'node',id});};
 
- const onRefresh=async()=>{if(busy)return;haptic('light');setBusy(true);try{await live.current?.refresh();}finally{setBusy(false);}};
+ const onRefresh=async()=>{if(busy)return;haptic('light');setBusy(true);try{await Promise.all([live.current?.refresh(),privateLive.current?.refresh()]);}finally{setBusy(false);}};
  const age=s.ageSeconds==null?null:s.ageSeconds+Math.max(0,Math.round((Date.now()-s.loadedAt)/1000));
  const status=s.mode==='loading'?'Обновляем…':describeMode(s)+(age!=null?' · '+ageLabel(age):'')+(s.asOf?' · '+moscowTime(s.asOf):'');
  const unprocessed=M.unprocessed(priv.inbox).length;
