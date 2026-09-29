@@ -1,7 +1,7 @@
 // Штаб.Точка · единая модель рабочего слоя ЦУП.
 // PROJECT · TASK · EVENT · DOCUMENT · INBOX_ITEM · SYSTEM_NODE — разные экраны показывают одни и те же сущности.
 // Здесь нет данных: только нормализация, правила отображения и состояние источников.
-// Приватные события, задачи и входящие НЕ идут через публичный live/status.json.
+// Задачи и входящие остаются приватными. Для календаря допустима отдельная безопасная общая проекция без описаний, участников и служебных ссылок.
 
 // ---------- состояние источника ----------
 // LIVE / STALE / OFFLINE / SYNCING / ERROR + NOT_CONNECTED (источник к экрану ещё не подключён).
@@ -40,12 +40,12 @@ export function telemetrySource(s){
 export const PRIVATE_REASON='Защищённый канал для событий, задач и входящих ещё не настроен. В публичную телеметрию эти данные не передаются';
 export function emptyPrivate(){
  const src={state:SOURCE.NOT_CONNECTED,reason:PRIVATE_REASON,ageSeconds:null,asOf:null};
- return {source:src,events:[],tasks:[],inbox:[]};
+ return {source:src,calendarSource:src,events:[],tasks:[],inbox:[]};
 }
 export function fromPrivateSnapshot(raw,now=Date.now()){
  if(!raw||raw.schema!=='private-1')return {...emptyPrivate(),source:{state:SOURCE.ERROR,reason:'неизвестный формат снимка',ageSeconds:null,asOf:null}};
  const src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
- return {source:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean),tasks:(raw.tasks||[]).map(normalizeTask).filter(Boolean),inbox:(raw.inbox||[]).map(normalizeInbox).filter(Boolean)};
+ return {source:src,calendarSource:src,events:(raw.events||[]).map(normalizeEvent).filter(Boolean),tasks:(raw.tasks||[]).map(normalizeTask).filter(Boolean),inbox:(raw.inbox||[]).map(normalizeInbox).filter(Boolean)};
 }
 
 // ---------- TASK ----------
@@ -110,7 +110,7 @@ export function normalizeEvent(e){
  const start=Date.parse(e.start);if(!Number.isFinite(start))return null;
  const end=e.end?Date.parse(e.end):NaN;
  const kind=EVENT_KINDS[e.kind]?e.kind:'other';
- return {id:String(e.id),title:String(e.title||EVENT_KINDS[kind].title),kind,start:e.start,end:Number.isFinite(end)?e.end:null,
+ return {id:String(e.id),title:String(e.title||EVENT_KINDS[kind].title),kind,start:e.start,end:Number.isFinite(end)?e.end:null,allDay:!!e.allDay,
   endConfirmed:!!e.endConfirmed&&Number.isFinite(end),format:e.format==='online'||e.format==='offline'?e.format:null,
   location:e.location||null,joinUrl:/^https:\/\//.test(e.joinUrl||'')?e.joinUrl:null,project:e.project||null,source:e.source||null};
 }
@@ -120,11 +120,18 @@ export function dayKey(ts){return new Date(ts).toLocaleDateString('sv-SE',{timeZ
 // Время события без выдумки: окончание показываем, только если оно подтверждено.
 export function eventWhen(e){
  const kind=EVENT_KINDS[e.kind]||EVENT_KINDS.other;
+ if(e.allDay)return {start:'Весь день',end:null,endNote:null};
  if(!kind.presence)return {start:timeLabel(e.start),end:null,endNote:null};
  return {start:timeLabel(e.start),end:e.endConfirmed?timeLabel(e.end):null,endNote:e.endConfirmed?null:'Окончание не указано'};
 }
 export function eventFormat(e){return e.format==='online'?'Онлайн':e.format==='offline'?'Очно':null;}
-export function eventsOfDay(events,key){return events.filter(e=>dayKey(e.start)===key).sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));}
+export function eventsOfDay(events,key){
+ const dayStart=Date.parse(key+'T00:00:00+03:00'),dayEnd=dayStart+86400000;
+ return events.filter(e=>{
+  const start=Date.parse(e.start),end=e.end?Date.parse(e.end):start;
+  return e.allDay?start<dayEnd&&end>dayStart:dayKey(e.start)===key;
+ }).sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
+}
 // Неделя от понедельника, в которую входит дата.
 export function weekOf(ts=Date.now()){
  const key=dayKey(ts);const base=Date.parse(key+'T12:00:00+03:00');
@@ -181,7 +188,7 @@ export function schemeGraph(state={},priv=emptyPrivate()){
   let level='none',detail='Состояние не подтверждено источником';
   if(d.card==='workflows'){if(known&&wf.length){const bad=wf.filter(w=>w[1]!=='ok');level=bad.some(w=>w[1]==='err')?'err':bad.length?'wait':'ok';detail=(wf.length-bad.length)+' из '+wf.length+' процессов работают штатно';}}
   else if(d.card){const c=cards[d.card];if(known&&c){level=['ok','wait','err'].includes(c.level)?c.level:'none';detail=c.detail||'Нет подробностей';}}
-  else{const src=priv.source;level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
+  else{const src=d.id==='calendar'?(priv.calendarSource||priv.source):priv.source;level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
   const issue=(state.focus||[]).find(f=>f.key===d.card||(d.card==='workflows'&&String(f.key).startsWith('wf:')));
   return {...d,level,detail,stale:state.mode==='stale',issue:issue?{text:issue.text,action:issue.action||null}:null,related:RELATED[d.id]||[]};
  });
