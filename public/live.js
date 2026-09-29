@@ -121,7 +121,7 @@ export async function fetchLive(urls=LIVE_URLS){
  return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
 }
 
-function normalizeCalendar(raw){
+export function normalizeCalendar(raw){
  if(!raw||raw.schema!=='calendar-1'||!raw.generated_at||!Array.isArray(raw.events))return null;
  const events=raw.events.map(e=>{
   if(!e||!e.id||!e.start)return null;
