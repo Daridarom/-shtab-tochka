@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-29T17:50:53.114514+00:00",
+  "generated_at": "2026-09-29T17:51:57.606825+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -37,7 +37,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+      "detail": "Ожидают: 0 · проверка связи 12 с назад"
     },
     {
       "id": "rostok",
@@ -48,8 +48,8 @@
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "ok",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0"
+      "level": "error",
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: next_slot_empty"
     }
   ],
   "workflows": [
