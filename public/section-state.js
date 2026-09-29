@@ -1,15 +1,18 @@
 // Safe presentation only: never infer preserved originals or completed tasks from telemetry.
 export function documentView(state={}){
- const card=(state.cards||[]).find(c=>c.id==='drive');
- const available=!!card&&['live','stale'].includes(state.mode);
- const detail=available?String(card.detail||''):'Нет данных от источника';
- const indexPending=available&&/индекс/i.test(detail)&&/ожида|retry|ошиб|не подтвержд/i.test(detail);
- const contextChecked=available&&/контекст проверен/i.test(detail);
+ const cards=state.cards||[],drive=cards.find(c=>c.id==='drive'),index=cards.find(c=>c.id==='task_index');
+ const available=!!drive&&['live','stale'].includes(state.mode);
+ const driveDetail=available?String(drive.detail||''):'Нет данных от источника';
+ const indexAvailable=!!index&&['live','stale'].includes(state.mode);
+ const indexDetail=indexAvailable?String(index.detail||''):'Состояние облачной копии индекса отдельно не подтверждено';
+ const level=[drive?.level,index?.level].includes('err')?'err':[drive?.level,index?.level].includes('wait')?'wait':available?'ok':'wait';
  return {
-  available,level:available&&['ok','wait','err'].includes(card.level)?card.level:'wait',
-  title:indexPending?'Облачный индекс задач ждёт обновления':'Документы и синхронизация',
-  detail,context:contextChecked?'Источник подтверждает проверку контекста':'Проверка контекста отдельно не подтверждена',
-  index:indexPending?'Облачная копия индекса задач ожидает обновления':available&&card.level==='ok'?'Проверка индекса пройдена по данным источника':'Актуальность индекса требует проверки',
+  available,level,title:'Документы и индекс задач',
+  detail:driveDetail,
+  driveLevel:available&&['ok','wait','err'].includes(drive.level)?drive.level:'wait',
+  indexLevel:indexAvailable&&['ok','wait','err'].includes(index.level)?index.level:'wait',
+  context:/контекст проверен/i.test(driveDetail)?'Контекст Google Drive подтверждён источником':driveDetail,
+  index:indexDetail,
   originals:'Сохранность каждого вложения на Диске и компьютере этим индикатором не проверяется.',
   stale:state.mode==='stale',asOf:state.asOf||null
  };
