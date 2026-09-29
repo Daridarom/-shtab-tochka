@@ -1,0 +1,88 @@
+{
+  "schema": "calendar-1",
+  "generated_at": "2026-09-29T22:20:15.145533+00:00",
+  "ttl_seconds": 21600,
+  "events": [
+    {
+      "id": "cal-20261001-internet",
+      "title": "ОПЛАТА — Интернет Дубинина 19-26 — 650 ₽",
+      "kind": "payment",
+      "start": "2026-10-01T09:00:00+03:00",
+      "end": "2026-10-01T09:15:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "tochka"
+    },
+    {
+      "id": "cal-20261005-payments-review",
+      "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
+      "kind": "checkpoint",
+      "start": "2026-10-05T09:00:00+03:00",
+      "end": "2026-10-05T09:20:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "hq"
+    },
+    {
+      "id": "cal-20261005-rent-kozlova",
+      "title": "ОПЛАТА — Аренда Козлова, 1 — 60 000 ₽",
+      "kind": "payment",
+      "start": "2026-10-05T09:00:00+03:00",
+      "end": "2026-10-05T09:15:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "tochka"
+    },
+    {
+      "id": "cal-20261009-svoyakultura",
+      "title": "#СВОяКУЛЬТУРА · Очный модуль — Меганом",
+      "kind": "trip",
+      "start": "2026-10-09T00:00:00+03:00",
+      "end": "2026-10-17T00:00:00+03:00",
+      "endConfirmed": true,
+      "allDay": true,
+      "location": "Академия творческих индустрий «Меганом»",
+      "project": "personal"
+    },
+    {
+      "id": "cal-20261010-ker-waste",
+      "title": "ОПЛАТА — КЭР, вывоз мусора",
+      "kind": "payment",
+      "start": "2026-10-10T09:00:00+03:00",
+      "end": "2026-10-10T09:15:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "tochka"
+    },
+    {
+      "id": "cal-20261011-powers-attorney",
+      "title": "ЦУП · Доверенности — срок 11.10.2026",
+      "kind": "checkpoint",
+      "start": "2026-10-11T09:00:00+03:00",
+      "end": "2026-10-11T09:15:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "hq"
+    },
+    {
+      "id": "cal-20261012-payments-review",
+      "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
+      "kind": "checkpoint",
+      "start": "2026-10-12T09:00:00+03:00",
+      "end": "2026-10-12T09:20:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "hq"
+    },
+    {
+      "id": "cal-20261012-rent-teatralnaya",
+      "title": "ОПЛАТА — Аренда Театральная, 37 — 63 000 ₽",
+      "kind": "payment",
+      "start": "2026-10-12T09:00:00+03:00",
+      "end": "2026-10-12T09:15:00+03:00",
+      "endConfirmed": true,
+      "allDay": false,
+      "project": "tochka"
+    }
+  ]
+}
