@@ -11,7 +11,7 @@ export function documentView(state={}){
   detail:driveDetail,
   driveLevel:available&&['ok','wait','err'].includes(drive.level)?drive.level:'wait',
   indexLevel:indexAvailable&&['ok','wait','err'].includes(index.level)?index.level:'wait',
-  context:/контекст проверен/i.test(driveDetail)?'Контекст Google Drive подтверждён источником':driveDetail,
+  context:/контекст проверен/i.test(driveDetail)?'Источник подтверждает контекст Google Drive':driveDetail,
   index:indexDetail,
   originals:'Сохранность каждого вложения на Диске и компьютере этим индикатором не проверяется.',
   stale:state.mode==='stale',asOf:state.asOf||null
