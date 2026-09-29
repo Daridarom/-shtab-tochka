@@ -141,3 +141,25 @@ nav button{font-size:12px;padding:0 2px}
 .proofState .dot{margin-top:5px}.proofState b,.proofState small{display:block}.proofState small{margin-top:3px;color:var(--muted);line-height:1.4}
 .proofState.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}.proofState.wait{border-color:color-mix(in srgb,var(--wait) 35%,var(--line))}.proofState.err{border-color:color-mix(in srgb,var(--err) 40%,var(--line))}
 @media(min-width:800px){.proofFlow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}.proofStep{min-width:0}}
+
+
+/* ---- Оперативная картина ЦУП ---- */
+.commandCard{overflow:hidden}
+.commandGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.commandMetric{min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--card) 76%,transparent)}
+.commandMetric small,.commandMetric b,.commandMetric em{display:block}
+.commandMetric small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.commandMetric b{margin-top:4px;font-size:17px;line-height:1.2;font-variant-numeric:tabular-nums}
+.commandMetric em{margin-top:4px;font-size:11px;line-height:1.35;color:var(--muted);font-style:normal;overflow-wrap:anywhere}
+.commandTrust{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 12px;border:1px solid var(--line);border-radius:14px}
+.commandTrust .dot{margin-top:5px}.commandTrust b,.commandTrust small{display:block}.commandTrust small{margin-top:3px;color:var(--muted);line-height:1.4}
+.commandTrust.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}.commandTrust.wait{border-color:color-mix(in srgb,var(--wait) 40%,var(--line))}.commandTrust.err{border-color:color-mix(in srgb,var(--err) 45%,var(--line))}
+
+/* ---- Агентный каркас: что реально измеряется ---- */
+.harnessCard{overflow:hidden}
+.harnessStack{display:grid;gap:7px;margin-top:10px}
+.harnessLayer{display:grid;grid-template-columns:30px 8px 1fr;gap:10px;align-items:start;padding:10px 11px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--card) 72%,transparent)}
+.harnessLayer .dot{margin-top:5px}.harnessNo{font-size:11px;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:.06em;padding-top:2px}
+.harnessLayer b,.harnessLayer small{display:block}.harnessLayer b{font-size:14px}.harnessLayer small{margin-top:3px;color:var(--muted);font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.harnessLayer.ok{border-color:color-mix(in srgb,var(--ok) 26%,var(--line))}.harnessLayer.wait{border-color:color-mix(in srgb,var(--wait) 30%,var(--line))}.harnessLayer.err{border-color:color-mix(in srgb,var(--err) 36%,var(--line))}.harnessLayer.none{opacity:.78;border-style:dashed}
+@media(min-width:800px){.commandGrid{grid-template-columns:repeat(4,1fr)}.harnessStack{grid-template-columns:1fr 1fr}.harnessLayer:last-child:nth-child(odd){grid-column:1/-1}}

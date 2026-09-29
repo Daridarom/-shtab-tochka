@@ -55,6 +55,61 @@ function ProofFlow({runtime,mode}){
  </Card>;
 }
 
+
+function worstTone(levels=[]){
+ if(levels.includes('err'))return 'err';
+ if(levels.includes('wait'))return 'wait';
+ if(levels.includes('ok'))return 'ok';
+ return 'none';
+}
+function cardTone(s,id){
+ if(!['live','stale'].includes(s.mode))return 'none';
+ const c=(s.cards||[]).find(x=>x.id===id);
+ return c&&['ok','wait','err'].includes(c.level)?c.level:'none';
+}
+function OperationalPicture({s,priv,age}){
+ const tel={...M.telemetrySource(s),ageSeconds:age??s.ageSeconds??null};
+ const privateConnected=priv.source.state!==M.SOURCE.NOT_CONNECTED;
+ const privateFresh=priv.source.state===M.SOURCE.LIVE;
+ const coverage=1+(privateConnected?3:0);
+ const trustTone=s.mode==='live'?(privateFresh?'ok':'wait'):s.mode==='stale'?'wait':'err';
+ const trust=s.mode==='live'?(privateFresh?'Полная рабочая картина':'Частичная рабочая картина'):s.mode==='stale'?'Картина устарела':'Картина не подтверждена';
+ const proc=s.metrics.active!=null&&s.metrics.total!=null?s.metrics.active+' из '+s.metrics.total:'—';
+ const rostok=s.rostok?(s.rostok.publishedToday!=null&&s.rostok.dailyLimit!=null?s.rostok.publishedToday+' из '+s.rostok.dailyLimit:s.rostok.publishedToday??'—'):'—';
+ const next=s.rostok?.nextSlotLabel||'—';
+ const verdict=s.verdict?.text||(s.mode==='loading'?'Получаем состояние':'Состояние не подтверждено');
+ return <Card title="Оперативная картина" aside={verdict} className="span2 commandCard">
+  <div className="commandGrid">
+   <div className="commandMetric"><small>Автоматика</small><b>{proc}</b><em>процессов штатно</em></div>
+   <div className="commandMetric"><small>Росток сегодня</small><b>{rostok}</b><em>следующий слот · {next}</em></div>
+   <div className="commandMetric"><small>Полнота</small><b>{coverage} из 4</b><em>контуров данных подключено</em></div>
+   <div className="commandMetric"><small>Свежесть</small><b>{M.sourceLabel(tel.state)}</b><em>{M.sourceNote('Штаб',tel).replace(/^Штаб:\s*/,'')}</em></div>
+  </div>
+  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{privateConnected?M.sourceNote('Защищённый слой',priv.source):'Календарь, задачи и входящие пока не входят в защищённый слой ЦУПа'}</small></div></div>
+ </Card>;
+}
+function HarnessCard({s}){
+ const channels=worstTone([cardTone(s,'max'),cardTone(s,'telegram')]);
+ const workflows=worstTone((s.workflows||[]).map(x=>x[1]));
+ const artifact=s.artifactRuntime;
+ const artifactTone=!artifact?'none':artifact.lastResult==='blocked'?'err':['pending','needs_more_evidence'].includes(artifact.lastResult)?'wait':artifact.lastResult==='verified'?'ok':'none';
+ const artifactText=!artifact?'Агрегат артефактов и доказательств пока не приходит в телеметрию':artifact.lastResult==='verified'?'Последний результат подтверждён доказательствами':artifact.lastResult==='blocked'?'Проверка остановила перевод результата в готовое состояние':['pending','needs_more_evidence'].includes(artifact.lastResult)?'Есть результат, но проверка ещё не завершена':'Статус проверки не подтверждён';
+ const layers=[
+  ['01','Входы',channels,'MAX и Telegram · приём сигналов и сообщений'],
+  ['02','Контекст и состояние',cardTone(s,'drive'),(s.cards||[]).find(x=>x.id==='drive')?.detail||'Состояние контекста не подтверждено'],
+  ['03','Навыки',cardTone(s,'skills'),(s.cards||[]).find(x=>x.id==='skills')?.detail||'Реестр активных навыков пока не включён в безопасную телеметрию'],
+  ['04','Оркестрация',workflows,s.workflows?.length?s.workflows.filter(x=>x[1]==='ok').length+' из '+s.workflows.length+' процессов штатно':'Состояние процессов не подтверждено'],
+  ['05','Исполнение',cardTone(s,'queue'),(s.cards||[]).find(x=>x.id==='queue')?.detail||'Канал исполнения не подтверждён'],
+  ['06','Артефакты и проверка',artifactTone,artifactText],
+  ['07','Результат',worstTone([cardTone(s,'rostok'),cardTone(s,'publications')]),(s.cards||[]).find(x=>x.id==='publications')?.detail||'Доставка результата не подтверждена']
+ ];
+ const known=layers.filter(x=>x[2]!=='none').length;
+ return <Card title="Агентный каркас" aside={known+' из '+layers.length+' слоёв измеряются'} className="span2 harnessCard">
+  <p className="desc">ЦУП показывает не только сервисы, но и весь путь работы: входы → контекст → навыки → оркестрация → исполнение → артефакты и проверка → результат. Серым оставляем то, чего источник пока не умеет подтверждать.</p>
+  <div className="harnessStack">{layers.map(([n,title,tone,text])=><div className={'harnessLayer '+tone} key={n}><span className="harnessNo">{n}</span><span className={'dot '+tone}/><div><b>{title}</b><small>{text}</small></div></div>)}</div>
+ </Card>;
+}
+
 function Workflows({list,id}){
  return <Card id={id} title="Автоматические процессы" aside={list.length?list.filter(w=>w[1]==='ok').length+' из '+list.length:''}>
   {list.length?list.map((x,i)=><Row key={i} dot={x[1]} title={x[0]} text={x[2]}/>):<Empty text="Список процессов появится после первого обновления"/>}
@@ -105,6 +160,7 @@ export function Today({s,priv,go,openSheet,age}){
  const tel={...M.telemetrySource(s),ageSeconds:age??s.ageSeconds??null};
  const calOn=cal.state!==M.SOURCE.NOT_CONNECTED;
  return <div className="home">
+  <OperationalPicture s={s} priv={priv} age={age}/>
   <Card title="Ближайшее событие" className="span2 hero">
    {next?<EventItem e={next} big onOpen={id=>openSheet({kind:'event',id})}/>:<div className="heroEmpty"><b>{calOn&&M.confirmsAbsence(cal)?'Сегодня больше событий нет':'Нет подтверждённых событий'}</b><small>{M.sourceNote('Календарь',cal)}</small></div>}
    <button type="button" className="ghost" onClick={()=>go('calendar')}>Открыть календарь</button>
@@ -252,8 +308,9 @@ export function SystemsScreen({s,graph,selected,onSelect}){
  const bad=s.systems.filter(x=>x[1]!=='ok');
  return <div className="home">
   <SchemeCard graph={graph} selected={selected} onSelect={onSelect}/>
+  <HarnessCard s={s}/>
   <ProofFlow runtime={s.artifactRuntime} mode={s.mode}/>
-  <Signals s={s} className="span2"/>
+  <Signals s={s} title="Что требует решения" className="span2"/>
   <Documents s={s}/>
   <Workflows id="workflows" list={s.workflows}/>
   <Rostok r={s.rostok}/>

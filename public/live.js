@@ -12,7 +12,7 @@ const CACHE_KEY='shtab.lastState.v1';
 
 // ---------- вспомогательное ----------
 export function level(x){return x==='error'?'err':x==='warn'||x==='unknown'?'wait':'ok';}
-export function humanName(id,title){return ({system:'Компьютер штаба',visual:'Визуалы',drive:'Документы',queue:'Канал управления',rostok:'Росток',publications:'Публикации',telegram:'Telegram',max:'MAX'})[id]||title||id;}
+export function humanName(id,title){return ({system:'Компьютер штаба',visual:'Визуалы',drive:'Документы',skills:'Навыки',queue:'Канал управления',rostok:'Росток',publications:'Публикации',telegram:'Telegram',max:'MAX'})[id]||title||id;}
 export function moscowTime(iso,withDate){
  const d=new Date(iso);if(!Number.isFinite(d.getTime()))return '—';
  const o={timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'};
@@ -76,6 +76,7 @@ function explainCard(c){
    else{it.text=d||'Работа компьютера требует проверки';it.action='Проверить доступность компьютера и автоматических процессов';}
    it.details=d;break;}
   case 'drive':it.text='Свежесть документов пока не подтверждена';it.action='Проверить последнюю успешную синхронизацию и обновление списка документов';it.details=d;break;
+  case 'skills':it.text=d||'Состояние реестра навыков требует проверки';it.action='Проверить загрузку активных навыков, версии и последнюю успешную проверку';it.details=d;break;
   case 'queue':it.text=/ожидают:\s*[1-9]/i.test(d)?'Задачи в очереди ждут исполнения':'Связь с исполнителем очереди потеряна';it.action='Проверить службу runner на машине штаба';it.details=d;break;
   case 'telegram':case 'max':it.text='Получатель сообщений '+it.title+' не работает: входящие не собираются';it.action='Перезапустить получатель '+it.title;it.details=d;break;
   case 'rostok':it.text='Росток сигналит '+(lv==='err'?'ошибку':'предупреждение')+', причина в сводке не указана';it.action='Открыть отчёт Ростка на машине штаба';it.details=d;break;
