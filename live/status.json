@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-29T05:59:28.169222+00:00",
+  "generated_at": "2026-09-29T06:00:35.170720+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -37,13 +37,13 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 19 с назад"
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
       "title": "Росток",
       "level": "ok",
-      "detail": "Сегодня: 0 из 4 · в очереди: 3 · следующий слот: сегодня 09:00 · всего опубликовано: 57 · ожидают изображения: 4 · согласование: 1 · заблокировано: 49"
+      "detail": "Сегодня: 1 из 4 · в очереди: 2 · следующий слот: сегодня 13:00 · всего опубликовано: 58 · ожидают изображения: 4 · согласование: 1 · заблокировано: 49"
     },
     {
       "id": "publications",
@@ -80,12 +80,12 @@
   ],
   "failed_visual_count": 0,
   "rostok": {
-    "published_today": 0,
+    "published_today": 1,
     "daily_limit": 4,
     "unresolved": 0,
-    "next_slot": "2026-09-29T09:00+03:00",
-    "queue": 3,
-    "total_published": 57
+    "next_slot": "2026-09-29T13:00+03:00",
+    "queue": 2,
+    "total_published": 58
   },
   "publication_unresolved": 0,
   "publication_delivery_errors": 0
