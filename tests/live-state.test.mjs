@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const source=await readFile(new URL('../public/live.js',import.meta.url),'utf8');
-const {toState}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const {toState,normalizeCalendar}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const raw={generated_at:'2026-09-28T05:35:00Z',cards:[
  {id:'system',level:'ok',detail:'Канал управления: работает · процессы: работает · свободно 209 ГБ'},
  {id:'visual',level:'error',detail:'2 сервисов в состоянии ошибки'},
@@ -52,3 +52,10 @@ const badProof=structuredClone(raw);badProof.artifact_runtime={mode:'unexpected'
 const normalizedBad=toState(badProof).artifactRuntime;
 assert.equal(normalizedBad.mode,'pilot');assert.equal(normalizedBad.active,false);assert.equal(normalizedBad.lastResult,'unknown');assert.equal(normalizedBad.lastStage,null);
 console.log('PASS: artifact runtime is optional, fail-closed and never turns unknown data green');
+
+const safeCalendar=normalizeCalendar({schema:'calendar-1',generated_at:'2026-09-29T22:00:00Z',ttl_seconds:21600,events:[{id:'raw-id',title:'Встреча',kind:'meeting',start:'2026-10-01T10:00:00+03:00',end:'2026-10-01T11:00:00+03:00',endConfirmed:true,location:'Керчь',description:'секрет',attendees:['x'],joinUrl:'https://secret.example'}]});
+assert.equal(safeCalendar.schema,'calendar-1');assert.equal(safeCalendar.events.length,1);
+assert.equal(safeCalendar.events[0].title,'Встреча');assert.equal(safeCalendar.events[0].location,'Керчь');
+assert.equal('description' in safeCalendar.events[0],false);assert.equal('attendees' in safeCalendar.events[0],false);assert.equal('joinUrl' in safeCalendar.events[0],false);
+assert.equal(normalizeCalendar({schema:'wrong',generated_at:'x',events:[]}),null);
+console.log('PASS: calendar projection strips descriptions, attendees and links');
