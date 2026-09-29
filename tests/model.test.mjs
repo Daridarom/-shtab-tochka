@@ -16,6 +16,16 @@ assert.equal(stale.state,'stale');
 assert.equal(M.sourceNote('Календарь',stale),'Календарь не обновлялся 18 минут. Показан последний подтверждённый снимок');
 assert.equal(M.emptyDayText(stale),'Нет подтверждённых данных на этот день');
 assert.equal(M.fromPrivateSnapshot({schema:'x'}).source.state,'error');
+const partial=M.fromPrivateSnapshot({
+ schema:'private-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:120,
+ capabilities:{calendar:true,tasks:false,inbox:false},
+ events:[{id:'cal1',title:'Встреча',start:'2026-09-29T11:00:00+03:00',kind:'meeting'}],
+ tasks:[{id:'hidden',title:'Не должна показаться'}],inbox:[{id:'hidden'}]
+},now);
+assert.equal(partial.sources.calendar.state,'live');
+assert.equal(partial.sources.tasks.state,'not_connected');
+assert.equal(partial.sources.inbox.state,'not_connected');
+assert.equal(partial.events.length,1);assert.equal(partial.tasks.length,0);assert.equal(partial.inbox.length,0);
 
 // EVENT: окончание не выдумывается; оплата — не встреча.
 const ev=M.normalizeEvent({id:'e1',start:'2026-09-29T11:00:00+03:00',end:'2026-09-29T12:00:00+03:00',kind:'meeting',format:'online',joinUrl:'javascript:alert(1)'});
