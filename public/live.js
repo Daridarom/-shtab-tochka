@@ -12,7 +12,7 @@ const CACHE_KEY='shtab.lastState.v1';
 
 // ---------- вспомогательное ----------
 export function level(x){return x==='error'?'err':x==='warn'||x==='unknown'?'wait':'ok';}
-export function humanName(id,title){return ({system:'Компьютер штаба',visual:'Визуалы',drive:'Документы',skills:'Навыки',queue:'Канал управления',rostok:'Росток',publications:'Публикации',telegram:'Telegram',max:'MAX'})[id]||title||id;}
+export function humanName(id,title){return ({system:'Компьютер штаба',visual:'Визуалы',drive:'Google Drive',task_index:'Индекс задач',skills:'Навыки',queue:'Канал управления',rostok:'Росток',publications:'Публикации',telegram:'Telegram',max:'MAX'})[id]||title||id;}
 export function moscowTime(iso,withDate){
  const d=new Date(iso);if(!Number.isFinite(d.getTime()))return '—';
  const o={timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'};
@@ -70,12 +70,13 @@ function explainCard(c){
  const d=fixPlural(c.detail||'');const lv=level(c.level);
  const it={level:lv,key:c.id,title:humanName(c.id,c.title),text:d||'требует проверки',action:null,details:null};
  switch(c.id){
-  case 'visual':{const m=/(\d+)/.exec(d);const n=m?+m[1]:null;it.text=n!=null?plural(n,'задача подготовки изображения завершилась','задачи подготовки изображений завершились','задач подготовки изображений завершились')+' с ошибкой. Причину нужно проверить отдельно':'Подготовка изображений требует проверки';it.action='Проверить причину остановки, исправить её и повторить подготовку';it.details=d;break;}
+  case 'visual':{const m=/(\d+)/.exec(d);const n=m?+m[1]:null;const waiting=/ожидают возобновления генератора/i.test(d);it.text=waiting?(n!=null?plural(n,'задача ждёт','задачи ждут','задач ждут')+' возобновления генератора':'Генератор временно на паузе'):(n!=null?plural(n,'задача подготовки изображения завершилась','задачи подготовки изображений завершились','задач подготовки изображений завершились')+' с ошибкой. Причину нужно проверить отдельно':'Подготовка изображений требует проверки');it.action=waiting?'Дождаться окончания подтверждённой паузы; диспетчер повторит задачу автоматически':'Проверить причину остановки, исправить её и повторить подготовку';it.details=d;break;}
   case 'system':{const m=/свободно\s+([\d.,]+)\s*ГБ/i.exec(d);const free=m?parseFloat(m[1].replace(',','.')):null;
    if(free!=null&&free<15){it.text='Мало места на диске: свободно '+free+' ГБ';it.action='Освободить место на машине штаба';}
    else{it.text=d||'Работа компьютера требует проверки';it.action='Проверить доступность компьютера и автоматических процессов';}
    it.details=d;break;}
-  case 'drive':it.text='Свежесть документов пока не подтверждена';it.action='Проверить последнюю успешную синхронизацию и обновление списка документов';it.details=d;break;
+  case 'drive':it.text=d||'Свежесть документов пока не подтверждена';it.action='Проверить последнюю успешную синхронизацию документов';it.details=d;break;
+  case 'task_index':it.text=d||'Облачная копия индекса задач требует проверки';it.action='Проверить локальный индекс и канал публикации его облачной копии';it.details=d;break;
   case 'skills':it.text=d||'Состояние реестра навыков требует проверки';it.action='Проверить загрузку активных навыков, версии и последнюю успешную проверку';it.details=d;break;
   case 'queue':it.text=/ожидают:\s*[1-9]/i.test(d)?'Задачи в очереди ждут исполнения':'Связь с исполнителем очереди потеряна';it.action='Проверить службу runner на машине штаба';it.details=d;break;
   case 'telegram':case 'max':it.text='Получатель сообщений '+it.title+' не работает: входящие не собираются';it.action='Перезапустить получатель '+it.title;it.details=d;break;
