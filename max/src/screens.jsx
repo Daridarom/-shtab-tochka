@@ -69,11 +69,13 @@ function cardTone(s,id){
 }
 function OperationalPicture({s,priv,age}){
  const tel={...M.telemetrySource(s),ageSeconds:age??s.ageSeconds??null};
+ const cal=priv.calendarSource||priv.source;
+ const calendarConnected=cal.state!==M.SOURCE.NOT_CONNECTED;
  const privateConnected=priv.source.state!==M.SOURCE.NOT_CONNECTED;
- const privateFresh=priv.source.state===M.SOURCE.LIVE;
- const coverage=1+(privateConnected?3:0);
- const trustTone=s.mode==='live'?(privateFresh?'ok':'wait'):s.mode==='stale'?'wait':'err';
- const trust=s.mode==='live'?(privateFresh?'Полная рабочая картина':'Частичная рабочая картина'):s.mode==='stale'?'Картина устарела':'Картина не подтверждена';
+ const coverage=1+(calendarConnected?1:0)+(privateConnected?2:0);
+ const fullFresh=s.mode==='live'&&cal.state===M.SOURCE.LIVE&&priv.source.state===M.SOURCE.LIVE;
+ const trustTone=s.mode==='live'?(fullFresh?'ok':'wait'):s.mode==='stale'?'wait':'err';
+ const trust=s.mode==='live'?(fullFresh?'Полная рабочая картина':'Частичная рабочая картина'):s.mode==='stale'?'Картина устарела':'Картина не подтверждена';
  const proc=s.metrics.active!=null&&s.metrics.total!=null?s.metrics.active+' из '+s.metrics.total:'—';
  const rostok=s.rostok?(s.rostok.publishedToday!=null&&s.rostok.dailyLimit!=null?s.rostok.publishedToday+' из '+s.rostok.dailyLimit:s.rostok.publishedToday??'—'):'—';
  const next=s.rostok?.nextSlotLabel||'—';
@@ -85,7 +87,7 @@ function OperationalPicture({s,priv,age}){
    <div className="commandMetric"><small>Полнота</small><b>{coverage} из 4</b><em>контуров данных подключено</em></div>
    <div className="commandMetric"><small>Свежесть</small><b>{M.sourceLabel(tel.state)}</b><em>{M.sourceNote('Штаб',tel).replace(/^Штаб:\s*/,'')}</em></div>
   </div>
-  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{privateConnected?M.sourceNote('Защищённый слой',priv.source):'Календарь, задачи и входящие пока не входят в защищённый слой ЦУПа'}</small></div></div>
+  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{[M.sourceNote('Календарь',cal),M.sourceNote('Задачи и входящие',priv.source)].join(' · ')}</small></div></div>
  </Card>;
 }
 function HarnessCard({s}){
@@ -141,8 +143,9 @@ export function EventSheet({e}){
  const w=M.eventWhen(e),k=M.EVENT_KINDS[e.kind];
  return <>
   <div className="chips"><Chip tone={'k-'+e.kind}>{k.title}</Chip>{M.eventFormat(e)&&<Chip>{M.eventFormat(e)}</Chip>}</div>
-  <Field k="Начало">{w.start} · {M.dayTitle(M.dayKey(e.start))}</Field>
-  {k.presence&&<Field k="Окончание">{w.end||'Окончание не указано'}</Field>}
+  <Field k={e.allDay?'Дата':'Начало'}>{e.allDay?M.dayTitle(M.dayKey(e.start)):w.start+' · '+M.dayTitle(M.dayKey(e.start))}</Field>
+  {e.allDay&&e.endConfirmed&&<Field k="До">{M.dayTitle(M.dayKey(Date.parse(e.end)-86400000))}</Field>}
+  {k.presence&&!e.allDay&&<Field k="Окончание">{w.end||'Окончание не указано'}</Field>}
   <Field k="Проект">{e.project&&projectName(e.project)}</Field>
   <Field k="Место">{e.location}</Field>
   {e.joinUrl&&<button type="button" className="primary" onClick={()=>{haptic('light');openExternal(e.joinUrl);}}>Подключиться</button>}
@@ -152,7 +155,7 @@ export function EventSheet({e}){
 
 // ---------- СЕГОДНЯ ----------
 export function Today({s,priv,go,openSheet,age}){
- const now=Date.now(),cal=priv.source,todayKey=M.dayKey(now);
+ const now=Date.now(),cal=priv.calendarSource||priv.source,todayKey=M.dayKey(now);
  const next=M.nextEvent(priv.events,now);
  const later=M.eventsOfDay(priv.events,todayKey).filter(e=>e!==next&&Date.parse(e.start)>now);
  const actions=M.topActions(priv.tasks);
@@ -187,7 +190,7 @@ export function CalendarScreen({priv,openSheet,store}){
  const [sel,setSel]=useState(()=>M.dayKey(Date.now()));
  const week=M.weekOf(Date.now()+shift*7*86400000);
  const todayKey=M.dayKey(Date.now());
- const src=priv.source;
+ const src=priv.calendarSource||priv.source;
  const list=M.eventsOfDay(priv.events,sel);
  const counts=useMemo(()=>Object.fromEntries(week.map(d=>[d.key,M.eventsOfDay(priv.events,d.key).length])),[priv.events,week[0].key]);
  const move=d=>{haptic('select');const n=shift+d;setShift(n);setSel(n===0?todayKey:M.weekOf(Date.now()+n*7*86400000)[0].key);};
@@ -203,7 +206,7 @@ export function CalendarScreen({priv,openSheet,store}){
   </Card>
   <Card title="Типы событий" className="span2">
    <div className="chips">{Object.entries(M.EVENT_KINDS).filter(([k])=>k!=='other').map(([k,v])=><Chip key={k} tone={'k-'+k}>{v.title}</Chip>)}</div>
-   <p className="empty">Оплаты, контрольные точки и автоматические публикации показываются отдельно от встреч и не требуют личного присутствия. Названия, адреса, суммы и ссылки не попадают в публичную телеметрию.</p>
+   <p className="empty">В ЦУП передаётся только общая карточка календаря: название, время, тип и при необходимости место. Описания, участники, служебные идентификаторы и внутренние ссылки не публикуются.</p>
   </Card>
  </div>;
 }
