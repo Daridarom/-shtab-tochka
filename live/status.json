@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T18:22:23.161671+00:00",
+  "generated_at": "2026-09-30T18:23:28.159294+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
       "id": "system",
       "title": "Система",
       "level": "ok",
-      "detail": "Канал управления: работает · процессы: работает · свободно 185.1 ГБ"
+      "detail": "Канал управления: работает · процессы: работает · свободно 184.6 ГБ"
     },
     {
       "id": "visual",
@@ -54,8 +54,8 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "warn",
-      "detail": "Ожидают: 4 · проверка связи 1 с назад"
+      "level": "ok",
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
@@ -174,7 +174,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T18:22:23.161671+00:00",
+    "generated_at": "2026-09-30T18:23:28.159294+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
