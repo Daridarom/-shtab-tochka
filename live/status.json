@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T07:50:31.135751+00:00",
+  "generated_at": "2026-09-30T07:51:36.160954+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -43,7 +43,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 10 с назад"
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
@@ -86,7 +86,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-09-30T07:39:05.232971+00:00",
+    "generated_at": "2026-09-30T07:50:54.753524+00:00",
     "ttl_seconds": 21600,
     "authority": "project TASKS",
     "partial": true,
@@ -108,7 +108,7 @@
         "status": "OPEN",
         "deadline": null,
         "fresh": true,
-        "verified_at": "2026-09-30T07:34:30+00:00"
+        "verified_at": "2026-09-30T07:50:43.457564+00:00"
       },
       {
         "id": "1c15addefda0eb69",
@@ -117,7 +117,7 @@
         "status": "OPEN",
         "deadline": null,
         "fresh": true,
-        "verified_at": "2026-09-30T06:33:42.981784+00:00"
+        "verified_at": "2026-09-30T07:50:44.442399+00:00"
       },
       {
         "id": "b81adc0557635c18",
@@ -126,7 +126,7 @@
         "status": "OPEN",
         "deadline": null,
         "fresh": true,
-        "verified_at": "2026-09-30T06:33:42.981784+00:00"
+        "verified_at": "2026-09-30T07:50:44.442399+00:00"
       },
       {
         "id": "54c68a998766e1ba",
@@ -135,7 +135,7 @@
         "status": "OPEN",
         "deadline": null,
         "fresh": true,
-        "verified_at": "2026-09-30T06:33:48.044017+00:00"
+        "verified_at": "2026-09-30T07:50:50.763896+00:00"
       },
       {
         "id": "6a091c0f0d8d08b2",
@@ -154,7 +154,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T07:50:31.135751+00:00",
+    "generated_at": "2026-09-30T07:51:36.160954+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
