@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T14:03:31.602127+00:00",
+  "generated_at": "2026-09-30T14:04:36.753972+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -175,7 +175,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T14:03:31.602127+00:00",
+    "generated_at": "2026-09-30T14:04:36.753972+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
