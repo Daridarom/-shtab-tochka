@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T12:03:51.118559+00:00",
+  "generated_at": "2026-09-30T12:04:56.154178+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -25,7 +25,7 @@
       "id": "max",
       "title": "MAX",
       "level": "ok",
-      "detail": "Получатель: работает · записей: 563"
+      "detail": "Получатель: работает · записей: 564"
     },
     {
       "id": "drive",
@@ -166,7 +166,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T12:03:51.118559+00:00",
+    "generated_at": "2026-09-30T12:04:56.154178+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
@@ -178,9 +178,9 @@
       },
       "max": {
         "read_ok": true,
-        "total": 563,
-        "last_24h": 30,
-        "last_message_at": "2026-09-30T11:58:37.051987+00:00",
+        "total": 564,
+        "last_24h": 31,
+        "last_message_at": "2026-09-30T12:04:08.965633+00:00",
         "attention_count": 19
       }
     },
