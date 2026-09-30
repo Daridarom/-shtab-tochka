@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T12:33:37.136162+00:00",
+  "generated_at": "2026-09-30T12:34:42.185752+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+      "detail": "Ожидают: 0 · проверка связи 18 с назад"
     },
     {
       "id": "rostok",
@@ -155,18 +155,21 @@
         "title": "Следующий шаг: зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": true,
+        "fresh": false,
         "verified_at": "2026-09-30T06:33:51.136718+00:00"
       }
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 0,
-    "missing_sources": []
+    "stale_rows": 1,
+    "missing_sources": [
+      "h45",
+      "reo"
+    ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T12:33:37.136162+00:00",
+    "generated_at": "2026-09-30T12:34:42.185752+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
