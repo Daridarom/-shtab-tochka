@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T05:39:35.167795+00:00",
+  "generated_at": "2026-09-30T05:40:40.141787+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -43,7 +43,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 1 с назад"
+      "detail": "Ожидают: 0 · проверка связи 10 с назад"
     },
     {
       "id": "rostok",
@@ -125,7 +125,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T05:39:35.167795+00:00",
+    "generated_at": "2026-09-30T05:40:40.141787+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
@@ -133,31 +133,14 @@
         "total": 12,
         "last_24h": 1,
         "last_message_at": "2026-09-29T20:33:34+00:00",
-        "source_states": {
-          "received": 12
-        }
+        "attention_count": 0
       },
       "max": {
         "read_ok": true,
         "total": 534,
         "last_24h": 16,
         "last_message_at": "2026-09-30T05:18:27.530723+00:00",
-        "source_states": {
-          "alexw_auto_saved": 4,
-          "alexw_query": 1,
-          "document_answered": 2,
-          "done": 286,
-          "empty": 13,
-          "failed": 2,
-          "ignored_ephemeral_code": 35,
-          "incomplete": 10,
-          "kb_answered": 5,
-          "kb_refresh_started": 1,
-          "membership_recorded": 1,
-          "no_session": 7,
-          "secretary_captured_silent": 166,
-          "workspace_membership_recorded": 1
-        }
+        "attention_count": 19
       }
     },
     "detail_available": false
