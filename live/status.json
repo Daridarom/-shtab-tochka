@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T07:34:07.630215+00:00",
+  "generated_at": "2026-09-30T07:35:21.125744+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -42,8 +42,8 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "warn",
-      "detail": "Ожидают: 5 · проверка связи 1 с назад"
+      "level": "ok",
+      "detail": "Ожидают: 1 · проверка связи 3 с назад"
     },
     {
       "id": "rostok",
@@ -54,8 +54,8 @@
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "ok",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0"
+      "level": "error",
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: public-readback-unavailable:2026-09-30"
     }
   ],
   "workflows": [
@@ -87,7 +87,7 @@
   "task_summary": {
     "schema": "tasks-public-1",
     "generated_at": "2026-09-30T07:29:08.294099+00:00",
-    "ttl_seconds": 7200,
+    "ttl_seconds": 21600,
     "authority": "project TASKS",
     "partial": true,
     "scope": [
@@ -107,7 +107,7 @@
         "title": "ИНВЕСТПРЕДЛОЖЕНИЕ ПО ЗЕМЕЛЬНЫМ ПРОЕКТАМ — активная задача от 17.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
+        "fresh": true,
         "verified_at": "2026-09-30T06:33:42.981784+00:00"
       },
       {
@@ -116,7 +116,7 @@
         "title": "AB-BOOK-001 — Исходники книги и работа с книгами, поручение Алексея 27.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
+        "fresh": true,
         "verified_at": "2026-09-30T06:33:42.981784+00:00"
       },
       {
@@ -125,7 +125,7 @@
         "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
+        "fresh": true,
         "verified_at": "2026-09-30T06:33:48.044017+00:00"
       },
       {
@@ -134,27 +134,21 @@
         "title": "Следующий шаг: зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
+        "fresh": true,
         "verified_at": "2026-09-30T06:33:51.136718+00:00"
       }
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 4,
+    "stale_rows": 0,
     "missing_sources": [
       "ai-radar",
-      "alexander",
-      "h45",
-      "kinouroki",
-      "media",
-      "rostok",
-      "reo",
-      "rko"
+      "rostok"
     ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T07:34:07.630215+00:00",
+    "generated_at": "2026-09-30T07:35:21.125744+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
