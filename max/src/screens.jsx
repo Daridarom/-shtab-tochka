@@ -72,8 +72,9 @@ function OperationalPicture({s,priv,age}){
  const cal=priv.calendarSource||priv.source;
  const tasks=priv.taskSource||priv.source;
  const inbox=priv.inboxSource||priv.source;
- const coverage=1+[cal,tasks,inbox].filter(src=>src.state!==M.SOURCE.NOT_CONNECTED).length;
- const fullFresh=s.mode==='live'&&[cal,tasks,inbox].every(src=>src.state===M.SOURCE.LIVE);
+ const inboxAgg=priv.inboxSummarySource||inbox;
+ const coverage=1+[cal,tasks,inboxAgg].filter(src=>src&&src.state!==M.SOURCE.NOT_CONNECTED).length;
+ const fullFresh=s.mode==='live'&&cal.state===M.SOURCE.LIVE&&tasks.state===M.SOURCE.LIVE&&inbox.state===M.SOURCE.LIVE;
  const trustTone=s.mode==='live'?(fullFresh?'ok':'wait'):s.mode==='stale'?'wait':'err';
  const trust=s.mode==='live'?(fullFresh?'Полная рабочая картина':'Частичная рабочая картина'):s.mode==='stale'?'Картина устарела':'Картина не подтверждена';
  const proc=s.metrics.active!=null&&s.metrics.total!=null?s.metrics.active+' из '+s.metrics.total:'—';
@@ -87,7 +88,7 @@ function OperationalPicture({s,priv,age}){
    <div className="commandMetric"><small>Полнота</small><b>{coverage} из 4</b><em>контуров данных подключено</em></div>
    <div className="commandMetric"><small>Свежесть</small><b>{M.sourceLabel(tel.state)}</b><em>{M.sourceNote('Штаб',tel).replace(/^Штаб:\s*/,'')}</em></div>
   </div>
-  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{[M.sourceNote('Календарь',cal),M.sourceNote('Задачи',tasks),M.sourceNote('Входящие',inbox)].join(' · ')}</small></div></div>
+  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{[M.sourceNote('Календарь',cal),M.sourceNote('Задачи',tasks),priv.inboxSummary&&!priv.inboxSummary.detailAvailable?M.sourceNote('Входящие · агрегаты',inboxAgg):M.sourceNote('Входящие',inbox)].join(' · ')}</small></div></div>
  </Card>;
 }
 function HarnessCard({s}){
@@ -155,7 +156,7 @@ export function EventSheet({e}){
 
 // ---------- СЕГОДНЯ ----------
 export function Today({s,priv,go,openSheet,age}){
- const now=Date.now(),cal=priv.calendarSource||priv.source,taskSrc=priv.taskSource||priv.source,inboxSrc=priv.inboxSource||priv.source,todayKey=M.dayKey(now);
+ const now=Date.now(),cal=priv.calendarSource||priv.source,taskSrc=priv.taskSource||priv.source,inboxSrc=priv.inboxSource||priv.source,inboxAgg=priv.inboxSummarySource||inboxSrc,todayKey=M.dayKey(now);
  const next=M.nextEvent(priv.events,now);
  const later=M.eventsOfDay(priv.events,todayKey).filter(e=>e!==next&&Date.parse(e.start)>now);
  const actions=M.topActions(priv.tasks);
@@ -170,7 +171,8 @@ export function Today({s,priv,go,openSheet,age}){
   </Card>
   <Card title="Главные действия" aside={actions.length?String(actions.length):''} className="span2">
    {actions.length?actions.map((t,i)=><button type="button" className="action" key={t.id} onClick={()=>{haptic('select');openSheet({kind:'task',id:t.id});}}><span className="num">{i+1}</span><div><b>{t.title}</b><small>{[t.project&&projectName(t.project),M.statusTitle(t.status),t.deadline&&'срок '+t.deadline].filter(Boolean).join(' · ')}</small></div></button>)
-    :<Empty text={taskSrc.state===M.SOURCE.NOT_CONNECTED?'Реестр задач к экрану не подключён — главные действия появятся после подключения защищённого канала.':'Открытых задач с приоритетом нет по данным реестра.'}/>}
+    :<Empty text={taskSrc.state===M.SOURCE.NOT_CONNECTED?'Реестр задач к экрану не подключён — главные действия появятся после подключения защищённого канала.':priv.taskMeta?.partial?'В безопасном срезе сейчас нет активных действий. Полный приватный реестр ещё не подключён.':'Открытых задач с приоритетом нет по данным реестра.'}/>}
+   {priv.taskMeta?.partial&&<small className="since">Безопасный срез задач · чувствительные и приватные направления здесь не публикуются.</small>}
   </Card>
   {calOn&&<Card title="Дальше сегодня" aside={later.length?String(later.length):''}>{later.length?later.map(e=><EventItem key={e.id} e={e} onOpen={id=>openSheet({kind:'event',id})}/>):<Empty text={M.emptyDayText(cal)}/>}</Card>}
   <Signals s={s} className="span2"/>
@@ -178,7 +180,7 @@ export function Today({s,priv,go,openSheet,age}){
    <SourceLine name="Состояние Штаба" src={tel}/>
    <SourceLine name="Календарь" src={cal} compact/>
    <SourceLine name="Задачи" src={taskSrc} compact/>
-   <SourceLine name="Входящие" src={inboxSrc} compact/>
+   <SourceLine name={priv.inboxSummary&&!priv.inboxSummary.detailAvailable?"Входящие · агрегаты":"Входящие"} src={priv.inboxSummary&&!priv.inboxSummary.detailAvailable?inboxAgg:inboxSrc} compact/>
    <button type="button" className="ghost" onClick={()=>go('systems')}>Схема и системы</button>
   </Card>
  </div>;
@@ -244,7 +246,7 @@ export function ProjectsScreen({s,priv,tasks,view,setView,project,openSheet,chan
  const open=id=>openSheet({kind:'task',id});
  let body;
  if(!connected)body=<Card className="span2"><Empty text="Реестр задач Штаба приватный и к этому экрану пока не подключён. Список, доска и приоритеты покажут одни и те же задачи, как только появится защищённый канал."/><p className="empty">Статусы берутся из реестра как есть и только группируются в колонки. Приоритет — отдельное измерение и хранится на этом устройстве, реестр не переписывается.</p></Card>;
- else if(!list.length)body=<Card className="span2"><Empty text={project?'В этом направлении задач по данным реестра нет':'Задач по данным реестра нет'}/></Card>;
+ else if(!list.length)body=<Card className="span2"><Empty text={priv.taskMeta?.partial?'В безопасном срезе для этого направления активных задач нет. Это не подтверждает отсутствие приватных задач.':project?'В этом направлении задач по данным реестра нет':'Задач по данным реестра нет'}/></Card>;
  else if(view==='list'){const cols=M.boardColumns(list);body=<Card className="span2 taskList">{cols.filter(c=>c.tasks.length).map(c=><div key={c.id}><h4>{c.title} <span>{c.tasks.length}</span></h4>{c.tasks.map(t=><TaskCard key={t.id} t={t} onOpen={open}/>)}</div>)}</Card>;}
  else if(view==='board'){const cols=M.boardColumns(list);body=<div className="span2"><div className="board" ref={boardRef}>{cols.map(c=><DropZone key={c.id} className="col" onDrop={id=>changeTask(id,{status:M.codeForColumn(c.id)},true)}><div className="colHead"><b>{c.title}</b><span>{c.tasks.length}</span></div>{c.tasks.length?c.tasks.map(t=><TaskCard key={t.id} t={t} onOpen={open} drag={drag}/>):<p className="empty">Пусто</p>}</DropZone>)}</div><div className="boardDots">{cols.map(c=><button type="button" key={c.id} onClick={()=>{const el=boardRef.current?.children[cols.indexOf(c)];el?.scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});}}>{c.title} · {c.tasks.length}</button>)}</div></div>;}
  else{const mx=M.matrix(list);body=<div className="span2"><div className="matrix">{mx.quads.map(q=><DropZone key={q.id} className={'quad pr-'+q.id} onDrop={id=>changeTask(id,{priority:q.id},true)}><div className="colHead"><b>{q.title}</b><span>{q.tasks.length}</span></div><small className="hint">{q.hint}</small>{q.tasks.map(t=><TaskCard key={t.id} t={t} onOpen={open} drag={drag}/>)}</DropZone>)}</div>
@@ -254,7 +256,8 @@ export function ProjectsScreen({s,priv,tasks,view,setView,project,openSheet,chan
   <div className="span2 projBar">
    <button type="button" className="picker" onClick={()=>{haptic('select');openSheet({kind:'project'});}}><small>Направление</small><b>{node?node.name:'Все проекты'}</b><i>▾</i></button>
    <Seg label="Представление задач" value={view} onChange={setView} items={[['list','Список'],['board','Доска'],['matrix','Приоритеты']]}/>
-   <SourceLine name="Реестр задач" src={taskSrc} compact/>
+   <SourceLine name={priv.taskMeta?.partial?"Реестр задач · безопасный срез":"Реестр задач"} src={taskSrc} compact/>
+   {priv.taskMeta?.partial&&<p className="empty">Показаны только разрешённые для общего ЦУПа направления. Источник статуса остаётся проектный TASKS; этот экран — производный обзор.</p>}
   </div>
   {node?.id==='rostok'&&<><Rostok r={s.rostok}/><ProofFlow runtime={s.artifactRuntime} mode={s.mode}/><Workflows list={s.workflows.filter(x=>/Росток|публикаци/i.test(x[0]))}/></>}
   {node?.id==='hq'&&<><Documents s={s}/><Workflows list={s.workflows}/></>}
@@ -323,14 +326,26 @@ export function SystemsScreen({s,graph,selected,onSelect}){
 }
 
 // ---------- ВХОДЯЩИЕ ----------
+function InboxActivity({summary}){
+ if(!summary)return null;
+ const labels={max:'MAX',telegram:'Telegram'};
+ const rows=Object.entries(summary.channels||{});
+ return <Card title="Активность каналов" aside={rows.length?'реальные журналы':''} className="span2">
+  {rows.length?rows.map(([key,x])=><Row key={key} dot={x.readOk?'ok':'wait'} title={labels[key]||key}
+   text={[x.last24h!=null?'за 24 ч: '+x.last24h:null,x.total!=null?'всего записей: '+x.total:null,x.lastMessageAt?'последняя: '+moscowTime(x.lastMessageAt,true)+' МСК':null].filter(Boolean).join(' · ')}/>)
+   :<Empty text="Агрегаты входящих пока не получены"/>}
+  <p className="empty">Это активность получателей, а не список поручений: текст сообщений и идентификаторы пользователей в общую телеметрию не передаются.</p>
+ </Card>;
+}
 export function InboxScreen({s,priv,openSheet}){
  const items=M.unprocessed(priv.inbox);
  const inboxSrc=priv.inboxSource||priv.source;
  const connected=inboxSrc.state!==M.SOURCE.NOT_CONNECTED;
  return <div className="home">
+  <InboxActivity summary={priv.inboxSummary}/>
   <Card title="Не разобрано" aside={connected?String(items.length):''} className="span2">
    <SourceLine name="Входящие" src={inboxSrc} compact/>
-   {!connected?<Empty text="Карточки входящих приходят через приватный канал, он ещё не подключён. Число записей у получателей ниже — это не список новых сообщений."/>
+   {!connected?<Empty text={priv.inboxSummary?'Реальная активность каналов подключена, но карточки сообщений остаются в защищённом слое и пока не передаются в ЦУП.':'Карточки входящих приходят через приватный канал, он ещё не подключён.'}/>
     :items.length?items.map(x=><button type="button" key={x.id} className="inboxItem" onClick={()=>{haptic('select');openSheet({kind:'inbox',id:x.id});}}><span className={'dot '+(x.triage==='new'?'wait':'ok')}/><div><b>{x.summary||x.type}</b><small>{[x.channel,x.receivedAt&&moscowTime(x.receivedAt,true),x.type,x.project&&projectName(x.project)].filter(Boolean).join(' · ')}</small></div><Chip>{x.triage==='new'?'новое':'связано'}</Chip></button>)
     :<Empty text={M.confirmsAbsence(inboxSrc)?'Всё разобрано по данным источника':'Нет подтверждённых данных'}/>}
   </Card>
