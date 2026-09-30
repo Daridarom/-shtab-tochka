@@ -27,6 +27,16 @@ assert.equal(stalePub.source.state,'stale');assert.match(stalePub.source.reason,
 const inboxAgg=M.fromInboxSummary({schema:'inbox-summary-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:120,channels:{max:{read_ok:true,total:12,last_24h:3,last_message_at:'2026-09-28T19:58:00Z',source_states:{received:12}}},detail_available:false},now);
 assert.equal(inboxAgg.source.state,'live');assert.equal(inboxAgg.channels.max.last24h,3);assert.equal(inboxAgg.detailAvailable,false);
 
+// Оперативная свежесть: свежий общий снимок не скрывает устаревшие календарь и задачи.
+const ops=M.operationalFreshness(
+ {mode:'live',ageSeconds:30,asOf:'2026-09-28T19:59:30Z'},
+ {source:none.source,calendarSource:stale,taskSource:stalePub.source,inboxSummarySource:inboxAgg.source},
+ 30
+);
+assert.equal(ops.total,4);assert.equal(ops.connected,4);assert.equal(ops.fresh,2);assert.equal(ops.state,'stale');assert.match(ops.label,/2 из 4/);assert.match(ops.detail,/Календарь/);assert.match(ops.detail,/Задачи/);
+assert.equal(M.resultEvidence({mode:'live',cards:[{id:'publications',level:'err',detail:'проверка слота'}]}).level,'err');
+assert.equal(M.resultEvidence({mode:'live',cards:[{id:'publications',level:'ok',detail:'доставка подтверждена'}]}).label,'Подтверждено');
+
 // EVENT: окончание не выдумывается; оплата — не встреча.
 const ev=M.normalizeEvent({id:'e1',start:'2026-09-29T11:00:00+03:00',end:'2026-09-29T12:00:00+03:00',kind:'meeting',format:'online',joinUrl:'javascript:alert(1)'});
 assert.equal(ev.endConfirmed,false);assert.equal(M.eventWhen(ev).endNote,'Окончание не указано');assert.equal(M.eventWhen(ev).end,null);assert.equal(ev.joinUrl,null);
