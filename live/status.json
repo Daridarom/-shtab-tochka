@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T06:33:17.170006+00:00",
+  "generated_at": "2026-09-30T06:34:21.173270+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,8 +36,8 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "ok",
-      "detail": "Облачная копия индекса задач актуальна"
+      "level": "warn",
+      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
     },
     {
       "id": "queue",
@@ -86,7 +86,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-09-30T02:31:00.278075+00:00",
+    "generated_at": "2026-09-30T06:33:54.032032+00:00",
     "ttl_seconds": 7200,
     "authority": "project TASKS",
     "partial": true,
@@ -106,26 +106,23 @@
         "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-29T22:28:52.422846+00:00"
+        "fresh": true,
+        "verified_at": "2026-09-30T06:33:48.044017+00:00"
       }
     ],
     "proposal_count": 1,
     "today_complete": false,
-    "stale_rows": 1,
+    "stale_rows": 0,
     "missing_sources": [
       "ai-radar",
       "ai-shtab-os",
-      "kinouroki",
       "media-factory",
-      "privet-planeta",
-      "reo-crimea",
-      "rko"
+      "privet-planeta"
     ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T06:33:17.170006+00:00",
+    "generated_at": "2026-09-30T06:34:21.173270+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
