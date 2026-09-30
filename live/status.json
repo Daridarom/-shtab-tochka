@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T05:35:52.164683+00:00",
+  "generated_at": "2026-09-30T05:36:56.870592+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -43,7 +43,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 1 · проверка связи 5 с назад"
+      "detail": "Ожидают: 4 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
@@ -84,6 +84,84 @@
       "last_status": "success"
     }
   ],
+  "task_summary": {
+    "schema": "tasks-public-1",
+    "generated_at": "2026-09-30T02:31:00.278075+00:00",
+    "ttl_seconds": 7200,
+    "authority": "project TASKS",
+    "partial": true,
+    "scope": [
+      "ai-radar",
+      "ai-shtab-os",
+      "kinouroki",
+      "media-factory",
+      "privet-planeta",
+      "reo-crimea",
+      "rko"
+    ],
+    "items": [
+      {
+        "id": "54c68a998766e1ba",
+        "project": "rko",
+        "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": false,
+        "verified_at": "2026-09-29T22:28:52.422846+00:00"
+      }
+    ],
+    "proposal_count": 1,
+    "today_complete": false,
+    "stale_rows": 1,
+    "missing_sources": [
+      "ai-radar",
+      "ai-shtab-os",
+      "kinouroki",
+      "media-factory",
+      "privet-planeta",
+      "reo-crimea",
+      "rko"
+    ]
+  },
+  "inbox_summary": {
+    "schema": "inbox-summary-1",
+    "generated_at": "2026-09-30T05:36:56.870592+00:00",
+    "ttl_seconds": 120,
+    "channels": {
+      "telegram": {
+        "read_ok": true,
+        "total": 12,
+        "last_24h": 1,
+        "last_message_at": "2026-09-29T20:33:34+00:00",
+        "source_states": {
+          "received": 12
+        }
+      },
+      "max": {
+        "read_ok": true,
+        "total": 534,
+        "last_24h": 16,
+        "last_message_at": "2026-09-30T05:18:27.530723+00:00",
+        "source_states": {
+          "alexw_auto_saved": 4,
+          "alexw_query": 1,
+          "document_answered": 2,
+          "done": 286,
+          "empty": 13,
+          "failed": 2,
+          "ignored_ephemeral_code": 35,
+          "incomplete": 10,
+          "kb_answered": 5,
+          "kb_refresh_started": 1,
+          "membership_recorded": 1,
+          "no_session": 7,
+          "secretary_captured_silent": 166,
+          "workspace_membership_recorded": 1
+        }
+      }
+    },
+    "detail_available": false
+  },
   "failed_visual_count": 2,
   "rostok": {
     "published_today": 0,
