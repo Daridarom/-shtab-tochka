@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T13:50:09.153598+00:00",
+  "generated_at": "2026-09-30T13:51:15.179317+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,8 +36,8 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "ok",
-      "detail": "Облачная копия индекса задач актуальна"
+      "level": "warn",
+      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
     },
     {
       "id": "reliability",
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 3 с назад"
+      "detail": "Ожидают: 0 · проверка связи 4 с назад"
     },
     {
       "id": "rostok",
@@ -119,7 +119,7 @@
         "title": "PP-SKILL-ARTIFACT-001 — перевести публикационный контур Ростка на Task → Skill → Artifact → Evidence без создания новых ботов. Риск: важное.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": true,
+        "fresh": false,
         "verified_at": "2026-09-30T07:50:43.457564+00:00"
       },
       {
@@ -128,7 +128,7 @@
         "title": "ИНВЕСТПРЕДЛОЖЕНИЕ ПО ЗЕМЕЛЬНЫМ ПРОЕКТАМ — активная задача от 17.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": true,
+        "fresh": false,
         "verified_at": "2026-09-30T07:50:44.442399+00:00"
       },
       {
@@ -137,7 +137,7 @@
         "title": "AB-BOOK-001 — Исходники книги и работа с книгами, поручение Алексея 27.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": true,
+        "fresh": false,
         "verified_at": "2026-09-30T07:50:44.442399+00:00"
       },
       {
@@ -146,7 +146,7 @@
         "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": true,
+        "fresh": false,
         "verified_at": "2026-09-30T07:50:50.763896+00:00"
       },
       {
@@ -161,16 +161,21 @@
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 1,
+    "stale_rows": 6,
     "missing_sources": [
       "ai-radar",
+      "alexander",
       "h45",
-      "reo"
+      "kinouroki",
+      "media",
+      "rostok",
+      "reo",
+      "rko"
     ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T13:50:09.153598+00:00",
+    "generated_at": "2026-09-30T13:51:15.179317+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
