@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T15:54:55.151549+00:00",
+  "generated_at": "2026-09-30T15:56:00.139040+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,8 +36,8 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "warn",
-      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
+      "level": "ok",
+      "detail": "Облачная копия индекса задач актуальна"
     },
     {
       "id": "reliability",
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 15 с назад"
+      "detail": "Ожидают: 0 · проверка связи 16 с назад"
     },
     {
       "id": "rostok",
@@ -98,7 +98,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-09-30T07:50:54.753524+00:00",
+    "generated_at": "2026-09-30T15:55:25.249237+00:00",
     "ttl_seconds": 21600,
     "authority": "project TASKS",
     "partial": true,
@@ -128,8 +128,8 @@
         "title": "ИНВЕСТПРЕДЛОЖЕНИЕ ПО ЗЕМЕЛЬНЫМ ПРОЕКТАМ — активная задача от 17.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T07:50:44.442399+00:00"
+        "fresh": true,
+        "verified_at": "2026-09-30T15:55:24.565544+00:00"
       },
       {
         "id": "b81adc0557635c18",
@@ -137,8 +137,8 @@
         "title": "AB-BOOK-001 — Исходники книги и работа с книгами, поручение Алексея 27.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T07:50:44.442399+00:00"
+        "fresh": true,
+        "verified_at": "2026-09-30T15:55:24.565544+00:00"
       },
       {
         "id": "54c68a998766e1ba",
@@ -161,10 +161,9 @@
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 6,
+    "stale_rows": 4,
     "missing_sources": [
       "ai-radar",
-      "alexander",
       "h45",
       "kinouroki",
       "media",
@@ -175,7 +174,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T15:54:55.151549+00:00",
+    "generated_at": "2026-09-30T15:56:00.139040+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
