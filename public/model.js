@@ -34,6 +34,46 @@ export function telemetrySource(s){
  return {state:map[s.mode]||SOURCE.ERROR,ageSeconds:s.ageSeconds??null,asOf:s.asOf??null};
 }
 
+// ---------- защита от утечки в отображении ----------
+// Публичная проекция календаря не должна нести суммы, адреса, телефоны и ссылки. Если коллектор их всё же прислал,
+// экран не показывает их: это вторая линия защиты, а не замена очистки на стороне коллектора.
+const PRIVATE_PATTERNS=[
+ [/\d[\d\s\u00a0]*(?:[.,]\d+)?\s*(?:₽|руб\.?|р\.|\$|€|(?:eur|usd|rub)(?![a-zа-яё]))/gi,'сумма'],
+ [/\+?\d[\d\s()\u00a0-]{8,}\d/g,'телефон'],
+ [/https?:\/\/\S+|(?:^|\s)www\.\S+/gi,'ссылка'],
+ [/(?:^|[\s—–·,(])(?:ул\.|улица|просп\.|проспект|пер\.|переулок|д\.|дом|кв\.|офис|оф\.)\s*[^,·—]*\d[^,·—]*/gi,'адрес'],
+ [/(?:^|[\s—–·,(])[А-ЯЁ][а-яё-]{2,},?\s+\d{1,4}(?:[-–/]\d{1,4})?[а-яё]?(?=$|[\s,.;:·—–)])/g,'адрес']
+];
+export function privateHints(text){
+ const out=[];const t=String(text||'');
+ for(const [re,kind] of PRIVATE_PATTERNS){re.lastIndex=0;if(re.test(t))out.push(kind);}
+ return [...new Set(out)];
+}
+export function redactPrivate(text){
+ let t=String(text||'');
+ for(const [re] of PRIVATE_PATTERNS){re.lastIndex=0;t=t.replace(re,'');}
+ t=t.replace(/\s{2,}/g,' ').replace(/\s*([—–-]|·)\s*(?=$|[—–·-])/g,' ').replace(/^\s*[—–·,-]+\s*|\s*[—–·,-]+\s*$/g,'').replace(/\s*,\s*$/,'').trim();
+ return t;
+}
+
+// Состояние слоя из экранного состояния live.js: пока идёт первая загрузка — SYNCING, при потере связи — OFFLINE с возрастом
+// последнего снимка, при отсутствии проекции у живого источника — ERROR. «Не подключён» — только когда источник не предусмотрен.
+export function layerSource(s,parsed,{origin=null,missingReason=null}={},now=Date.now()){
+ const loading=!s||s.mode==='loading';
+ if(!parsed){
+  if(loading)return {state:SOURCE.SYNCING,ageSeconds:null,asOf:null};
+  if(s.mode==='offline')return {state:SOURCE.OFFLINE,ageSeconds:null,asOf:null,reason:'нет связи с источником'};
+  return missingReason?{state:SOURCE.NOT_CONNECTED,reason:missingReason,ageSeconds:null,asOf:null}:{state:SOURCE.ERROR,reason:'проекция не получена от источника',ageSeconds:null,asOf:null};
+ }
+ const src={...parsed.source};
+ if(origin==='cache'&&src.state!==SOURCE.ERROR){
+  if(loading)src.state=SOURCE.SYNCING;
+  else if(s.mode==='offline')src.state=SOURCE.OFFLINE;
+  else if(src.state===SOURCE.LIVE){src.state=SOURCE.STALE;src.reason='источник сейчас не ответил, показан последний снимок с устройства';}
+ }
+ return src;
+}
+
 // ---------- защищённый слой ----------
 // Сейчас приватного канала к ЦУП нет: возвращаем честное «не подключён», ничего не симулируем.
 // Когда канал появится, он должен вернуть снимок {schema:'private-1',generated_at,ttl_seconds,events[],tasks[],inbox[]}.
@@ -158,9 +198,10 @@ export function normalizeEvent(e){
  const start=Date.parse(e.start);if(!Number.isFinite(start))return null;
  const end=e.end?Date.parse(e.end):NaN;
  const kind=EVENT_KINDS[e.kind]?e.kind:'other';
- return {id:String(e.id),title:String(e.title||EVENT_KINDS[kind].title),kind,start:e.start,end:Number.isFinite(end)?e.end:null,allDay:!!e.allDay,
+ const title=redactPrivate(e.title)||EVENT_KINDS[kind].title;
+ return {id:String(e.id),title,kind,start:e.start,end:Number.isFinite(end)?e.end:null,allDay:!!e.allDay,redacted:privateHints(e.title).length>0||privateHints(e.location).length>0,
   endConfirmed:!!e.endConfirmed&&Number.isFinite(end),format:e.format==='online'||e.format==='offline'?e.format:null,
-  location:e.location||null,joinUrl:/^https:\/\//.test(e.joinUrl||'')?e.joinUrl:null,project:e.project||null,source:e.source||null};
+  location:redactPrivate(e.location)||null,joinUrl:/^https:\/\//.test(e.joinUrl||'')?e.joinUrl:null,project:e.project||null,source:e.source||null};
 }
 const TZ='Europe/Moscow';
 export function timeLabel(iso){const d=new Date(iso);return Number.isFinite(d.getTime())?d.toLocaleTimeString('ru-RU',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'—';}
@@ -220,12 +261,21 @@ const NODE_DEFS=[
  {id:'drive',title:'Документы',card:'drive',x:314,y:118,nav:'documents',group:'Рабочий слой'},
  {id:'queue',title:'ИИ-исполнители',card:'queue',x:314,y:218,group:'Исполнение'},
  {id:'workflows',title:'Автоматика',card:'workflows',x:180,y:262,nav:'workflows',group:'Исполнение'},
- {id:'rostok',title:'Росток',card:'rostok',x:62,y:352,nav:'rostok',group:'Публикации'},
- {id:'visual',title:'Генерация',card:'visual',x:180,y:352,nav:'rostok',group:'Публикации'},
- {id:'publications',title:'Публикации',card:'publications',x:298,y:352,nav:'rostok',group:'Результат'}
+ {id:'rostok',title:'Росток',card:'rostok',x:48,y:352,nav:'rostok',group:'Публикации'},
+ {id:'visual',title:'Генерация',card:'visual',x:138,y:352,nav:'rostok',group:'Публикации'},
+ {id:'evidence',title:'Проверка',card:null,x:228,y:352,nav:'rostok',group:'Публикации'},
+ {id:'publications',title:'Публикации',card:'publications',x:316,y:352,nav:'rostok',group:'Результат'}
 ];
-const EDGES=[['max','system'],['telegram','system'],['system','calendar'],['system','projects'],['system','drive'],['system','queue'],['system','workflows'],['system','rostok'],['rostok','visual'],['visual','publications']];
-const RELATED={max:['Штаб'],telegram:['Штаб'],system:['Все проекты'],calendar:['Все проекты'],projects:['Все проекты'],drive:['Все проекты'],queue:['Штаб'],workflows:['Штаб','Росток · Привет, планета'],rostok:['Росток · Привет, планета'],visual:['Росток · Привет, планета'],publications:['Росток · Привет, планета']};
+const EDGES=[['max','system'],['telegram','system'],['system','calendar'],['system','projects'],['system','drive'],['system','queue'],['system','workflows'],['system','rostok'],['rostok','visual'],['visual','evidence'],['evidence','publications']];
+const RELATED={max:['Штаб'],telegram:['Штаб'],system:['Все проекты'],calendar:['Все проекты'],projects:['Все проекты'],drive:['Все проекты'],queue:['Штаб'],workflows:['Штаб','Росток · Привет, планета'],rostok:['Росток · Привет, планета'],visual:['Росток · Привет, планета'],evidence:['Росток · Привет, планета'],publications:['Росток · Привет, планета']};
+// Узел «Проверка»: только из безопасного агрегата artifact_runtime. Нет агрегата — серый, не зелёный.
+function evidenceLevel(state){
+ const a=state.artifactRuntime;if(!a||!['live','stale'].includes(state.mode))return ['none','Агрегат проверки артефактов пока не приходит в телеметрию'];
+ if(a.lastResult==='verified')return ['ok','Последний результат подтверждён доказательствами'];
+ if(a.lastResult==='blocked')return ['err','Проверка остановила публикацию результата'];
+ if(['pending','needs_more_evidence'].includes(a.lastResult))return ['wait','Есть результат, проверка ещё не завершена'];
+ return ['none','Итог проверки не подтверждён источником'];
+}
 
 // state — экранное состояние live.js; priv — результат защищённого слоя.
 export function schemeGraph(state={},priv=emptyPrivate()){
@@ -236,7 +286,8 @@ export function schemeGraph(state={},priv=emptyPrivate()){
   let level='none',detail='Состояние не подтверждено источником';
   if(d.card==='workflows'){if(known&&wf.length){const bad=wf.filter(w=>w[1]!=='ok');level=bad.some(w=>w[1]==='err')?'err':bad.length?'wait':'ok';detail=(wf.length-bad.length)+' из '+wf.length+' процессов работают штатно';}}
   else if(d.card){const c=cards[d.card];if(known&&c){level=['ok','wait','err'].includes(c.level)?c.level:'none';detail=c.detail||'Нет подробностей';}}
-  else{const src=d.id==='calendar'?(priv.calendarSource||priv.source):(priv.taskSource||priv.source);level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
+  else if(d.id==='evidence'){[level,detail]=evidenceLevel(state);}
+  else{const src=d.id==='calendar'?(priv.calendarSource||priv.source):(priv.taskSource||priv.source);level=src.state===SOURCE.LIVE?'ok':src.state===SOURCE.STALE?'wait':src.state===SOURCE.ERROR||src.state===SOURCE.OFFLINE?'err':'none';detail=sourceNote(d.id==='calendar'?'Календарь':'Реестр задач',src);}
   const issue=(state.focus||[]).find(f=>f.key===d.card||(d.card==='workflows'&&String(f.key).startsWith('wf:')));
   return {...d,level,detail,stale:state.mode==='stale',issue:issue?{text:issue.text,action:issue.action||null}:null,related:RELATED[d.id]||[]};
  });
@@ -250,3 +301,16 @@ export function schemeGraph(state={},priv=emptyPrivate()){
  return {nodes,edges,counts,known,asOf:state.asOf||null};
 }
 export function levelLabel(l){return l==='ok'?'Работает штатно':l==='wait'?'Требует внимания':l==='err'?'Ошибка или блокировка':'Состояние не подтверждено';}
+
+// Связи узла схемы с сущностями модели: задачи, события, документы. Только по реальным данным, без выдумки.
+export function nodeLinks(node,{tasks=[],events=[],state={},now=Date.now()}={}){
+ const open=tasks.filter(t=>columnOf(t.status)!=='done');
+ const byProject=p=>open.filter(t=>t.project===p||t.project==='Росток · Привет, планета'&&p==='rostok');
+ const soon=events.filter(e=>{const ts=Date.parse(e.start);return ts>=now-3600000&&ts<=now+7*86400000;}).sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
+ const links={tasks:[],events:[],documents:null};
+ if(['rostok','visual','evidence','publications'].includes(node.id))links.tasks=byProject('rostok');
+ else if(node.id==='projects'||node.id==='system')links.tasks=open;
+ if(node.id==='calendar'||node.id==='system')links.events=soon;
+ if(node.id==='drive'){const c=(state.cards||[]).find(x=>x.id==='drive');links.documents=c&&['live','stale'].includes(state.mode)?c.detail||'Нет подробностей':null;}
+ return links;
+}

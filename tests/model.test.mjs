@@ -62,7 +62,7 @@ const g=M.schemeGraph(state,none);
 const node=id=>g.nodes.find(n=>n.id===id),edge=(a,b)=>g.edges.find(e=>e.from===a&&e.to===b);
 assert.equal(node('calendar').level,'none');assert.equal(node('telegram').level,'none');assert.equal(node('visual').level,'err');
 assert.equal(node('visual').issue.action,'Проверить');
-assert.equal(edge('max','system').kind,'flow');assert.equal(edge('rostok','visual').kind,'stop err');assert.equal(edge('visual','publications').kind,'idle');
+assert.equal(edge('max','system').kind,'flow');assert.equal(edge('rostok','visual').kind,'stop err');assert.equal(edge('visual','evidence').kind,'unknown');assert.equal(edge('evidence','publications').kind,'unknown');
 assert.equal(edge('system','calendar').kind,'unknown');
 const withCalendar={...none,calendarSource:publicCal.source,events:publicCal.events};
 const gc=M.schemeGraph(state,withCalendar);
@@ -73,3 +73,35 @@ const O=await load('orbit.js');
 const svg=O.schemeSVG(g,{selected:'visual'});assert.equal((svg.match(/class="pulse"/g)||[]).length,g.edges.filter(e=>e.kind==='flow').length);assert.match(svg,/data-node="visual"/);
 assert.ok(O.orbitSVG([{id:'a',title:'A',level:'ok'}]).startsWith('<svg class="orbit"'));
 console.log('PASS: sources honest, events keep unconfirmed end, status/priority independent, one task per view, scheme shows real states');
+
+// Защита отображения: суммы, адреса, телефоны и ссылки не показываются, даже если коллектор их прислал.
+assert.equal(M.redactPrivate('ОПЛАТА — Аренда Козлова, 1 — 60 000 ₽'),'ОПЛАТА — Аренда');
+assert.equal(M.redactPrivate('ОПЛАТА — Интернет Дубинина 19-26 — 650 ₽'),'ОПЛАТА — Интернет');
+assert.equal(M.redactPrivate('Созвон https://meet.example/x +7 978 123-45-67'),'Созвон');
+assert.equal(M.redactPrivate('ЦУП · Доверенности — срок 11.10.2026'),'ЦУП · Доверенности — срок 11.10.2026');
+assert.deepEqual(M.privateHints('Совещание в 14:30'),[]);
+const leaky=M.normalizeEvent({id:'l',start:'2026-10-05T09:00:00+03:00',kind:'payment',title:'ОПЛАТА — Аренда Театральная, 37 — 63 000 ₽'});
+assert.equal(leaky.title,'ОПЛАТА — Аренда');assert.equal(leaky.redacted,true);
+assert.equal(M.normalizeEvent({id:'c',start:'2026-10-05T09:00:00+03:00',title:'Встреча'}).redacted,false);
+
+// Состояние слоя: SYNCING при загрузке, OFFLINE с кэшем без связи, STALE если источник не ответил, ERROR если проекции нет у живого источника.
+assert.equal(M.layerSource({mode:'loading'},null).state,'syncing');
+assert.equal(M.layerSource({mode:'offline'},null).state,'offline');
+assert.equal(M.layerSource({mode:'live'},null).state,'error');
+assert.equal(M.layerSource({mode:'live'},null,{missingReason:'нет'}).state,'not_connected');
+assert.equal(M.layerSource({mode:'live'},publicCal,{origin:'main-calendar'}).state,'live');
+assert.equal(M.layerSource({mode:'offline'},publicCal,{origin:'cache'}).state,'offline');
+assert.equal(M.layerSource({mode:'live'},publicCal,{origin:'cache'}).state,'stale');
+assert.equal(M.layerSource({mode:'loading'},publicCal,{origin:'cache'}).state,'syncing');
+
+// Узел «Проверка»: серый без агрегата, красный при блокировке; связи узла — только реальные задачи и события.
+const ge=M.schemeGraph({...state,artifactRuntime:{lastResult:'blocked'}},none);
+assert.equal(ge.nodes.find(n=>n.id==='evidence').level,'err');assert.equal(ge.edges.find(e=>e.from==='visual'&&e.to==='evidence').kind,'idle');
+assert.equal(g.nodes.find(n=>n.id==='evidence').level,'none');
+const gv=M.schemeGraph({...state,cards:[...state.cards.filter(c=>c.id!=='visual'),{id:'visual',level:'ok'}],artifactRuntime:{lastResult:'verified'}},none);
+assert.equal(gv.edges.find(e=>e.from==='evidence'&&e.to==='publications').kind,'flow');
+const links=M.nodeLinks(ge.nodes.find(n=>n.id==='rostok'),{tasks:[{id:'r1',title:'x',status:'OPEN',project:'rostok'},{id:'o1',title:'y',status:'OPEN',project:'rko'},{id:'d1',title:'z',status:'DONE',project:'rostok'}],events:[],state});
+assert.deepEqual(links.tasks.map(t=>t.id),['r1']);
+const calLinks=M.nodeLinks(ge.nodes.find(n=>n.id==='calendar'),{tasks:[],events:publicCal.events,state,now});
+assert.equal(calLinks.events.length,1);
+console.log('PASS: display redaction, layer states and evidence node are honest');

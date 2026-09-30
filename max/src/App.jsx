@@ -22,7 +22,9 @@ function ThemeIcon({setting}){
 }
 function RefreshIcon(){return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>;}
 
-// Защищённый слой. Приватного канала пока нет — возвращаем «не подключён», без имитации синхронизации.
+// Рабочий слой. Приватного канала (задачи целиком, карточки входящих) пока нет — честное «не подключён», без имитации.
+// Календарь и безопасный срез задач приходят публичными проекциями; их состояние выводится из режима загрузки:
+// SYNCING при первой загрузке, OFFLINE при потере связи с кэшем на устройстве, ERROR если живой источник не дал проекцию.
 // Только в режиме разработки можно подставить тестовый снимок через window.__SHTAB_PRIVATE__ (в сборку не попадает).
 function usePrivate(s){
  return useMemo(()=>{
@@ -34,19 +36,21 @@ function usePrivate(s){
   const inboxSummary=M.fromInboxSummary(s?.inboxSummary);
   const hasPrivateTasks=(base.taskSource||base.source).state!==M.SOURCE.NOT_CONNECTED;
   const hasPrivateInbox=(base.inboxSource||base.source).state!==M.SOURCE.NOT_CONNECTED;
+  const calendarSource=M.layerSource(s,cal,{origin:s?.calendarOrigin,missingReason:null});
+  const taskSource=hasPrivateTasks?(base.taskSource||base.source):M.layerSource(s,pubTasks,{origin:s?.mode==='offline'?'cache':null,missingReason:'Безопасный срез задач в телеметрии не найден. '+M.PRIVATE_REASON});
   return {
    ...base,
-   calendarSource:cal?.source||base.calendarSource||base.source,
+   calendarSource,
    events:cal?.events||base.events,
-   taskSource:hasPrivateTasks?(base.taskSource||base.source):(pubTasks?.source||base.taskSource||base.source),
+   taskSource,
    tasks:hasPrivateTasks?base.tasks:(pubTasks?.tasks||base.tasks),
    taskMeta:hasPrivateTasks?{partial:false}:(pubTasks?.meta||{partial:true}),
    inboxSource:base.inboxSource||base.source,
-   inboxSummarySource:inboxSummary?.source||null,
+   inboxSummarySource:inboxSummary?M.layerSource(s,inboxSummary,{origin:s?.mode==='offline'?'cache':null}):null,
    inboxSummary:inboxSummary||null,
    inbox:hasPrivateInbox?base.inbox:base.inbox
   };
- },[s?.calendar,s?.taskSummary,s?.inboxSummary]);
+ },[s?.mode,s?.calendar,s?.calendarOrigin,s?.taskSummary,s?.inboxSummary]);
 }
 function findProject(id){const f=l=>{for(const x of l){if(x.id===id)return x;const r=x.children&&f(x.children);if(r)return r;}return null;};return id?f(projectTree):null;}
 
@@ -100,7 +104,7 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
   if(sheet.kind==='event'){const e=priv.events.find(x=>x.id===sheet.id);if(e)sheetView=<Sheet title={e.title} onClose={closeSheet}><EventSheet e={e}/></Sheet>;}
   else if(sheet.kind==='task'){const t=tasks.find(x=>x.id===sheet.id);if(t)sheetView=<Sheet title={t.title} onClose={closeSheet}><TaskSheet t={t} changeTask={changeTask}/></Sheet>;}
   else if(sheet.kind==='project')sheetView=<Sheet title="Направление" onClose={closeSheet}><ProjectPicker path={pickerPath} setPath={setPickerPath} project={project} pick={p=>{haptic('select');setProject(p);setSheet(null);}}/></Sheet>;
-  else if(sheet.kind==='node'){const n=graph.nodes.find(x=>x.id===sheet.id);if(n)sheetView=<Sheet title={n.title} onClose={closeSheet}><NodeSheet n={n} asOf={graph.asOf} navigate={navigate}/></Sheet>;}
+  else if(sheet.kind==='node'){const n=graph.nodes.find(x=>x.id===sheet.id);if(n)sheetView=<Sheet title={n.title} onClose={closeSheet}><NodeSheet n={n} asOf={graph.asOf} navigate={navigate} links={M.nodeLinks(n,{tasks,events:priv.events,state:s})} openSheet={openSheet}/></Sheet>;}
   else if(sheet.kind==='inbox'){const x=priv.inbox.find(i=>i.id===sheet.id);if(x)sheetView=<Sheet title={x.summary||x.type} onClose={closeSheet}><InboxSheet x={x}/></Sheet>;}
  }
 

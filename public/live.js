@@ -104,7 +104,7 @@ function explainWorkflow(row,w){return {level:row[1],key:'wf:'+(w.id||w.name),ti
 export function offlineState(){
  return {mode:'offline',source:null,asOf:null,ageSeconds:null,ttlSeconds:120,cached:false,
   verdict:{level:'wait',text:'Нет связи с источником'},notice:{level:'wait',text:'Нет связи с источником состояния. Проверьте сеть и повторите'},
-  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,taskSummary:null,inboxSummary:null,calendar:null,workflows:[],projects:[],cards:[],
+  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,taskSummary:null,inboxSummary:null,calendar:null,calendarOrigin:null,workflows:[],projects:[],cards:[],
   focus:[],
   systems:[['Обновление данных','wait','Нет связи с источником состояния']],
   events:[['Сейчас','Состояние штаба недоступно: нет связи с источником','wait']],
@@ -274,20 +274,21 @@ function finish(raw,source,now,offline){
 }
 
 // Главная функция: возвращает экранное состояние в одном из режимов live / stale / offline.
+// calendarOrigin: откуда взята проекция календаря — 'telemetry-calendar' / 'main-calendar' (получена сейчас), 'cache' (последний снимок на устройстве), null (нет).
 export async function loadState(now=Date.now()){
  const [hit,calendarHit]=await Promise.all([fetchLive(),fetchCalendar()]);
- let calendar=calendarHit?.raw||null;
+ let calendar=calendarHit?.raw||null,calendarOrigin=calendarHit?.source||null;
  if(calendarHit)writeCalendarCache(calendarHit.raw,calendarHit.source);
- if(!calendar)calendar=readCalendarCache()?.raw||null;
- if(hit){writeCache(hit.raw,hit.source);const state=finish(hit.raw,hit.source,now,false);state.calendar=calendar;return state;}
+ if(!calendar){const cc=readCalendarCache();if(cc){calendar=cc.raw;calendarOrigin='cache';}}
+ if(hit){writeCache(hit.raw,hit.source);const state=finish(hit.raw,hit.source,now,false);state.calendar=calendar;state.calendarOrigin=calendarOrigin;return state;}
  const c=readCache();
- if(c){const state=finish(c.raw,c.source,now,true);state.calendar=calendar;return state;}
- const state=offlineState();state.calendar=calendar;return state;
+ if(c){const state=finish(c.raw,c.source,now,true);state.calendar=calendar;state.calendarOrigin=calendarOrigin;return state;}
+ const state=offlineState();state.calendar=calendar;state.calendarOrigin=calendarOrigin;return state;
 }
 // Мгновенное состояние из кэша для первой отрисовки, пока идёт запрос.
 export function cachedState(now=Date.now()){
  const c=readCache();if(!c)return null;
- const state=finish(c.raw,c.source,now,true);state.calendar=readCalendarCache()?.raw||null;return state;
+ const state=finish(c.raw,c.source,now,true);const cc=readCalendarCache();state.calendar=cc?.raw||null;state.calendarOrigin=cc?'cache':null;return state;
 }
 
 // Авто-обновление: сразу, по таймеру, при возврате на экран и при появлении сети.

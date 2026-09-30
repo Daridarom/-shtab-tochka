@@ -137,6 +137,7 @@ function EventItem({e,onOpen,big}){
    <small>{[k.title,e.project&&projectName(e.project),fmt,e.location].filter(Boolean).join(' · ')}</small>
    {w.endNote&&<small className="muted2">{w.endNote}</small>}
    {!k.presence&&<small className="muted2">{e.kind==='payment'?'Финансовое событие · не встреча':'Без личного присутствия'}</small>}
+   {e.redacted&&<small className="muted2">Часть названия скрыта: суммы и адреса в общий ЦУП не выводятся</small>}
   </div>
  </button>;
 }
@@ -148,7 +149,9 @@ export function EventSheet({e}){
   {e.allDay&&e.endConfirmed&&<Field k="До">{M.dayTitle(M.dayKey(Date.parse(e.end)-86400000))}</Field>}
   {k.presence&&!e.allDay&&<Field k="Окончание">{w.end||'Окончание не указано'}</Field>}
   <Field k="Проект">{e.project&&projectName(e.project)}</Field>
+  {k.presence&&<Field k="Формат">{M.eventFormat(e)||'Не указан в источнике'}</Field>}
   <Field k="Место">{e.location}</Field>
+  {e.redacted&&<Field k="Защита">Суммы, адреса, телефоны и ссылки из названия скрыты на экране. Их не должно быть и в публичной проекции — это задача коллектора.</Field>}
   {e.joinUrl&&<button type="button" className="primary" onClick={()=>{haptic('light');openExternal(e.joinUrl);}}>Подключиться</button>}
   <p className="empty">Перенос задачи не переносит встречу. Изменение события делается отдельно, в самом календаре.</p>
  </>;
@@ -163,19 +166,21 @@ export function Today({s,priv,go,openSheet,age}){
  // Возраст считаем так же, как в шапке, чтобы строки не расходились.
  const tel={...M.telemetrySource(s),ageSeconds:age??s.ageSeconds??null};
  const calOn=cal.state!==M.SOURCE.NOT_CONNECTED;
+ const dayLabel=M.dayTitle(todayKey);
  return <div className="home">
-  <OperationalPicture s={s} priv={priv} age={age}/>
-  <Card title="Ближайшее событие" className="span2 hero">
-   {next?<EventItem e={next} big onOpen={id=>openSheet({kind:'event',id})}/>:<div className="heroEmpty"><b>{calOn&&M.confirmsAbsence(cal)?'Сегодня больше событий нет':'Нет подтверждённых событий'}</b><small>{M.sourceNote('Календарь',cal)}</small></div>}
+  <Card title="Ближайшее событие" aside={dayLabel} className="span2 hero">
+   {next?<EventItem e={next} big onOpen={id=>openSheet({kind:'event',id})}/>:<div className="heroEmpty"><b>{calOn&&M.confirmsAbsence(cal)?'Подтверждённых событий впереди нет':'Нет подтверждённых событий'}</b><small>{M.sourceNote('Календарь',cal)}</small></div>}
    <button type="button" className="ghost" onClick={()=>go('calendar')}>Открыть календарь</button>
   </Card>
   <Card title="Главные действия" aside={actions.length?String(actions.length):''} className="span2">
-   {actions.length?actions.map((t,i)=><button type="button" className="action" key={t.id} onClick={()=>{haptic('select');openSheet({kind:'task',id:t.id});}}><span className="num">{i+1}</span><div><b>{t.title}</b><small>{[t.project&&projectName(t.project),M.statusTitle(t.status),t.deadline&&'срок '+t.deadline].filter(Boolean).join(' · ')}</small></div></button>)
-    :<Empty text={taskSrc.state===M.SOURCE.NOT_CONNECTED?'Реестр задач к экрану не подключён — главные действия появятся после подключения защищённого канала.':priv.taskMeta?.partial?'В безопасном срезе сейчас нет активных действий. Полный приватный реестр ещё не подключён.':'Открытых задач с приоритетом нет по данным реестра.'}/>}
-   {priv.taskMeta?.partial&&<small className="since">Безопасный срез задач · чувствительные и приватные направления здесь не публикуются.</small>}
+   {actions.length?actions.map((t,i)=><button type="button" className="action" key={t.id} onClick={()=>{haptic('select');openSheet({kind:'task',id:t.id});}}><span className="num">{i+1}</span><div><b>{t.title}</b><small>{[t.project&&projectName(t.project),M.statusTitle(t.status),t.priority&&M.priorityTitle(t.priority),t.deadline&&'срок '+t.deadline].filter(Boolean).join(' · ')}</small></div></button>)
+    :<Empty text={taskSrc.state===M.SOURCE.NOT_CONNECTED?'Реестр задач к экрану не подключён — главные действия появятся после подключения защищённого канала.':taskSrc.state===M.SOURCE.SYNCING?'Получаем срез задач…':priv.taskMeta?.partial?'В безопасном срезе сейчас нет активных действий. Полный приватный реестр ещё не подключён.':'Открытых задач с приоритетом нет по данным реестра.'}/>}
+   {priv.taskMeta?.partial&&actions.length>0&&<small className="since">Безопасный срез задач · чувствительные и приватные направления здесь не публикуются.</small>}
+   <button type="button" className="ghost" onClick={()=>go('projects')}>Все задачи</button>
   </Card>
-  {calOn&&<Card title="Дальше сегодня" aside={later.length?String(later.length):''}>{later.length?later.map(e=><EventItem key={e.id} e={e} onOpen={id=>openSheet({kind:'event',id})}/>):<Empty text={M.emptyDayText(cal)}/>}</Card>}
+  {calOn&&<Card title="Дальше сегодня" aside={later.length?String(later.length):''} className="span2">{later.length?later.map(e=><EventItem key={e.id} e={e} onOpen={id=>openSheet({kind:'event',id})}/>):<Empty text={next&&M.dayKey(next.start)===todayKey?(M.confirmsAbsence(cal)?'Больше событий сегодня нет':'Других подтверждённых событий на сегодня нет'):M.emptyDayText(cal)}/>}</Card>}
   <Signals s={s} className="span2"/>
+  <OperationalPicture s={s} priv={priv} age={age}/>
   <Card title="Источники данных" className="span2">
    <SourceLine name="Состояние Штаба" src={tel}/>
    <SourceLine name="Календарь" src={cal} compact/>
@@ -201,7 +206,7 @@ export function CalendarScreen({priv,openSheet,store}){
    <SourceLine name="Календарь" src={src}/>
    <div className="weekNav"><button type="button" onClick={()=>move(-1)} aria-label="Предыдущая неделя">‹</button><b>{new Date(week[0].ts).toLocaleDateString('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'short'})} — {new Date(week[6].ts).toLocaleDateString('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'short'})}</b><button type="button" onClick={()=>move(1)} aria-label="Следующая неделя">›</button></div>
    <div className="week">{week.map(d=><button type="button" key={d.key} className={'day'+(d.key===sel?' active':'')+(d.key===todayKey?' today':'')} onClick={()=>{haptic('select');setSel(d.key);}} aria-pressed={d.key===sel}><small>{d.wd}</small><b>{d.num}</b><i>{counts[d.key]?'•'.repeat(Math.min(3,counts[d.key])):''}</i></button>)}</div>
-   {shift!==0&&<button type="button" className="ghost" onClick={()=>{haptic('select');setShift(0);setSel(todayKey);}}>К сегодняшнему дню</button>}
+   {(shift!==0||sel!==todayKey)&&<button type="button" className="ghost" onClick={()=>{haptic('select');setShift(0);setSel(todayKey);}}>К сегодняшнему дню</button>}
   </Card>
   <Card title={M.dayTitle(sel)} aside={list.length?String(list.length):''} className="span2">
    {list.length?list.map(e=><EventItem key={e.id} e={e} onOpen={id=>openSheet({kind:'event',id})}/>):<Empty text={M.emptyDayText(src)}/>}
@@ -294,12 +299,15 @@ export function SchemeCard({graph,selected,onSelect}){
  return <Card title="Живая схема Штаба" aside={graph.known?(c.err?c.err+' ошибк'+(c.err===1?'а':'и'):c.wait?c.wait+' с вниманием':'связи штатно'):'нет данных'} className="span2 hud schemeCard">
   <div className="schemeWrap" onClick={onClick} onKeyDown={onKey} dangerouslySetInnerHTML={{__html:html}}/>
   <div className="legend"><span><i className="dot ok"/>штатно · {c.ok}</span><span><i className="dot wait"/>внимание · {c.wait}</span><span><i className="dot err"/>ошибка · {c.err}</span><span><i className="dot none"/>не подтверждено · {c.none}</span></div>
-  <small className="since">{graph.known?'Импульс идёт только по работающим участкам свежего снимка. Нажми на узел — откроется его карточка.':'Состояние узлов не подтверждено: нет свежего снимка.'}</small>
+  <small className="since">{graph.known?'Маршрут: MAX / Telegram → Штаб → контуры → Росток → генерация → проверка → публикации. Импульс идёт только по работающим участкам свежего снимка; пунктир — где процесс остановился. Нажми на узел — откроется его карточка.':'Состояние узлов не подтверждено: нет свежего снимка.'}</small>
  </Card>;
 }
 const NAV={calendar:['calendar','Открыть календарь'],projects:['projects','Открыть проекты'],documents:['documents','Открыть документы'],workflows:['workflows','Открыть процессы'],rostok:['rostok','Открыть проект'],inbox:['inbox','Открыть входящие']};
-export function NodeSheet({n,asOf,navigate}){
+export function NodeSheet({n,asOf,navigate,links,openSheet}){
  const nav=n.nav&&NAV[n.nav];
+ const L=links||{tasks:[],events:[],documents:null};
+ const openTask=id=>openSheet&&openSheet({kind:'task',id});
+ const openEvent=id=>openSheet&&openSheet({kind:'event',id});
  return <>
   <div className={'nodeState '+n.level}><span className={'dot '+n.level}/><b>{M.levelLabel(n.level)}</b>{n.stale&&<Chip tone="wait">последний снимок</Chip>}</div>
   <Field k="Последнее обновление">{asOf&&n.level!=='none'?moscowTime(asOf,true)+' МСК':'не подтверждено'}</Field>
@@ -307,7 +315,10 @@ export function NodeSheet({n,asOf,navigate}){
   {n.issue&&<Field k="Проблема">{n.issue.text}</Field>}
   {n.issue?.action&&<Field k="Следующее действие"><span className="act">{n.issue.action}</span></Field>}
   <Field k="Связанные проекты">{n.related.join(' · ')}</Field>
-  <Field k="Задачи и документы">Связи узла с задачами и документами появятся после подключения приватного реестра</Field>
+  {L.tasks.length>0&&<div className="field"><small>Связанные задачи · {L.tasks.length}</small><div className="linkList">{L.tasks.slice(0,5).map(t=><button type="button" key={t.id} className="linkRow" onClick={()=>{haptic('select');openTask(t.id);}}><span className={'dot st-'+M.columnOf(t.status)}/><div><b>{t.title}</b><small>{[t.project&&projectName(t.project),M.statusTitle(t.status)].filter(Boolean).join(' · ')}</small></div></button>)}{L.tasks.length>5&&<small className="muted2">и ещё {L.tasks.length-5} · открой «Проекты»</small>}</div></div>}
+  {L.events.length>0&&<div className="field"><small>Ближайшие события · {L.events.length}</small><div className="linkList">{L.events.slice(0,4).map(e=><button type="button" key={e.id} className="linkRow" onClick={()=>{haptic('select');openEvent(e.id);}}><span className="dot none"/><div><b>{e.title}</b><small>{M.dayTitle(M.dayKey(e.start))} · {M.eventWhen(e).start}</small></div></button>)}</div></div>}
+  {L.documents!=null&&<Field k="Связанные документы">{L.documents}</Field>}
+  {L.tasks.length===0&&L.events.length===0&&L.documents==null&&<Field k="Задачи и документы">{n.id==='calendar'?'На ближайшую неделю подтверждённых событий нет или календарь не отвечает':'Связей с задачами и документами в безопасном срезе нет; полный приватный реестр к схеме не подключён'}</Field>}
   {nav&&<button type="button" className="primary" onClick={()=>navigate(nav[0])}>{nav[1]}</button>}
  </>;
 }
