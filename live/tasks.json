@@ -1,0 +1,113 @@
+{
+  "schema": "tasks-public-1",
+  "generated_at": "2026-09-30T05:50:00Z",
+  "ttl_seconds": 7200,
+  "authority": "project TASKS · direct Google Drive read",
+  "partial": true,
+  "scope": [
+    "kinouroki",
+    "privet-planeta",
+    "media-factory",
+    "reo-crimea",
+    "rko",
+    "ai-radar"
+  ],
+  "sources": [
+    {
+      "project": "kinouroki",
+      "title": "TASKS — Киноуроки",
+      "source_modified_at": "2026-09-11T09:35:33.696Z",
+      "verified_at": "2026-09-30T05:50:00Z",
+      "active_count": 0,
+      "note": "CURRENT требует подтверждения Алексея; RECENT DIRECTIONS не активируются автоматически"
+    },
+    {
+      "project": "privet-planeta",
+      "title": "TASKS — Привет, планета",
+      "source_modified_at": "2026-09-29T20:25:20.312Z",
+      "verified_at": "2026-09-30T05:50:00Z",
+      "active_count": 1,
+      "note": "Верхний блок АКТУАЛЬНО 29.09 прочитан напрямую из Drive"
+    },
+    {
+      "project": "media-factory",
+      "title": "TASKS — Медиа и Точка притяжения",
+      "source_modified_at": "2026-09-14T19:46:34.198Z",
+      "verified_at": "2026-09-30T05:50:00Z",
+      "active_count": 0,
+      "note": "CURRENT: активной общей задачи нет"
+    },
+    {
+      "project": "reo-crimea",
+      "title": "TASKS — РЭО Крым",
+      "source_modified_at": "2026-09-23T17:36:40.053Z",
+      "verified_at": "2026-09-30T05:50:00Z",
+      "active_count": 1,
+      "note": "Следующий шаг прочитан напрямую из Drive"
+    },
+    {
+      "project": "rko",
+      "title": "TASKS — РКО",
+      "source_modified_at": "2026-09-11T09:35:33.700Z",
+      "verified_at": "2026-09-30T05:50:00Z",
+      "active_count": 2,
+      "note": "CURRENT + NEXT прочитаны напрямую из Drive"
+    },
+    {
+      "project": "ai-radar",
+      "title": "TASKS — AI Radar",
+      "source_modified_at": "2026-09-15T10:43:38.420Z",
+      "verified_at": "2026-09-30T05:50:00Z",
+      "active_count": 0,
+      "note": "RECURRING_RECORDED не включён в главные действия"
+    }
+  ],
+  "items": [
+    {
+      "id": "task-pp-skill-artifact-001",
+      "project": "privet-planeta",
+      "title": "Перевести публикационный контур Ростка на Task → Skill → Artifact → Evidence без создания новых ботов.",
+      "status": "NEEDS_REVIEW",
+      "priority": "do",
+      "deadline": null,
+      "fresh": true,
+      "verified_at": "2026-09-30T05:50:00Z"
+    },
+    {
+      "id": "task-reo-feedback",
+      "project": "reo-crimea",
+      "title": "Зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
+      "status": "OPEN",
+      "priority": "schedule",
+      "deadline": null,
+      "fresh": true,
+      "verified_at": "2026-09-30T05:50:00Z"
+    },
+    {
+      "id": "task-rko-library-transfer",
+      "project": "rko",
+      "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
+      "status": "OPEN",
+      "priority": "schedule",
+      "deadline": null,
+      "fresh": true,
+      "verified_at": "2026-09-30T05:50:00Z"
+    },
+    {
+      "id": "task-rko-kerch-roadmap",
+      "project": "rko",
+      "title": "Сформировать рабочую дорожную карту штаба РКО в Керчи по отдельному поручению Алексея.",
+      "status": "PROPOSED",
+      "priority": null,
+      "deadline": null,
+      "fresh": true,
+      "verified_at": "2026-09-30T05:50:00Z"
+    }
+  ],
+  "proposal_count": 1,
+  "today_complete": false,
+  "stale_rows": 0,
+  "missing_sources": [
+    "ai-shtab-os"
+  ]
+}
