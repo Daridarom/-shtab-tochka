@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T21:01:23.155134+00:00",
+  "generated_at": "2026-09-30T21:02:28.160441+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,8 +36,8 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "ok",
-      "detail": "Облачная копия индекса задач актуальна"
+      "level": "warn",
+      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
     },
     {
       "id": "reliability",
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 13 с назад"
+      "detail": "Ожидают: 0 · проверка связи 10 с назад"
     },
     {
       "id": "rostok",
@@ -98,7 +98,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-09-30T20:31:20.560451+00:00",
+    "generated_at": "2026-09-30T21:01:40.358040+00:00",
     "ttl_seconds": 3600,
     "authority": "project TASKS",
     "partial": true,
@@ -119,8 +119,8 @@
         "title": "PP-SKILL-ARTIFACT-001 — перевести публикационный контур Ростка на Task → Skill → Artifact → Evidence без создания новых ботов. Риск: важное.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T07:50:43.457564+00:00"
+        "fresh": true,
+        "verified_at": "2026-09-30T21:01:24.511562+00:00"
       },
       {
         "id": "1c15addefda0eb69",
@@ -129,7 +129,7 @@
         "status": "OPEN",
         "deadline": null,
         "fresh": true,
-        "verified_at": "2026-09-30T15:55:24.565544+00:00"
+        "verified_at": "2026-09-30T21:01:25.648580+00:00"
       },
       {
         "id": "b81adc0557635c18",
@@ -138,7 +138,7 @@
         "status": "OPEN",
         "deadline": null,
         "fresh": true,
-        "verified_at": "2026-09-30T15:55:24.565544+00:00"
+        "verified_at": "2026-09-30T21:01:25.648580+00:00"
       },
       {
         "id": "54c68a998766e1ba",
@@ -146,8 +146,8 @@
         "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T07:50:50.763896+00:00"
+        "fresh": true,
+        "verified_at": "2026-09-30T21:01:31.802535+00:00"
       },
       {
         "id": "6a091c0f0d8d08b2",
@@ -155,26 +155,18 @@
         "title": "Следующий шаг: зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T06:33:51.136718+00:00"
+        "fresh": true,
+        "verified_at": "2026-09-30T21:01:35.774461+00:00"
       }
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 4,
-    "missing_sources": [
-      "ai-radar",
-      "h45",
-      "kinouroki",
-      "media",
-      "rostok",
-      "reo",
-      "rko"
-    ]
+    "stale_rows": 0,
+    "missing_sources": []
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T21:01:23.155134+00:00",
+    "generated_at": "2026-09-30T21:02:28.160441+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
