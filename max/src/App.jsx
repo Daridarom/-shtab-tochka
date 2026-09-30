@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState,useCallback,useMemo} from 'react';
 import {Panel,Typography} from '@maxhub/max-ui';
-import {startLive,describeMode,ageLabel,moscowTime} from '../../public/live.js';
+import {startLive,moscowTime} from '../../public/live.js';
 import {normalizeMaxState} from '../../public/section-state.js';
 import {projectTree} from '../../public/projects.js';
 import * as M from '../../public/model.js';
