@@ -1,31 +1,31 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-27T13:25:12.137946+00:00",
+  "generated_at": "2026-09-30T07:12:29.063823+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
       "id": "system",
       "title": "Система",
       "level": "ok",
-      "detail": "Канал управления: работает · процессы: работает · свободно 211.1 ГБ"
+      "detail": "Канал управления: работает · процессы: работает · свободно 189.2 ГБ"
     },
     {
       "id": "visual",
-      "title": "Ошибки визуала",
-      "level": "ok",
-      "detail": "0 сервисов в состоянии ошибки"
+      "title": "Визуалы",
+      "level": "warn",
+      "detail": "2 задания ожидают возобновления генератора"
     },
     {
       "id": "telegram",
       "title": "Telegram",
       "level": "ok",
-      "detail": "Получатель: работает · записей: 10"
+      "detail": "Получатель: работает · записей: 12"
     },
     {
       "id": "max",
       "title": "MAX",
       "level": "ok",
-      "detail": "Получатель: работает · записей: 504"
+      "detail": "Получатель: работает · записей: 537"
     },
     {
       "id": "drive",
@@ -34,16 +34,22 @@
       "detail": "Контекст проверен"
     },
     {
+      "id": "task_index",
+      "title": "Индекс задач",
+      "level": "warn",
+      "detail": "Облачный срез обновлён · 7 проектных источников проверено · 3 источника требуют подключения"
+    },
+    {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+      "level": "warn",
+      "detail": "Ожидают: 0 · проверка связи 23 с назад"
     },
     {
       "id": "rostok",
       "title": "Росток",
       "level": "ok",
-      "detail": "Сегодня: 2 из 4 · в очереди: 2 · следующий слот: сегодня 18:00 · всего опубликовано: 51 · готово: 6 · согласование: 1 · заблокировано: 41"
+      "detail": "Сегодня: 1 из 4 · в очереди: 0 · следующий слот: сегодня 13:00 · всего опубликовано: 61 · ожидают изображения: 6 · согласование: 1 · заблокировано: 63"
     },
     {
       "id": "publications",
@@ -78,14 +84,107 @@
       "last_status": "success"
     }
   ],
-  "failed_visual_count": 0,
+  "task_summary": {
+    "schema": "tasks-public-1",
+    "generated_at": "2026-09-30T07:12:39Z",
+    "ttl_seconds": 7200,
+    "authority": "project TASKS",
+    "partial": true,
+    "scope": [
+      "privet-planeta",
+      "alexblagov",
+      "reo-crimea",
+      "rko",
+      "kinouroki",
+      "horizon45",
+      "media-point"
+    ],
+    "items": [
+      {
+        "id": "task-pp-skill-artifact-001",
+        "project": "rostok",
+        "title": "Завершить независимую проверку нового контура Task → Skill → Artifact → Evidence на первом новом реальном выпуске.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": true,
+        "verified_at": "2026-09-30T07:12:39Z"
+      },
+      {
+        "id": "task-ab-invest-20260917",
+        "project": "alexander",
+        "title": "Подготовить первый черновик инвестпредложения по земельным проектам: состав сценариев, подтверждённые исходные данные и перечень недостающей информации.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": true,
+        "verified_at": "2026-09-30T07:12:39Z"
+      },
+      {
+        "id": "task-ab-book-001",
+        "project": "alexander",
+        "title": "Установить подтверждённый локальный путь исходника книги либо создать проверенную штатную копию; затем сделать пробную карту смысла одной главы.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": true,
+        "verified_at": "2026-09-30T07:12:39Z"
+      },
+      {
+        "id": "task-reo-community-20260923",
+        "project": "reo",
+        "title": "Зафиксировать факт выступления РЭО Крым и обратную связь; после подтверждения сохранить итог и следующий результат.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": true,
+        "verified_at": "2026-09-30T07:12:39Z"
+      },
+      {
+        "id": "task-rko-library-check",
+        "project": "rko",
+        "title": "После завершения переноса электронной библиотеки проверить результат без повторной загрузки дублей.",
+        "status": "WAITING",
+        "deadline": null,
+        "fresh": true,
+        "verified_at": "2026-09-30T07:12:39Z"
+      }
+    ],
+    "proposal_count": 0,
+    "today_complete": false,
+    "stale_rows": 0,
+    "missing_sources": [
+      "ai-radar",
+      "ai-shtab-os",
+      "media-factory"
+    ]
+  },
+  "inbox_summary": {
+    "schema": "inbox-summary-1",
+    "generated_at": "2026-09-30T07:12:29.063823+00:00",
+    "ttl_seconds": 120,
+    "channels": {
+      "telegram": {
+        "read_ok": true,
+        "total": 12,
+        "last_24h": 1,
+        "last_message_at": "2026-09-29T20:33:34+00:00",
+        "attention_count": 0
+      },
+      "max": {
+        "read_ok": true,
+        "total": 537,
+        "last_24h": 17,
+        "last_message_at": "2026-09-30T06:35:12.658420+00:00",
+        "attention_count": 19
+      }
+    },
+    "detail_available": false
+  },
+  "failed_visual_count": 2,
   "rostok": {
-    "published_today": 2,
+    "published_today": 1,
     "daily_limit": 4,
     "unresolved": 0,
-    "next_slot": "2026-09-27T18:00+03:00",
-    "queue": 2,
-    "total_published": 51
+    "next_slot": "2026-09-30T13:00+03:00",
+    "queue": 0,
+    "total_published": 61
   },
   "publication_unresolved": 0,
   "publication_delivery_errors": 0
