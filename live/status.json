@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T12:45:48.194633+00:00",
+  "generated_at": "2026-09-30T12:46:54.165236+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -25,7 +25,7 @@
       "id": "max",
       "title": "MAX",
       "level": "ok",
-      "detail": "Получатель: работает · записей: 571"
+      "detail": "Получатель: работает · записей: 572"
     },
     {
       "id": "drive",
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 16 с назад"
+      "detail": "Ожидают: 0 · проверка связи 17 с назад"
     },
     {
       "id": "rostok",
@@ -169,7 +169,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T12:45:48.194633+00:00",
+    "generated_at": "2026-09-30T12:46:54.165236+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
@@ -181,9 +181,9 @@
       },
       "max": {
         "read_ok": true,
-        "total": 571,
-        "last_24h": 38,
-        "last_message_at": "2026-09-30T12:41:06.766574+00:00",
+        "total": 572,
+        "last_24h": 39,
+        "last_message_at": "2026-09-30T12:46:12.518826+00:00",
         "attention_count": 19
       }
     },
