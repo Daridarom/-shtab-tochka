@@ -34,6 +34,51 @@ export function telemetrySource(s){
  return {state:map[s.mode]||SOURCE.ERROR,ageSeconds:s.ageSeconds??null,asOf:s.asOf??null};
 }
 
+// Сводная свежесть рабочего ЦУП. В отличие от шапки телеметрии,
+// здесь учитываются все четыре независимых источника, которые видит пользователь:
+// состояние Штаба, календарь, задачи и безопасный агрегат входящих.
+export function operationalFreshness(s={},priv={},telemetryAgeSeconds=null){
+ const tel={...telemetrySource(s),ageSeconds:telemetryAgeSeconds??s?.ageSeconds??null};
+ const fallback={state:SOURCE.NOT_CONNECTED,ageSeconds:null,asOf:null};
+ const cal=priv.calendarSource||priv.source||fallback;
+ const tasks=priv.taskSource||priv.source||fallback;
+ const inbox=priv.inboxSummarySource||priv.inboxSource||priv.source||fallback;
+ const sources=[
+  {id:'hq',name:'Штаб',src:tel},
+  {id:'calendar',name:'Календарь',src:cal},
+  {id:'tasks',name:'Задачи',src:tasks},
+  {id:'inbox',name:'Входящие',src:inbox}
+ ];
+ const connected=sources.filter(x=>x.src&&x.src.state!==SOURCE.NOT_CONNECTED);
+ const fresh=sources.filter(x=>x.src?.state===SOURCE.LIVE);
+ const failed=sources.filter(x=>[SOURCE.ERROR,SOURCE.OFFLINE].includes(x.src?.state));
+ const stale=sources.filter(x=>x.src?.state===SOURCE.STALE);
+ const syncing=sources.filter(x=>x.src?.state===SOURCE.SYNCING);
+ let state=SOURCE.LIVE;
+ if(failed.length)state=SOURCE.ERROR;
+ else if(fresh.length!==sources.length)state=stale.length||connected.length<sources.length?SOURCE.STALE:(syncing.length?SOURCE.SYNCING:SOURCE.STALE);
+ const label=state===SOURCE.LIVE
+  ?'Все 4 источника свежие'
+  :fresh.length+' из '+sources.length+' источников свежие';
+ const problemSources=sources.filter(x=>x.src?.state!==SOURCE.LIVE);
+ const detail=problemSources.length
+  ?problemSources.map(x=>sourceNote(x.name,x.src)).join(' · ')
+  :'Все рабочие источники подтверждены свежими';
+ return {state,label,total:sources.length,connected:connected.length,fresh:fresh.length,failed:failed.length,stale:stale.length,detail,sources};
+}
+
+// Отдельное состояние доказательства конечного результата.
+// Успех технического процесса не равен подтверждённой доставке результата.
+export function resultEvidence(s={}){
+ if(!['live','stale'].includes(s.mode))return {level:'none',label:'Нет данных',detail:'Подтверждение результата не получено'};
+ const card=(s.cards||[]).find(x=>x.id==='publications');
+ if(!card)return {level:'none',label:'Нет данных',detail:'Контур подтверждения доставки не измеряется'};
+ if(card.level==='err')return {level:'err',label:'Не подтверждено',detail:card.detail||'Доставка результата требует проверки'};
+ if(card.level==='wait')return {level:'wait',label:'Требует проверки',detail:card.detail||'Подтверждение результата не завершено'};
+ if(card.level==='ok')return {level:'ok',label:'Подтверждено',detail:card.detail||'Доставка результата подтверждена'};
+ return {level:'none',label:'Нет данных',detail:'Статус подтверждения неизвестен'};
+}
+
 // ---------- защищённый слой ----------
 // Сейчас приватного канала к ЦУП нет: возвращаем честное «не подключён», ничего не симулируем.
 // Когда канал появится, он должен вернуть снимок {schema:'private-1',generated_at,ttl_seconds,events[],tasks[],inbox[]}.
