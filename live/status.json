@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T06:39:46.126616+00:00",
+  "generated_at": "2026-09-30T06:40:50.786295+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -42,14 +42,14 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 13 с назад"
+      "level": "warn",
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
       "title": "Росток",
-      "level": "warn",
-      "detail": "Очередь: нет данных · всего опубликовано: 60 · ожидают изображения: 6 · согласование: 1 · заблокировано: 60"
+      "level": "ok",
+      "detail": "Сегодня: 0 из 4 · в очереди: 1 · следующий слот: сегодня 13:00 · всего опубликовано: 60 · ожидают изображения: 6 · согласование: 1 · заблокировано: 60"
     },
     {
       "id": "publications",
@@ -122,7 +122,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T06:39:46.126616+00:00",
+    "generated_at": "2026-09-30T06:40:50.786295+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
@@ -144,11 +144,11 @@
   },
   "failed_visual_count": 2,
   "rostok": {
-    "published_today": null,
-    "daily_limit": null,
-    "unresolved": null,
-    "next_slot": null,
-    "queue": 0,
+    "published_today": 0,
+    "daily_limit": 4,
+    "unresolved": 0,
+    "next_slot": "2026-09-30T13:00+03:00",
+    "queue": 1,
     "total_published": 60
   },
   "publication_unresolved": 0,
