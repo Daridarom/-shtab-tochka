@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T05:38:02.122104+00:00",
+  "generated_at": "2026-09-30T05:39:35.167795+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,14 +36,14 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "warn",
-      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
+      "level": "ok",
+      "detail": "Облачная копия индекса задач актуальна"
     },
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "warn",
-      "detail": "Ожидают: 0 · проверка связи 2 с назад"
+      "level": "ok",
+      "detail": "Ожидают: 0 · проверка связи 1 с назад"
     },
     {
       "id": "rostok",
@@ -125,7 +125,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T05:38:02.122104+00:00",
+    "generated_at": "2026-09-30T05:39:35.167795+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
