@@ -60,6 +60,23 @@ jobs:
           gen=$(grep -o '"generated_at": *"[^"]*"' /tmp/status.json | head -1 | sed 's/.*: *"//;s/"$//')
           age=$(( $(date +%s) - $(date -d "$gen" +%s) ))
           echo "TELEMETRY_AGE_SECONDS=$age"
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/status.json',encoding='utf-8'))
+          ts=data.get('task_summary')
+          if ts is not None:
+              assert ts.get('schema')=='tasks-public-1'
+              for item in ts.get('items') or []:
+                  assert set(item) <= {'id','project','title','status','deadline','fresh','verified_at'}, set(item)
+                  assert not any(k in item for k in ('source_url','url','links','owner_email','description'))
+          ins=data.get('inbox_summary')
+          if ins is not None:
+              assert ins.get('schema')=='inbox-summary-1'
+              for ch in (ins.get('channels') or {}).values():
+                  assert set(ch) <= {'read_ok','total','last_24h','last_message_at','attention_count'}, set(ch)
+                  assert not any(k in ch for k in ('messages','source_states','chat_id','user_id','text'))
+          print('SAFE_TASK_INBOX_PROJECTION=OK')
+          PY
 
       - name: Probe safe calendar projection
         shell: bash
