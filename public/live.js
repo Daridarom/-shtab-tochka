@@ -12,8 +12,13 @@ export const CALENDAR_URLS=[
  'https://raw.githubusercontent.com/Daridarom/shtab-tochka/telemetry/live/calendar.json',
  'https://raw.githubusercontent.com/Daridarom/shtab-tochka/main/live/calendar.json'
 ];
+export const TASK_URLS=[
+ 'https://raw.githubusercontent.com/Daridarom/shtab-tochka/telemetry/live/tasks.json',
+ 'https://raw.githubusercontent.com/Daridarom/shtab-tochka/main/live/tasks.json'
+];
 const CACHE_KEY='shtab.lastState.v1';
 const CALENDAR_CACHE_KEY='shtab.lastCalendar.v1';
+const TASK_CACHE_KEY='shtab.lastTasks.v1';
 
 // ---------- вспомогательное ----------
 export function level(x){return x==='error'?'err':x==='warn'||x==='unknown'?'wait':'ok';}
@@ -151,19 +156,40 @@ export async function fetchCalendar(urls=CALENDAR_URLS){
  }));
  return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
 }
+export async function fetchTasks(urls=TASK_URLS){
+ const hits=await Promise.all(urls.map(async url=>{
+  try{
+   const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});
+   if(!r.ok)return null;
+   const raw=normalizeTaskSummary(await r.json());
+   if(!raw)return null;
+   const ts=Date.parse(raw.generated_at);
+   return {raw,ts:Number.isFinite(ts)?ts:0,source:url.includes('/telemetry/')?'telemetry-tasks':'main-tasks'};
+  }catch(e){return null;}
+ }));
+ return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
+}
 
 export function normalizeTaskSummary(raw){
  if(!raw||raw.schema!=='tasks-public-1'||!raw.generated_at||!Array.isArray(raw.items))return null;
- const allowedStatus=new Set(['OPEN','IN_PROGRESS','WAITING','BLOCKED','DONE','PROPOSED','DEFERRED','HOLD','ON_HOLD']);
+ const allowedStatus=new Set(['OPEN','IN_PROGRESS','WAITING','BLOCKED','DONE','PROPOSED','NEEDS_REVIEW','DEFERRED','HOLD','ON_HOLD']);
+ const allowedPriority=new Set(['do','schedule','delegate','later']);
  const items=raw.items.map(x=>{
   if(!x||!x.id||!x.title)return null;
   const status=String(x.status||'OPEN').toUpperCase();
   return {id:String(x.id),title:short(x.title,240),status:allowedStatus.has(status)?status:'OPEN',
+   priority:allowedPriority.has(x.priority)?x.priority:null,
    deadline:x.deadline||null,project:x.project||null,owner:x.owner||null,fresh:x.fresh===true,verified_at:x.verified_at||null};
  }).filter(Boolean);
+ const sources=Array.isArray(raw.sources)?raw.sources.map(x=>{
+  if(!x||!x.project)return null;
+  return {project:String(x.project),title:short(x.title||'TASKS',120),source_modified_at:x.source_modified_at||null,
+   verified_at:x.verified_at||null,active_count:Number.isFinite(x.active_count)?Math.max(0,Math.trunc(x.active_count)):null,
+   note:short(x.note||'',220)};
+ }).filter(Boolean).slice(0,50):[];
  return {schema:'tasks-public-1',generated_at:raw.generated_at,ttl_seconds:raw.ttl_seconds||7200,
   authority:raw.authority||'project TASKS',partial:raw.partial!==false,scope:Array.isArray(raw.scope)?raw.scope:[],
-  items,proposal_count:Number.isFinite(raw.proposal_count)?raw.proposal_count:null,today_complete:raw.today_complete===true,
+  sources,items,proposal_count:Number.isFinite(raw.proposal_count)?raw.proposal_count:null,today_complete:raw.today_complete===true,
   stale_rows:Number.isFinite(raw.stale_rows)?raw.stale_rows:0,
   missing_sources:Array.isArray(raw.missing_sources)?raw.missing_sources.filter(x=>typeof x==='string').slice(0,50):[]};
 }
@@ -250,6 +276,8 @@ function readCache(){try{const j=JSON.parse(localStorage.getItem(CACHE_KEY)||'nu
 function writeCache(raw,source){try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),raw,source}));}catch(e){}}
 function readCalendarCache(){try{const j=JSON.parse(localStorage.getItem(CALENDAR_CACHE_KEY)||'null');return j&&j.raw&&j.raw.generated_at?j:null;}catch(e){return null;}}
 function writeCalendarCache(raw,source){try{localStorage.setItem(CALENDAR_CACHE_KEY,JSON.stringify({savedAt:Date.now(),raw,source}));}catch(e){}}
+function readTaskCache(){try{const j=JSON.parse(localStorage.getItem(TASK_CACHE_KEY)||'null');return j&&j.raw&&j.raw.generated_at?j:null;}catch(e){return null;}}
+function writeTaskCache(raw,source){try{localStorage.setItem(TASK_CACHE_KEY,JSON.stringify({savedAt:Date.now(),raw,source}));}catch(e){}}
 
 function finish(raw,source,now,offline){
  const state=toState(raw,now);
@@ -275,19 +303,21 @@ function finish(raw,source,now,offline){
 
 // Главная функция: возвращает экранное состояние в одном из режимов live / stale / offline.
 export async function loadState(now=Date.now()){
- const [hit,calendarHit]=await Promise.all([fetchLive(),fetchCalendar()]);
- let calendar=calendarHit?.raw||null;
+ const [hit,calendarHit,taskHit]=await Promise.all([fetchLive(),fetchCalendar(),fetchTasks()]);
+ let calendar=calendarHit?.raw||null,tasks=taskHit?.raw||null;
  if(calendarHit)writeCalendarCache(calendarHit.raw,calendarHit.source);
+ if(taskHit)writeTaskCache(taskHit.raw,taskHit.source);
  if(!calendar)calendar=readCalendarCache()?.raw||null;
- if(hit){writeCache(hit.raw,hit.source);const state=finish(hit.raw,hit.source,now,false);state.calendar=calendar;return state;}
- const c=readCache();
- if(c){const state=finish(c.raw,c.source,now,true);state.calendar=calendar;return state;}
- const state=offlineState();state.calendar=calendar;return state;
+ if(!tasks)tasks=readTaskCache()?.raw||null;
+ if(hit){writeCache(hit.raw,hit.source);const state=finish(hit.raw,hit.source,now,false);state.calendar=calendar;state.driveTasks=tasks;return state;}
+ const cached=readCache();
+ if(cached){const state=finish(cached.raw,cached.source,now,true);state.calendar=calendar;state.driveTasks=tasks;return state;}
+ const state=offlineState();state.calendar=calendar;state.driveTasks=tasks;return state;
 }
 // Мгновенное состояние из кэша для первой отрисовки, пока идёт запрос.
 export function cachedState(now=Date.now()){
  const c=readCache();if(!c)return null;
- const state=finish(c.raw,c.source,now,true);state.calendar=readCalendarCache()?.raw||null;return state;
+ const state=finish(c.raw,c.source,now,true);state.calendar=readCalendarCache()?.raw||null;state.driveTasks=readTaskCache()?.raw||null;return state;
 }
 
 // Авто-обновление: сразу, по таймеру, при возврате на экран и при появлении сети.
