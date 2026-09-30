@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T14:28:52.179495+00:00",
+  "generated_at": "2026-09-30T14:29:58.139466+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
       "id": "system",
       "title": "Система",
       "level": "ok",
-      "detail": "Канал управления: работает · процессы: работает · свободно 187.9 ГБ"
+      "detail": "Канал управления: работает · процессы: работает · свободно 187.7 ГБ"
     },
     {
       "id": "visual",
@@ -66,8 +66,8 @@
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: public-readback-unavailable:2026-09-30"
+      "level": "ok",
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0"
     }
   ],
   "workflows": [
@@ -175,7 +175,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T14:28:52.179495+00:00",
+    "generated_at": "2026-09-30T14:29:58.139466+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
