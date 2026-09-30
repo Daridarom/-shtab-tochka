@@ -172,12 +172,9 @@ export function normalizeInboxSummary(raw){
  const channels={};
  for(const key of ['telegram','max']){
   const x=raw.channels[key];if(!x||typeof x!=='object')continue;
-  const states={};
-  if(x.source_states&&typeof x.source_states==='object'&&!Array.isArray(x.source_states)){
-   for(const [k,v] of Object.entries(x.source_states)){if(Number.isFinite(v))states[String(k).slice(0,40)]=Math.max(0,Math.trunc(v));}
-  }
   channels[key]={read_ok:x.read_ok===true,total:Number.isFinite(x.total)?Math.max(0,Math.trunc(x.total)):null,
-   last_24h:Number.isFinite(x.last_24h)?Math.max(0,Math.trunc(x.last_24h)):null,last_message_at:x.last_message_at||null,source_states:states};
+   last_24h:Number.isFinite(x.last_24h)?Math.max(0,Math.trunc(x.last_24h)):null,last_message_at:x.last_message_at||null,
+   attention_count:Number.isFinite(x.attention_count)?Math.max(0,Math.trunc(x.attention_count)):null};
  }
  return {schema:'inbox-summary-1',generated_at:raw.generated_at,ttl_seconds:raw.ttl_seconds||120,channels,detail_available:raw.detail_available===true};
 }
