@@ -331,8 +331,8 @@ function InboxActivity({summary}){
  const labels={max:'MAX',telegram:'Telegram'};
  const rows=Object.entries(summary.channels||{});
  return <Card title="Активность каналов" aside={rows.length?'реальные журналы':''} className="span2">
-  {rows.length?rows.map(([key,x])=><Row key={key} dot={x.readOk?'ok':'wait'} title={labels[key]||key}
-   text={[x.last24h!=null?'за 24 ч: '+x.last24h:null,x.total!=null?'всего записей: '+x.total:null,x.lastMessageAt?'последняя: '+moscowTime(x.lastMessageAt,true)+' МСК':null].filter(Boolean).join(' · ')}/>)
+  {rows.length?rows.map(([key,x])=><Row key={key} dot={!x.readOk?'wait':x.attentionCount>0?'wait':'ok'} title={labels[key]||key}
+   text={[x.last24h!=null?'за 24 ч: '+x.last24h:null,x.attentionCount>0?'требуют внимания: '+x.attentionCount:null,x.total!=null?'всего записей: '+x.total:null,x.lastMessageAt?'последняя: '+moscowTime(x.lastMessageAt,true)+' МСК':null].filter(Boolean).join(' · ')}/>)
    :<Empty text="Агрегаты входящих пока не получены"/>}
   <p className="empty">Это активность получателей, а не список поручений: текст сообщений и идентификаторы пользователей в общую телеметрию не передаются.</p>
  </Card>;
