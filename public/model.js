@@ -90,7 +90,7 @@ export function fromInboxSummary(raw,now=Date.now()){
    total:Number.isFinite(x.total)?x.total:null,
    last24h:Number.isFinite(x.last_24h)?x.last_24h:null,
    lastMessageAt:x.last_message_at||null,
-   sourceStates:x.source_states&&typeof x.source_states==='object'&&!Array.isArray(x.source_states)?x.source_states:{}
+   attentionCount:Number.isFinite(x.attention_count)?Math.max(0,Math.trunc(x.attention_count)):null
   };
  }
  return {source:src,channels,detailAvailable:raw.detail_available===true};
