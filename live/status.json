@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T07:38:36.148083+00:00",
+  "generated_at": "2026-09-30T07:39:40.838292+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -43,7 +43,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 5 с назад"
+      "detail": "Ожидают: 0 · проверка связи 0 с назад"
     },
     {
       "id": "rostok",
@@ -86,7 +86,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-09-30T07:29:08.294099+00:00",
+    "generated_at": "2026-09-30T07:39:05.232971+00:00",
     "ttl_seconds": 21600,
     "authority": "project TASKS",
     "partial": true,
@@ -101,6 +101,15 @@
       "rko"
     ],
     "items": [
+      {
+        "id": "032e9591829bb40e",
+        "project": "rostok",
+        "title": "PP-SKILL-ARTIFACT-001 — перевести публикационный контур Ростка на Task → Skill → Artifact → Evidence без создания новых ботов. Риск: важное.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": true,
+        "verified_at": "2026-09-30T07:34:30+00:00"
+      },
       {
         "id": "1c15addefda0eb69",
         "project": "alexander",
@@ -141,14 +150,11 @@
     "proposal_count": 11,
     "today_complete": false,
     "stale_rows": 0,
-    "missing_sources": [
-      "ai-radar",
-      "rostok"
-    ]
+    "missing_sources": []
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T07:38:36.148083+00:00",
+    "generated_at": "2026-09-30T07:39:40.838292+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
