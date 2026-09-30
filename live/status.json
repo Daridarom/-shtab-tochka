@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T15:30:42.138451+00:00",
+  "generated_at": "2026-09-30T15:31:47.169623+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -67,7 +67,7 @@
       "id": "publications",
       "title": "Публикации",
       "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: telegram-check:2026-09-30:URLError"
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: slot:2026-09-30T13:00"
     }
   ],
   "workflows": [
@@ -175,7 +175,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T15:30:42.138451+00:00",
+    "generated_at": "2026-09-30T15:31:47.169623+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
