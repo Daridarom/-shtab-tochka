@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T15:56:00.139040+00:00",
+  "generated_at": "2026-09-30T15:57:06.161003+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 16 с назад"
+      "detail": "Ожидают: 0 · проверка связи 17 с назад"
     },
     {
       "id": "rostok",
@@ -67,7 +67,7 @@
       "id": "publications",
       "title": "Публикации",
       "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: telegram-check:2026-09-30:URLError"
+      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: slot:2026-09-30T13:00"
     }
   ],
   "workflows": [
@@ -174,7 +174,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T15:56:00.139040+00:00",
+    "generated_at": "2026-09-30T15:57:06.161003+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
