@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T07:28:43.148532+00:00",
+  "generated_at": "2026-09-30T07:29:48.176042+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,14 +36,14 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "ok",
-      "detail": "Облачная копия индекса задач актуальна"
+      "level": "warn",
+      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
     },
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 4 с назад"
+      "level": "warn",
+      "detail": "Ожидают: 1 · проверка связи 2 с назад"
     },
     {
       "id": "rostok",
@@ -86,7 +86,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-09-30T06:33:54.032032+00:00",
+    "generated_at": "2026-09-30T07:29:08.294099+00:00",
     "ttl_seconds": 7200,
     "authority": "project TASKS",
     "partial": true,
@@ -102,26 +102,59 @@
     ],
     "items": [
       {
+        "id": "1c15addefda0eb69",
+        "project": "alexander",
+        "title": "ИНВЕСТПРЕДЛОЖЕНИЕ ПО ЗЕМЕЛЬНЫМ ПРОЕКТАМ — активная задача от 17.09.2026.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": false,
+        "verified_at": "2026-09-30T06:33:42.981784+00:00"
+      },
+      {
+        "id": "b81adc0557635c18",
+        "project": "alexander",
+        "title": "AB-BOOK-001 — Исходники книги и работа с книгами, поручение Алексея 27.09.2026.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": false,
+        "verified_at": "2026-09-30T06:33:42.981784+00:00"
+      },
+      {
         "id": "54c68a998766e1ba",
         "project": "rko",
         "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": true,
+        "fresh": false,
         "verified_at": "2026-09-30T06:33:48.044017+00:00"
+      },
+      {
+        "id": "6a091c0f0d8d08b2",
+        "project": "reo",
+        "title": "Следующий шаг: зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
+        "status": "OPEN",
+        "deadline": null,
+        "fresh": false,
+        "verified_at": "2026-09-30T06:33:51.136718+00:00"
       }
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 0,
+    "stale_rows": 4,
     "missing_sources": [
       "ai-radar",
-      "rostok"
+      "alexander",
+      "h45",
+      "kinouroki",
+      "media",
+      "rostok",
+      "reo",
+      "rko"
     ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T07:28:43.148532+00:00",
+    "generated_at": "2026-09-30T07:29:48.176042+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
