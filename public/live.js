@@ -104,7 +104,7 @@ function explainWorkflow(row,w){return {level:row[1],key:'wf:'+(w.id||w.name),ti
 export function offlineState(){
  return {mode:'offline',source:null,asOf:null,ageSeconds:null,ttlSeconds:120,cached:false,
   verdict:{level:'wait',text:'Нет связи с источником'},notice:{level:'wait',text:'Нет связи с источником состояния. Проверьте сеть и повторите'},
-  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,calendar:null,workflows:[],projects:[],cards:[],
+  metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},rostok:null,artifactRuntime:null,taskSummary:null,inboxSummary:null,calendar:null,workflows:[],projects:[],cards:[],
   focus:[],
   systems:[['Обновление данных','wait','Нет связи с источником состояния']],
   events:[['Сейчас','Состояние штаба недоступно: нет связи с источником','wait']],
@@ -150,6 +150,33 @@ export async function fetchCalendar(urls=CALENDAR_URLS){
   }catch(e){return null;}
  }));
  return hits.filter(Boolean).sort((a,b)=>b.ts-a.ts)[0]||null;
+}
+
+export function normalizeTaskSummary(raw){
+ if(!raw||raw.schema!=='tasks-public-1'||!raw.generated_at||!Array.isArray(raw.items))return null;
+ const allowedStatus=new Set(['OPEN','IN_PROGRESS','WAITING','BLOCKED','DONE','PROPOSED','DEFERRED','HOLD','ON_HOLD']);
+ const items=raw.items.map(x=>{
+  if(!x||!x.id||!x.title)return null;
+  const status=String(x.status||'OPEN').toUpperCase();
+  return {id:String(x.id),title:short(x.title,240),status:allowedStatus.has(status)?status:'OPEN',
+   deadline:x.deadline||null,project:x.project||null,owner:x.owner||null,fresh:x.fresh===true,verified_at:x.verified_at||null};
+ }).filter(Boolean);
+ return {schema:'tasks-public-1',generated_at:raw.generated_at,ttl_seconds:raw.ttl_seconds||7200,
+  authority:raw.authority||'project TASKS',partial:raw.partial!==false,scope:Array.isArray(raw.scope)?raw.scope:[],
+  items,proposal_count:Number.isFinite(raw.proposal_count)?raw.proposal_count:null,today_complete:raw.today_complete===true,
+  stale_rows:Number.isFinite(raw.stale_rows)?raw.stale_rows:0,
+  missing_sources:Array.isArray(raw.missing_sources)?raw.missing_sources.filter(x=>typeof x==='string').slice(0,50):[]};
+}
+export function normalizeInboxSummary(raw){
+ if(!raw||raw.schema!=='inbox-summary-1'||!raw.generated_at||!raw.channels||typeof raw.channels!=='object')return null;
+ const channels={};
+ for(const key of ['telegram','max']){
+  const x=raw.channels[key];if(!x||typeof x!=='object')continue;
+  channels[key]={read_ok:x.read_ok===true,total:Number.isFinite(x.total)?Math.max(0,Math.trunc(x.total)):null,
+   last_24h:Number.isFinite(x.last_24h)?Math.max(0,Math.trunc(x.last_24h)):null,last_message_at:x.last_message_at||null,
+   attention_count:Number.isFinite(x.attention_count)?Math.max(0,Math.trunc(x.attention_count)):null};
+ }
+ return {schema:'inbox-summary-1',generated_at:raw.generated_at,ttl_seconds:raw.ttl_seconds||120,channels,detail_available:raw.detail_available===true};
 }
 
 export function normalizeArtifactRuntime(raw){
@@ -207,12 +234,14 @@ export function toState(raw,now=Date.now()){
  const inbox=items.map(it=>['Внимание',it.title+': '+it.text,it.level]);
  const r=raw.rostok&&typeof raw.rostok==='object'?raw.rostok:null;
  const artifactRuntime=normalizeArtifactRuntime(raw);
+ const taskSummary=normalizeTaskSummary(raw.task_summary);
+ const inboxSummary=normalizeInboxSummary(raw.inbox_summary);
  const done=r&&Number.isFinite(r.published_today)?r.published_today:null;
  const rostok=r?{publishedToday:done,dailyLimit:r.daily_limit??null,queue:r.queue??null,statusLabel:r.unresolved?'нужна сверка доставки':level(cards.find(c=>c.id==='publications')?.level||'unknown')!=='ok'?'требует проверки':Number.isFinite(r.queue)&&r.queue>0?'есть готовые посты':'нет готовых постов',nextSlot:r.next_slot??null,nextSlotLabel:slotLabel(r.next_slot,now),totalPublished:r.total_published??null,unresolved:r.unresolved??null}:null;
  return {mode:'live',source:null,asOf:raw.generated_at,ageSeconds:null,ttlSeconds:raw.ttl_seconds||120,cached:false,
   verdict,notice:null,
   metrics:{active,total:wfs.length,attention,done,dailyLimit:rostok?rostok.dailyLimit:null,nextSlotLabel:rostok?rostok.nextSlotLabel:null,problems:items.length,oldest:oldestLabel},
-  rostok,artifactRuntime,workflows:rows,projects:[],focus:items,systems,events,inbox,
+  rostok,artifactRuntime,taskSummary,inboxSummary,workflows:rows,projects:[],focus:items,systems,events,inbox,
   cards:cards.map(c=>({id:c.id,title:humanName(c.id,c.title),level:level(c.level),detail:fixPlural(c.detail)||''}))};
 }
 

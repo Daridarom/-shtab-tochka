@@ -11,7 +11,7 @@ import {Today,CalendarScreen,ProjectsScreen,SystemsScreen,InboxScreen,EventSheet
 
 const TABS=[['home','Сегодня'],['calendar','Календарь'],['projects','Проекты'],['systems','Системы'],['inbox','Входящие']];
 const store={get(k,d){try{return localStorage.getItem(k)??d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},json(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v??d;}catch(e){return d;}}};
-const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,artifactRuntime:null,calendar:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
+const initial={mode:'loading',verdict:null,notice:null,cards:[],metrics:{active:null,total:null,attention:null,done:null,dailyLimit:null,nextSlotLabel:null,problems:null,oldest:null},focus:[],systems:[],workflows:[],events:[],inbox:[],rostok:null,artifactRuntime:null,taskSummary:null,inboxSummary:null,calendar:null,ageSeconds:null,asOf:null,loadedAt:Date.now()};
 const CHANGES_KEY='shtab.max.taskChanges.v1';
 
 function Starfield({theme}){const ref=useRef(null);useEffect(()=>{const h=startStarfield(ref.current,{theme});return()=>h.stop();},[theme]);return <canvas ref={ref} className="stars" aria-hidden="true"/>;}
@@ -30,9 +30,23 @@ function usePrivate(s){
    ?M.fromPrivateSnapshot(window.__SHTAB_PRIVATE__)
    :M.emptyPrivate();
   const cal=M.fromPublicCalendar(s?.calendar);
-  if(!cal)return base;
-  return {...base,calendarSource:cal.source,events:cal.events};
- },[s?.calendar]);
+  const pubTasks=M.fromPublicTasks(s?.taskSummary);
+  const inboxSummary=M.fromInboxSummary(s?.inboxSummary);
+  const hasPrivateTasks=(base.taskSource||base.source).state!==M.SOURCE.NOT_CONNECTED;
+  const hasPrivateInbox=(base.inboxSource||base.source).state!==M.SOURCE.NOT_CONNECTED;
+  return {
+   ...base,
+   calendarSource:cal?.source||base.calendarSource||base.source,
+   events:cal?.events||base.events,
+   taskSource:hasPrivateTasks?(base.taskSource||base.source):(pubTasks?.source||base.taskSource||base.source),
+   tasks:hasPrivateTasks?base.tasks:(pubTasks?.tasks||base.tasks),
+   taskMeta:hasPrivateTasks?{partial:false}:(pubTasks?.meta||{partial:true}),
+   inboxSource:base.inboxSource||base.source,
+   inboxSummarySource:inboxSummary?.source||null,
+   inboxSummary:inboxSummary||null,
+   inbox:hasPrivateInbox?base.inbox:base.inbox
+  };
+ },[s?.calendar,s?.taskSummary,s?.inboxSummary]);
 }
 function findProject(id){const f=l=>{for(const x of l){if(x.id===id)return x;const r=x.children&&f(x.children);if(r)return r;}return null;};return id?f(projectTree):null;}
 

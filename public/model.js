@@ -59,6 +59,43 @@ export function fromPublicCalendar(raw,now=Date.now()){
 }
 
 
+export function fromPublicTasks(raw,now=Date.now()){
+ if(!raw)return null;
+ if(raw.schema!=='tasks-public-1')return {source:{state:SOURCE.ERROR,reason:'неизвестный формат среза задач',ageSeconds:null,asOf:null,partial:true},tasks:[],meta:{partial:true}};
+ let src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
+ const staleRows=Number(raw.stale_rows)||0;
+ const missing=Array.isArray(raw.missing_sources)?raw.missing_sources.filter(Boolean):[];
+ const partial=raw.partial!==false;
+ if(src.state===SOURCE.LIVE&&(staleRows>0||missing.length)){
+  src={...src,state:SOURCE.STALE,reason:'часть проектных источников не подтверждена свежим Drive-снимком'};
+ }
+ src={...src,partial,reason:src.reason||(partial?'Показан безопасный рабочий срез; приватные и чувствительные задачи не публикуются':null)};
+ const tasks=(raw.items||[]).map(x=>normalizeTask({
+  id:x.id,title:x.title,status:x.status,deadline:x.deadline,project:x.project,
+  owner:x.owner||null,source:'HQ TASK INDEX'
+ })).filter(Boolean);
+ return {source:src,tasks,meta:{partial,scope:Array.isArray(raw.scope)?raw.scope:[],proposalCount:Number.isFinite(raw.proposal_count)?raw.proposal_count:null,todayComplete:raw.today_complete===true,staleRows,missingSources:missing}};
+}
+
+export function fromInboxSummary(raw,now=Date.now()){
+ if(!raw)return null;
+ if(raw.schema!=='inbox-summary-1')return {source:{state:SOURCE.ERROR,reason:'неизвестный формат агрегата входящих',ageSeconds:null,asOf:null},channels:{},detailAvailable:false};
+ const src=sourceFromSnapshot(raw.generated_at,raw.ttl_seconds,now);
+ const channels={};
+ for(const key of ['telegram','max']){
+  const x=raw.channels&&raw.channels[key];
+  if(!x||typeof x!=='object')continue;
+  channels[key]={
+   readOk:x.read_ok===true,
+   total:Number.isFinite(x.total)?x.total:null,
+   last24h:Number.isFinite(x.last_24h)?x.last_24h:null,
+   lastMessageAt:x.last_message_at||null,
+   attentionCount:Number.isFinite(x.attention_count)?Math.max(0,Math.trunc(x.attention_count)):null
+  };
+ }
+ return {source:src,channels,detailAvailable:raw.detail_available===true};
+}
+
 // ---------- TASK ----------
 // Статусы — коды реестра задач Штаба (HQ TASK INDEX / проектные TASKS). Колонки доски — только группировка,
 // сам статус не переименовывается и не подменяется. Неизвестный код попадает в «К делу» и показывается как есть.

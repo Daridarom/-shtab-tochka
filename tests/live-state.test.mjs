@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const source=await readFile(new URL('../public/live.js',import.meta.url),'utf8');
-const {toState,normalizeCalendar}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const {toState,normalizeCalendar,normalizeTaskSummary,normalizeInboxSummary}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const raw={generated_at:'2026-09-28T05:35:00Z',cards:[
  {id:'system',level:'ok',detail:'Канал управления: работает · процессы: работает · свободно 209 ГБ'},
  {id:'visual',level:'error',detail:'2 сервисов в состоянии ошибки'},
@@ -74,3 +74,9 @@ const taskIndexState=toState(taskIndex,Date.parse('2026-09-30T00:30:00+03:00'));
 assert.equal(taskIndexState.focus[0].title,'Индекс задач');
 assert.match(taskIndexState.focus[0].text,/Локальный индекс задач актуален/);
 console.log('PASS: waiting generator and cloud task index are described as warnings, not fabricated failures');
+
+const safeTasks=normalizeTaskSummary({schema:'tasks-public-1',generated_at:'2026-09-30T05:00:00Z',items:[{id:'a',title:'Задача',status:'OPEN',project:'rko',source_url:'https://forbidden.example',secret:'x'}],missing_sources:[]});
+assert.equal(safeTasks.items.length,1);assert.equal('source_url' in safeTasks.items[0],false);assert.equal('secret' in safeTasks.items[0],false);
+const safeInbox=normalizeInboxSummary({schema:'inbox-summary-1',generated_at:'2026-09-30T05:00:00Z',channels:{max:{read_ok:true,total:5,last_24h:2,last_message_at:'2026-09-30T04:00:00Z',attention_count:1,source_states:{internal_secret:5},messages:['secret']}}});
+assert.equal(safeInbox.channels.max.total,5);assert.equal(safeInbox.channels.max.attention_count,1);assert.equal('messages' in safeInbox.channels.max,false);assert.equal('source_states' in safeInbox.channels.max,false);
+console.log('PASS: safe task/inbox normalizers drop URLs and message content');
