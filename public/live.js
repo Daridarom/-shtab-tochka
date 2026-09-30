@@ -87,7 +87,24 @@ function explainCard(c){
   case 'drive':it.text='Свежесть документов пока не подтверждена';it.action='Проверить последнюю успешную синхронизацию и обновление списка документов';it.details=d;break;
   case 'task_index':it.text=/облачная копия ожидает обновления/i.test(d)?'Локальный индекс задач актуален, облачная копия ещё не подтверждена':(d||'Индекс задач требует проверки');it.action='Сверить локальную и облачную версии и обновить облако только после проверки версии';it.details=d;break;
   case 'skills':it.text=d||'Состояние реестра навыков требует проверки';it.action='Проверить загрузку активных навыков, версии и последнюю успешную проверку';it.details=d;break;
-  case 'queue':it.text=/ожидают:\s*[1-9]/i.test(d)?'Задачи в очереди ждут исполнения':'Связь с исполнителем очереди потеряна';it.action='Проверить службу runner на машине штаба';it.details=d;break;
+  case 'queue':{
+   const qm=/ожидают:\s*(\d+)/i.exec(d),hb=/проверка связи\s+(\d+)\s*с назад/i.exec(d);
+   const waiting=qm?Number(qm[1]):0,heartbeat=hb?Number(hb[1]):null,runnerAlive=heartbeat!=null&&heartbeat<=120;
+   if(waiting>0&&runnerAlive){
+    it.text='В очереди '+waiting+' задач. Исполнитель на связи, но задачи ещё не разобраны';
+    it.action='Проверить диспетчер и условия запуска ожидающих задач; runner перезапускать только если пропадёт связь';
+   }else if(waiting>0){
+    it.text='Задачи в очереди ждут исполнения';
+    it.action='Проверить связь с runner и затем причину ожидания задач';
+   }else if(runnerAlive){
+    it.text='Канал управления на связи, ожидающих задач нет';
+    it.action=null;
+   }else{
+    it.text='Связь с исполнителем очереди не подтверждена';
+    it.action='Проверить службу runner на машине штаба';
+   }
+   it.details=d;break;
+  }
   case 'telegram':case 'max':it.text='Получатель сообщений '+it.title+' не работает: входящие не собираются';it.action='Перезапустить получатель '+it.title;it.details=d;break;
   case 'rostok':it.text='Росток сигналит '+(lv==='err'?'ошибку':'предупреждение')+', причина в сводке не указана';it.action='Открыть отчёт Ростка на машине штаба';it.details=d;break;
   case 'publications':{const checks=parseChecks(d);
