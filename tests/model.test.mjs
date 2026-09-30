@@ -20,6 +20,12 @@ assert.equal(brokenPrivate.source.state,'error');assert.equal(brokenPrivate.cale
 const publicCal=M.fromPublicCalendar({schema:'calendar-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:21600,events:[{id:'g1',title:'Google событие',kind:'meeting',start:'2026-09-29T11:00:00+03:00',end:'2026-09-29T12:00:00+03:00',endConfirmed:true}]},now);
 assert.equal(publicCal.source.state,'live');assert.equal(publicCal.events.length,1);assert.equal(publicCal.events[0].title,'Google событие');
 assert.equal(M.fromPublicCalendar({schema:'unexpected'}).source.state,'error');
+const pubTasks=M.fromPublicTasks({schema:'tasks-public-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:7200,partial:true,scope:['rko'],items:[{id:'t1',title:'Проверить библиотеку',status:'OPEN',project:'rko',fresh:true}],proposal_count:2,today_complete:false,stale_rows:0,missing_sources:[]},now);
+assert.equal(pubTasks.source.state,'live');assert.equal(pubTasks.source.partial,true);assert.equal(pubTasks.tasks.length,1);assert.equal(pubTasks.tasks[0].project,'rko');
+const stalePub=M.fromPublicTasks({schema:'tasks-public-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:7200,partial:true,items:[],stale_rows:1,missing_sources:['rko']},now);
+assert.equal(stalePub.source.state,'stale');assert.match(stalePub.source.reason,/источник/);
+const inboxAgg=M.fromInboxSummary({schema:'inbox-summary-1',generated_at:'2026-09-28T19:59:00Z',ttl_seconds:120,channels:{max:{read_ok:true,total:12,last_24h:3,last_message_at:'2026-09-28T19:58:00Z',source_states:{received:12}}},detail_available:false},now);
+assert.equal(inboxAgg.source.state,'live');assert.equal(inboxAgg.channels.max.last24h,3);assert.equal(inboxAgg.detailAvailable,false);
 
 // EVENT: окончание не выдумывается; оплата — не встреча.
 const ev=M.normalizeEvent({id:'e1',start:'2026-09-29T11:00:00+03:00',end:'2026-09-29T12:00:00+03:00',kind:'meeting',format:'online',joinUrl:'javascript:alert(1)'});
