@@ -60,11 +60,19 @@ export function operationalFreshness(s={},priv={},telemetryAgeSeconds=null){
  const label=state===SOURCE.LIVE
   ?'Все 4 источника свежие'
   :fresh.length+' из '+sources.length+' источников свежие';
- const problemSources=sources.filter(x=>x.src?.state!==SOURCE.LIVE);
- const detail=problemSources.length
-  ?problemSources.map(x=>sourceNote(x.name,x.src)).join(' · ')
-  :'Все рабочие источники подтверждены свежими';
- return {state,label,total:sources.length,connected:connected.length,fresh:fresh.length,failed:failed.length,stale:stale.length,detail,sources};
+ const transportProblems=sources.filter(x=>x.src?.state!==SOURCE.LIVE).map(x=>sourceNote(x.name,x.src));
+ const qualityWarnings=[];
+ const tm=priv.taskMeta||{};
+ const missing=Array.isArray(tm.missingSources)?tm.missingSources.length:0;
+ const staleRows=Number(tm.staleRows)||0;
+ if(missing||staleRows){
+  const parts=[];
+  if(missing)parts.push('источников без свежей сверки: '+missing);
+  if(staleRows)parts.push('устаревших строк: '+staleRows);
+  qualityWarnings.push('Задачи: индекс доставлен свежим, но качество неполное ('+parts.join(', ')+')');
+ }
+ const detail=[...transportProblems,...qualityWarnings].join(' · ')||'Все рабочие источники подтверждены свежими';
+ return {state,label,total:sources.length,connected:connected.length,fresh:fresh.length,failed:failed.length,stale:stale.length,qualityIssues:qualityWarnings.length,qualityWarnings,detail,sources};
 }
 
 // Отдельное состояние доказательства конечного результата.
@@ -111,9 +119,8 @@ export function fromPublicTasks(raw,now=Date.now()){
  const staleRows=Number(raw.stale_rows)||0;
  const missing=Array.isArray(raw.missing_sources)?raw.missing_sources.filter(Boolean):[];
  const partial=raw.partial!==false;
- if(src.state===SOURCE.LIVE&&(staleRows>0||missing.length)){
-  src={...src,state:SOURCE.STALE,reason:'часть проектных источников не подтверждена свежим Drive-снимком'};
- }
+ // Свежесть транспорта и качество содержания — разные измерения.
+ // Свежий индекс остаётся LIVE, даже если часть проектных источников требует повторной сверки.
  src={...src,partial,reason:src.reason||(partial?'Показан безопасный рабочий срез; приватные и чувствительные задачи не публикуются':null)};
  const tasks=(raw.items||[]).map(x=>normalizeTask({
   id:x.id,title:x.title,status:x.status,deadline:x.deadline,project:x.project,

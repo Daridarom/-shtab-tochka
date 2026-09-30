@@ -74,7 +74,7 @@ function OperationalPicture({s,priv,age}){
  const rostok=s.rostok?(s.rostok.publishedToday!=null&&s.rostok.dailyLimit!=null?s.rostok.publishedToday+' из '+s.rostok.dailyLimit:s.rostok.publishedToday??'—'):'—';
  const next=s.rostok?.nextSlotLabel||'—';
  const freshnessTone=M.sourceLevel(freshness.state);
- const trustTone=evidence.level==='err'||freshness.failed>0?'err':freshness.state===M.SOURCE.LIVE&&evidence.level==='ok'?'ok':'wait';
+ const trustTone=evidence.level==='err'||freshness.failed>0?'err':freshness.state===M.SOURCE.LIVE&&freshness.qualityIssues===0&&evidence.level==='ok'?'ok':'wait';
  const trust=trustTone==='ok'?'Рабочая картина подтверждена':trustTone==='err'?'Есть неподтверждённый результат или недоступный источник':'Картина частичная: часть данных или результата требует проверки';
  const verdict=s.verdict?.text||(s.mode==='loading'?'Получаем состояние':'Состояние не подтверждено');
  return <Card title="Оперативная картина" aside={verdict} className="span2 commandCard">
