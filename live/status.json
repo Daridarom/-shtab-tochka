@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T07:27:38.131278+00:00",
+  "generated_at": "2026-09-30T07:28:43.148532+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -36,14 +36,14 @@
     {
       "id": "task_index",
       "title": "Индекс задач",
-      "level": "warn",
-      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
+      "level": "ok",
+      "detail": "Облачная копия индекса задач актуальна"
     },
     {
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 3 · проверка связи 0 с назад"
+      "detail": "Ожидают: 0 · проверка связи 4 с назад"
     },
     {
       "id": "rostok",
@@ -92,11 +92,12 @@
     "partial": true,
     "scope": [
       "ai-radar",
-      "ai-shtab-os",
+      "alexander",
+      "h45",
       "kinouroki",
-      "media-factory",
-      "privet-planeta",
-      "reo-crimea",
+      "media",
+      "rostok",
+      "reo",
       "rko"
     ],
     "items": [
@@ -110,19 +111,17 @@
         "verified_at": "2026-09-30T06:33:48.044017+00:00"
       }
     ],
-    "proposal_count": 1,
+    "proposal_count": 11,
     "today_complete": false,
     "stale_rows": 0,
     "missing_sources": [
       "ai-radar",
-      "ai-shtab-os",
-      "media-factory",
-      "privet-planeta"
+      "rostok"
     ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T07:27:38.131278+00:00",
+    "generated_at": "2026-09-30T07:28:43.148532+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
