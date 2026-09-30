@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-30T08:21:53.120523+00:00",
+  "generated_at": "2026-09-30T08:23:26.152720+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -40,10 +40,22 @@
       "detail": "Локальный индекс работает · облачная копия ожидает обновления"
     },
     {
+      "id": "reliability",
+      "title": "Надёжность",
+      "level": "warn",
+      "detail": "Проверка: REVIEW · предупреждений: 4"
+    },
+    {
+      "id": "model_eval",
+      "title": "Межмодельная проверка",
+      "level": "warn",
+      "detail": "Межмодельная проверка: REVIEW · ответы: 1 из 2 · codex: 4/5"
+    },
+    {
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+      "detail": "Ожидают: 0 · проверка связи 12 с назад"
     },
     {
       "id": "rostok",
@@ -154,7 +166,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-09-30T08:21:53.120523+00:00",
+    "generated_at": "2026-09-30T08:23:26.152720+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
