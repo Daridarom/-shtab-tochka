@@ -92,7 +92,10 @@ export default function App({scheme='dark',themeSetting='dark',cycleTheme=()=>{}
 
  const onRefresh=async()=>{if(busy)return;haptic('light');setBusy(true);try{await live.current?.refresh();}finally{setBusy(false);}};
  const age=s.ageSeconds==null?null:s.ageSeconds+Math.max(0,Math.round((Date.now()-s.loadedAt)/1000));
- const status=s.mode==='loading'?'Обновляем…':describeMode(s)+(age!=null?' · '+ageLabel(age):'')+(s.asOf?' · '+moscowTime(s.asOf):'');
+ const freshness=M.operationalFreshness(s,priv,age);
+ const status=s.mode==='loading'
+  ?'Обновляем…'
+  :freshness.label+(s.asOf?' · штаб '+moscowTime(s.asOf):'');
  const unprocessed=M.unprocessed(priv.inbox).length;
 
  let sheetView=null;

@@ -68,27 +68,23 @@ function cardTone(s,id){
  return c&&['ok','wait','err'].includes(c.level)?c.level:'none';
 }
 function OperationalPicture({s,priv,age}){
- const tel={...M.telemetrySource(s),ageSeconds:age??s.ageSeconds??null};
- const cal=priv.calendarSource||priv.source;
- const tasks=priv.taskSource||priv.source;
- const inbox=priv.inboxSource||priv.source;
- const inboxAgg=priv.inboxSummarySource||inbox;
- const coverage=1+[cal,tasks,inboxAgg].filter(src=>src&&src.state!==M.SOURCE.NOT_CONNECTED).length;
- const fullFresh=s.mode==='live'&&cal.state===M.SOURCE.LIVE&&tasks.state===M.SOURCE.LIVE&&inbox.state===M.SOURCE.LIVE;
- const trustTone=s.mode==='live'?(fullFresh?'ok':'wait'):s.mode==='stale'?'wait':'err';
- const trust=s.mode==='live'?(fullFresh?'Полная рабочая картина':'Частичная рабочая картина'):s.mode==='stale'?'Картина устарела':'Картина не подтверждена';
+ const freshness=M.operationalFreshness(s,priv,age??s.ageSeconds??null);
+ const evidence=M.resultEvidence(s);
  const proc=s.metrics.active!=null&&s.metrics.total!=null?s.metrics.active+' из '+s.metrics.total:'—';
  const rostok=s.rostok?(s.rostok.publishedToday!=null&&s.rostok.dailyLimit!=null?s.rostok.publishedToday+' из '+s.rostok.dailyLimit:s.rostok.publishedToday??'—'):'—';
  const next=s.rostok?.nextSlotLabel||'—';
+ const freshnessTone=M.sourceLevel(freshness.state);
+ const trustTone=evidence.level==='err'||freshness.failed>0?'err':freshness.state===M.SOURCE.LIVE&&evidence.level==='ok'?'ok':'wait';
+ const trust=trustTone==='ok'?'Рабочая картина подтверждена':trustTone==='err'?'Есть неподтверждённый результат или недоступный источник':'Картина частичная: часть данных или результата требует проверки';
  const verdict=s.verdict?.text||(s.mode==='loading'?'Получаем состояние':'Состояние не подтверждено');
  return <Card title="Оперативная картина" aside={verdict} className="span2 commandCard">
   <div className="commandGrid">
-   <div className="commandMetric"><small>Автоматика</small><b>{proc}</b><em>процессов штатно</em></div>
-   <div className="commandMetric"><small>Росток сегодня</small><b>{rostok}</b><em>следующий слот · {next}</em></div>
-   <div className="commandMetric"><small>Полнота</small><b>{coverage} из 4</b><em>контуров данных подключено</em></div>
-   <div className="commandMetric"><small>Свежесть</small><b>{M.sourceLabel(tel.state)}</b><em>{M.sourceNote('Штаб',tel).replace(/^Штаб:\s*/,'')}</em></div>
+   <div className="commandMetric"><small>Сервисы</small><b>{proc}</b><em>технически запущены и недавно отработали</em></div>
+   <div className={'commandMetric '+freshnessTone}><small>Данные</small><b>{freshness.fresh} из {freshness.total}</b><em>источников свежие</em></div>
+   <div className="commandMetric"><small>Результат</small><b>{rostok}</b><em>публикаций Ростка сегодня · следующий слот {next}</em></div>
+   <div className={'commandMetric '+evidence.level}><small>Подтверждение</small><b>{evidence.label}</b><em>{evidence.detail}</em></div>
   </div>
-  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{[M.sourceNote('Календарь',cal),M.sourceNote('Задачи',tasks),priv.inboxSummary&&!priv.inboxSummary.detailAvailable?M.sourceNote('Входящие · агрегаты',inboxAgg):M.sourceNote('Входящие',inbox)].join(' · ')}</small></div></div>
+  <div className={'commandTrust '+trustTone}><span className={'dot '+trustTone}/><div><b>{trust}</b><small>{freshness.detail}</small></div></div>
  </Card>;
 }
 function HarnessCard({s}){
