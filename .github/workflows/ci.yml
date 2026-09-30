@@ -22,6 +22,7 @@ jobs:
         run: |
           node tests/live-state.test.mjs
           node tests/model.test.mjs
+          node tests/calendar-privacy.test.mjs
       - name: Build MAX UI
         working-directory: max
         run: |
@@ -35,4 +36,5 @@ jobs:
           grep -q "Живая схема Штаба" "$js"
           grep -q "Контур доказуемой работы" "$js"
           grep -q "Окончание не указано" "$js"
+          grep -q "Маршрут: MAX" "$js"
           if grep -q "__SHTAB_PRIVATE__" "$js"; then echo "::error::Тестовые данные разработки попали в сборку"; exit 1; fi

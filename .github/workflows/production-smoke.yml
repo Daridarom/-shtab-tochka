@@ -13,6 +13,7 @@ jobs:
     env:
       SITE_URL: ${{ vars.SITE_URL || 'https://daridarom.github.io/shtab-tochka/' }}
     steps:
+      - uses: actions/checkout@v4
       - name: Probe site
         shell: bash
         run: |
@@ -107,3 +108,10 @@ jobs:
               assert set(e)<=allowed_event, set(e)-allowed_event
           print('CALENDAR_EVENTS=',len(data['events']))
           PY
+      - name: Scan calendar projection for private data
+        # Суммы, адреса, телефоны и ссылки в названиях — утечка на стороне коллектора. Экран их скрывает, но источник надо чинить.
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f /tmp/calendar.json || exit 0
+          if node tests/calendar-privacy.test.mjs /tmp/calendar.json; then echo "CALENDAR_PRIVACY=OK"; else echo "::error::В публичной проекции календаря есть суммы, адреса, телефоны или ссылки. Очисти названия в коллекторе: для оплат достаточно общего типа («Оплата — Аренда»)."; exit 1; fi
