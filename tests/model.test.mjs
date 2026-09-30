@@ -30,7 +30,7 @@ assert.equal(inboxAgg.source.state,'live');assert.equal(inboxAgg.channels.max.la
 // Оперативная свежесть: свежий общий снимок не скрывает устаревшие календарь и задачи.
 const ops=M.operationalFreshness(
  {mode:'live',ageSeconds:30,asOf:'2026-09-28T19:59:30Z'},
- {source:none.source,calendarSource:stale,taskSource:stalePub.source,inboxSummarySource:inboxAgg.source},
+ {source:none.source,calendarSource:stale,taskSource:stalePub.source,taskMeta:stalePub.meta,inboxSummarySource:inboxAgg.source},
  30
 );
 assert.equal(ops.total,4);assert.equal(ops.connected,4);assert.equal(ops.fresh,3);assert.equal(ops.state,'stale');assert.equal(ops.qualityIssues,1);assert.match(ops.label,/3 из 4/);assert.match(ops.detail,/Календарь/);assert.match(ops.detail,/Задачи/);
