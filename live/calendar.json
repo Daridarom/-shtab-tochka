@@ -1,6 +1,6 @@
 {
   "schema": "calendar-1",
-  "generated_at": "2026-09-30T07:53:18Z",
+  "generated_at": "2026-09-30T08:34:35.448Z",
   "ttl_seconds": 7200,
   "events": [
     {
@@ -18,7 +18,7 @@
     {
       "id": "cal-74e64ee2d22e85ae",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-10-05T09:00:00+03:00",
       "end": "2026-10-05T09:20:00+03:00",
       "endConfirmed": true,
@@ -66,7 +66,7 @@
     {
       "id": "cal-62730f7e3765d16e",
       "title": "ЦУП · Доверенности — срок 11.10.2026",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-10-11T09:00:00+03:00",
       "end": "2026-10-11T09:15:00+03:00",
       "endConfirmed": true,
@@ -78,7 +78,7 @@
     {
       "id": "cal-6bc6df8f86f27d57",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-10-12T09:00:00+03:00",
       "end": "2026-10-12T09:20:00+03:00",
       "endConfirmed": true,
@@ -102,7 +102,7 @@
     {
       "id": "cal-47d9e47ff70f5df4",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-10-19T09:00:00+03:00",
       "end": "2026-10-19T09:20:00+03:00",
       "endConfirmed": true,
@@ -138,7 +138,7 @@
     {
       "id": "cal-f738912fde074892",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-10-26T09:00:00+03:00",
       "end": "2026-10-26T09:20:00+03:00",
       "endConfirmed": true,
@@ -162,7 +162,7 @@
     {
       "id": "cal-c065beb4caa9b514",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-11-02T09:00:00+03:00",
       "end": "2026-11-02T09:20:00+03:00",
       "endConfirmed": true,
@@ -186,7 +186,7 @@
     {
       "id": "cal-fad84783daa72bd5",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
-      "kind": "checkpoint",
+      "kind": "meeting",
       "start": "2026-11-09T09:00:00+03:00",
       "end": "2026-11-09T09:20:00+03:00",
       "endConfirmed": true,
