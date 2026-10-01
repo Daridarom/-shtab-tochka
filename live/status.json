@@ -1,200 +1,122 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-01T08:36:23.282254+00:00",
+  "generated_at": "2026-10-01T08:38:33.611035+00:00",
   "ttl_seconds": 120,
+  "visibility": "public_aggregates",
+  "detail_available": false,
   "cards": [
     {
       "id": "system",
       "title": "Система",
-      "level": "error",
-      "detail": "Канал управления: работает · процессы: работает · свободно 175.1 ГБ · второй исполнитель активен без подтверждённого read-only режима"
+      "level": "warn",
+      "detail": "Требует внимания"
     },
     {
       "id": "visual",
       "title": "Визуалы",
       "level": "error",
-      "detail": "2 сервисов в состоянии ошибки"
+      "detail": "Обнаружена ошибка"
     },
     {
       "id": "telegram",
       "title": "Telegram",
       "level": "ok",
-      "detail": "Получатель: работает · записей: 13"
+      "detail": "Проверка пройдена"
     },
     {
       "id": "max",
       "title": "MAX",
       "level": "ok",
-      "detail": "Получатель: работает · записей: 590"
+      "detail": "Проверка пройдена"
     },
     {
       "id": "drive",
       "title": "Google Drive",
       "level": "ok",
-      "detail": "Контекст проверен"
+      "detail": "Проверка пройдена"
     },
     {
       "id": "task_index",
       "title": "Индекс задач",
       "level": "warn",
-      "detail": "Локальный индекс работает · облачная копия ожидает обновления"
+      "detail": "Требует внимания"
     },
     {
       "id": "reliability",
       "title": "Надёжность",
       "level": "error",
-      "detail": "Проверка: BLOCKED · предупреждений: 5 · блокировок: 2"
+      "detail": "Обнаружена ошибка"
     },
     {
       "id": "model_eval",
       "title": "Межмодельная проверка",
       "level": "warn",
-      "detail": "Межмодельная проверка: REVIEW · ответы: 0 из 2"
+      "detail": "Требует внимания"
     },
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 4 с назад"
+      "level": "warn",
+      "detail": "Требует внимания"
     },
     {
       "id": "rostok",
       "title": "Росток",
-      "level": "ok",
-      "detail": "Сегодня: 0 из 4 · в очереди: 0 · следующий слот: сегодня 13:00 · всего опубликовано: 61 · ожидают изображения: 6 · согласование: 1 · заблокировано: 33"
+      "level": "warn",
+      "detail": "Требует внимания"
     },
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "error",
-      "detail": "Неясная доставка: 0 · ошибки доставки: 0 · проверки: reserve_low"
+      "level": "warn",
+      "detail": "Требует внимания"
     }
   ],
-  "workflows": [
-    {
-      "id": "shtabHealth01",
-      "name": "Здоровье AI-Штаба",
-      "active": true,
-      "runtime_running": true,
-      "execution_recent": true,
-      "last_status": "success"
-    },
-    {
-      "id": "shtabIntake01",
-      "name": "Входящие Telegram и MAX",
-      "active": true,
-      "runtime_running": true,
-      "execution_recent": true,
-      "last_status": "success"
-    },
-    {
-      "id": "shtabPublications01",
-      "name": "Росток и публикации",
-      "active": true,
-      "runtime_running": true,
-      "execution_recent": true,
-      "last_status": "success"
-    }
-  ],
+  "workflows": [],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-10-01T08:29:55.853188+00:00",
-    "ttl_seconds": 3600,
+    "generated_at": "2026-10-01T08:38:33.611035+00:00",
+    "ttl_seconds": 21600,
     "authority": "project TASKS",
     "partial": true,
-    "scope": [
-      "ai-radar",
-      "alexander",
-      "h45",
-      "kinouroki",
-      "media",
-      "rostok",
-      "reo",
-      "rko"
-    ],
-    "items": [
-      {
-        "id": "032e9591829bb40e",
-        "project": "rostok",
-        "title": "PP-SKILL-ARTIFACT-001 — перевести публикационный контур Ростка на Task → Skill → Artifact → Evidence без создания новых ботов. Риск: важное.",
-        "status": "OPEN",
-        "deadline": null,
-        "fresh": true,
-        "verified_at": "2026-10-01T08:29:42.245699+00:00"
-      },
-      {
-        "id": "1c15addefda0eb69",
-        "project": "alexander",
-        "title": "ИНВЕСТПРЕДЛОЖЕНИЕ ПО ЗЕМЕЛЬНЫМ ПРОЕКТАМ — активная задача от 17.09.2026.",
-        "status": "OPEN",
-        "deadline": null,
-        "fresh": true,
-        "verified_at": "2026-10-01T08:29:43.507476+00:00"
-      },
-      {
-        "id": "b81adc0557635c18",
-        "project": "alexander",
-        "title": "AB-BOOK-001 — Исходники книги и работа с книгами, поручение Алексея 27.09.2026.",
-        "status": "OPEN",
-        "deadline": null,
-        "fresh": true,
-        "verified_at": "2026-10-01T08:29:43.507476+00:00"
-      },
-      {
-        "id": "54c68a998766e1ba",
-        "project": "rko",
-        "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
-        "status": "OPEN",
-        "deadline": null,
-        "fresh": true,
-        "verified_at": "2026-10-01T08:29:50.827633+00:00"
-      },
-      {
-        "id": "6a091c0f0d8d08b2",
-        "project": "reo",
-        "title": "Следующий шаг: зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
-        "status": "OPEN",
-        "deadline": null,
-        "fresh": true,
-        "verified_at": "2026-10-01T08:29:55.152432+00:00"
-      }
-    ],
+    "scope": [],
+    "items": [],
+    "detail_available": false,
+    "visibility": "private",
     "proposal_count": 11,
     "today_complete": false,
     "stale_rows": 0,
-    "missing_sources": [
-      "ai-radar",
-      "h45"
-    ]
+    "missing_sources": [],
+    "missing_source_count": 2
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-10-01T08:36:23.282254+00:00",
+    "generated_at": "2026-10-01T08:38:33.611035+00:00",
     "ttl_seconds": 120,
+    "detail_available": false,
     "channels": {
       "telegram": {
         "read_ok": true,
         "total": 13,
         "last_24h": 1,
-        "last_message_at": "2026-10-01T04:59:34+00:00",
+        "last_message_at": null,
         "attention_count": 0
       },
       "max": {
         "read_ok": true,
         "total": 590,
         "last_24h": 53,
-        "last_message_at": "2026-09-30T17:36:22.625981+00:00",
+        "last_message_at": null,
         "attention_count": 19
       }
-    },
-    "detail_available": false
+    }
   },
   "failed_visual_count": 2,
   "rostok": {
     "published_today": 0,
     "daily_limit": 4,
     "unresolved": 0,
-    "next_slot": "2026-10-01T13:00+03:00",
+    "next_slot": null,
     "queue": 0,
     "total_published": 61
   },
