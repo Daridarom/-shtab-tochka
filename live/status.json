@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-01T14:24:15.159036+00:00",
+  "generated_at": "2026-10-01T23:09:21.078479+00:00",
   "ttl_seconds": 120,
   "visibility": "public_aggregates",
   "detail_available": false,
@@ -8,20 +8,20 @@
     {
       "id": "system",
       "title": "Система",
-      "level": "warn",
-      "detail": "Требует внимания"
-    },
-    {
-      "id": "visual",
-      "title": "Визуалы",
       "level": "error",
       "detail": "Обнаружена ошибка"
     },
     {
-      "id": "telegram",
-      "title": "Telegram",
+      "id": "visual",
+      "title": "Визуалы",
       "level": "ok",
       "detail": "Проверка пройдена"
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram",
+      "level": "error",
+      "detail": "Обнаружена ошибка"
     },
     {
       "id": "max",
@@ -56,26 +56,26 @@
     {
       "id": "queue",
       "title": "GitHub queue",
-      "level": "ok",
-      "detail": "Проверка пройдена"
+      "level": "warn",
+      "detail": "Требует внимания"
     },
     {
       "id": "rostok",
       "title": "Росток",
-      "level": "error",
-      "detail": "Обнаружена ошибка"
+      "level": "warn",
+      "detail": "Требует внимания"
     },
     {
       "id": "publications",
       "title": "Публикации",
-      "level": "error",
-      "detail": "Обнаружена ошибка"
+      "level": "warn",
+      "detail": "Требует внимания"
     }
   ],
   "workflows": [],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-10-01T14:24:15.159036+00:00",
+    "generated_at": "2026-10-01T23:09:21.078479+00:00",
     "ttl_seconds": 21600,
     "authority": "project TASKS",
     "partial": true,
@@ -91,7 +91,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-10-01T14:24:15.159036+00:00",
+    "generated_at": "2026-10-01T23:09:21.078479+00:00",
     "ttl_seconds": 120,
     "detail_available": false,
     "channels": {
@@ -105,13 +105,13 @@
       "max": {
         "read_ok": true,
         "total": 625,
-        "last_24h": 36,
+        "last_24h": 35,
         "last_message_at": null,
         "attention_count": 19
       }
     }
   },
-  "failed_visual_count": 11,
+  "failed_visual_count": 0,
   "rostok": {
     "published_today": 0,
     "daily_limit": 4,
