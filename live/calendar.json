@@ -1,22 +1,9 @@
 {
   "schema": "calendar-1",
-  "generated_at": "2026-10-01T05:38:36.610Z",
+  "generated_at": "2026-10-01T06:28:51.000Z",
   "ttl_seconds": 7200,
   "events": [
     {
-      "id": "cal-91b932a2293eb0bc",
-      "title": "ОПЛАТА — Интернет Дубинина 19-26 — 650 ₽",
-      "kind": "payment",
-      "start": "2026-10-01T09:00:00+03:00",
-      "end": "2026-10-01T09:15:00+03:00",
-      "endConfirmed": true,
-      "allDay": false,
-      "format": null,
-      "location": null,
-      "project": "tochka"
-    },
-    {
-      "id": "cal-ac6e5aac7f18759f",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
       "kind": "checkpoint",
       "start": "2026-10-05T09:00:00+03:00",
@@ -25,10 +12,11 @@
       "allDay": false,
       "format": null,
       "location": null,
-      "project": "hq"
+      "project": "hq",
+      "id": "cal-74e64ee2d22e85ae"
     },
     {
-      "id": "cal-b42e27c34b023da7",
+      "id": "cal-46c967cb200ab099",
       "title": "ОПЛАТА — Аренда Козлова, 1 — 60 000 ₽",
       "kind": "payment",
       "start": "2026-10-05T09:00:00+03:00",
@@ -52,7 +40,7 @@
       "project": "personal"
     },
     {
-      "id": "cal-07e16f5a7501edbb",
+      "id": "cal-92da07094ffc3930",
       "title": "ОПЛАТА — КЭР, вывоз мусора",
       "kind": "payment",
       "start": "2026-10-10T09:00:00+03:00",
@@ -64,7 +52,7 @@
       "project": "tochka"
     },
     {
-      "id": "cal-f17124e1b4f903e6",
+      "id": "cal-62730f7e3765d16e",
       "title": "ЦУП · Доверенности — срок 11.10.2026",
       "kind": "checkpoint",
       "start": "2026-10-11T09:00:00+03:00",
@@ -76,7 +64,7 @@
       "project": "hq"
     },
     {
-      "id": "cal-2354507feafb3906",
+      "id": "cal-6bc6df8f86f27d57",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
       "kind": "checkpoint",
       "start": "2026-10-12T09:00:00+03:00",
@@ -88,7 +76,7 @@
       "project": "hq"
     },
     {
-      "id": "cal-780f4511121c36ca",
+      "id": "cal-2c069275d0dbdebb",
       "title": "ОПЛАТА — Аренда Театральная, 37 — 63 000 ₽",
       "kind": "payment",
       "start": "2026-10-12T09:00:00+03:00",
@@ -100,7 +88,7 @@
       "project": "tochka"
     },
     {
-      "id": "cal-1d1e8dad1038732a",
+      "id": "cal-47d9e47ff70f5df4",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
       "kind": "checkpoint",
       "start": "2026-10-19T09:00:00+03:00",
@@ -112,7 +100,7 @@
       "project": "hq"
     },
     {
-      "id": "cal-4252e2da5c9b5b20",
+      "id": "cal-668e3cad43d99eb9",
       "title": "ОПЛАТА — Альфа — 1 647 ₽",
       "kind": "payment",
       "start": "2026-10-20T09:00:00+03:00",
@@ -124,7 +112,7 @@
       "project": "tochka"
     },
     {
-      "id": "cal-62db7b4602d8224e",
+      "id": "cal-9b20b31b82f467ba",
       "title": "ОПЛАТА — Интернет Боспор — 690 ₽",
       "kind": "payment",
       "start": "2026-10-22T09:00:00+03:00",
@@ -136,7 +124,7 @@
       "project": "bospor"
     },
     {
-      "id": "cal-bf6488e905a18815",
+      "id": "cal-f738912fde074892",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
       "kind": "checkpoint",
       "start": "2026-10-26T09:00:00+03:00",
@@ -148,7 +136,7 @@
       "project": "hq"
     },
     {
-      "id": "cal-c20e2d9a9fca8404",
+      "id": "cal-5e8075ec6fd37ec1",
       "title": "ОПЛАТА — Интернет Дубинина 19-26 — 650 ₽",
       "kind": "payment",
       "start": "2026-11-01T09:00:00+03:00",
@@ -160,7 +148,7 @@
       "project": "tochka"
     },
     {
-      "id": "cal-4637b582daac6c96",
+      "id": "cal-c065beb4caa9b514",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
       "kind": "checkpoint",
       "start": "2026-11-02T09:00:00+03:00",
@@ -172,7 +160,7 @@
       "project": "hq"
     },
     {
-      "id": "cal-367f7123fab489d2",
+      "id": "cal-9702fc43fd762871",
       "title": "ОПЛАТА — Аренда Козлова, 1 — 60 000 ₽",
       "kind": "payment",
       "start": "2026-11-05T09:00:00+03:00",
@@ -184,7 +172,7 @@
       "project": "tochka"
     },
     {
-      "id": "cal-d34dd28f6949f264",
+      "id": "cal-fad84783daa72bd5",
       "title": "КОНТРОЛЬ — сверка оплат с Полиной на 30 дней",
       "kind": "checkpoint",
       "start": "2026-11-09T09:00:00+03:00",
@@ -196,7 +184,7 @@
       "project": "hq"
     },
     {
-      "id": "cal-b0dddb7a77894c96",
+      "id": "cal-af214e16a54eac7d",
       "title": "ОПЛАТА — КЭР, вывоз мусора",
       "kind": "payment",
       "start": "2026-11-10T09:00:00+03:00",
@@ -208,7 +196,7 @@
       "project": "tochka"
     },
     {
-      "id": "cal-f6294f1828c63b85",
+      "id": "cal-4de4c54ba4faff22",
       "title": "ОПЛАТА — Аренда Театральная, 37 — 63 000 ₽",
       "kind": "payment",
       "start": "2026-11-12T09:00:00+03:00",
