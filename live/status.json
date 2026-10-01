@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-01T08:29:40.200324+00:00",
+  "generated_at": "2026-10-01T08:30:46.206687+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
       "id": "system",
       "title": "Система",
       "level": "error",
-      "detail": "Канал управления: работает · процессы: работает · свободно 176.1 ГБ · второй исполнитель активен без подтверждённого read-only режима"
+      "detail": "Канал управления: работает · процессы: работает · свободно 175.9 ГБ · второй исполнитель активен без подтверждённого read-only режима"
     },
     {
       "id": "visual",
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 7 с назад"
+      "detail": "Ожидают: 0 · проверка связи 5 с назад"
     },
     {
       "id": "rostok",
@@ -98,7 +98,7 @@
   ],
   "task_summary": {
     "schema": "tasks-public-1",
-    "generated_at": "2026-10-01T07:59:19.299457+00:00",
+    "generated_at": "2026-10-01T08:29:55.853188+00:00",
     "ttl_seconds": 3600,
     "authority": "project TASKS",
     "partial": true,
@@ -119,8 +119,8 @@
         "title": "PP-SKILL-ARTIFACT-001 — перевести публикационный контур Ростка на Task → Skill → Artifact → Evidence без создания новых ботов. Риск: важное.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T21:31:51.906292+00:00"
+        "fresh": true,
+        "verified_at": "2026-10-01T08:29:42.245699+00:00"
       },
       {
         "id": "1c15addefda0eb69",
@@ -128,8 +128,8 @@
         "title": "ИНВЕСТПРЕДЛОЖЕНИЕ ПО ЗЕМЕЛЬНЫМ ПРОЕКТАМ — активная задача от 17.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T21:01:25.648580+00:00"
+        "fresh": true,
+        "verified_at": "2026-10-01T08:29:43.507476+00:00"
       },
       {
         "id": "b81adc0557635c18",
@@ -137,8 +137,8 @@
         "title": "AB-BOOK-001 — Исходники книги и работа с книгами, поручение Алексея 27.09.2026.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T21:01:25.648580+00:00"
+        "fresh": true,
+        "verified_at": "2026-10-01T08:29:43.507476+00:00"
       },
       {
         "id": "54c68a998766e1ba",
@@ -146,8 +146,8 @@
         "title": "Дождаться завершения переноса электронной библиотеки и затем проверить результат без повторной загрузки дублей.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T21:01:31.802535+00:00"
+        "fresh": true,
+        "verified_at": "2026-10-01T08:29:50.827633+00:00"
       },
       {
         "id": "6a091c0f0d8d08b2",
@@ -155,27 +155,21 @@
         "title": "Следующий шаг: зафиксировать факт выступления и обратную связь; если выступление состоялось, сохранить подтверждённый итог и следующий результат.",
         "status": "OPEN",
         "deadline": null,
-        "fresh": false,
-        "verified_at": "2026-09-30T21:01:35.774461+00:00"
+        "fresh": true,
+        "verified_at": "2026-10-01T08:29:55.152432+00:00"
       }
     ],
     "proposal_count": 11,
     "today_complete": false,
-    "stale_rows": 6,
+    "stale_rows": 0,
     "missing_sources": [
       "ai-radar",
-      "alexander",
-      "h45",
-      "kinouroki",
-      "media",
-      "rostok",
-      "reo",
-      "rko"
+      "h45"
     ]
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-10-01T08:29:40.200324+00:00",
+    "generated_at": "2026-10-01T08:30:46.206687+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
