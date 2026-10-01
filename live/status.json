@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-01T05:43:35.171722+00:00",
+  "generated_at": "2026-10-01T05:44:45.162277+00:00",
   "ttl_seconds": 120,
   "cards": [
     {
@@ -55,7 +55,7 @@
       "id": "queue",
       "title": "GitHub queue",
       "level": "ok",
-      "detail": "Ожидают: 0 · проверка связи 0 с назад"
+      "detail": "Ожидают: 1 · проверка связи 5 с назад"
     },
     {
       "id": "rostok",
@@ -175,7 +175,7 @@
   },
   "inbox_summary": {
     "schema": "inbox-summary-1",
-    "generated_at": "2026-10-01T05:43:35.171722+00:00",
+    "generated_at": "2026-10-01T05:44:45.162277+00:00",
     "ttl_seconds": 120,
     "channels": {
       "telegram": {
