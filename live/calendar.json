@@ -1,9 +1,9 @@
 {
   "schema": "calendar-1",
   "ttl_seconds": 7200,
-  "generated_at": "2026-10-02T10:26:09.531651+00:00",
+  "generated_at": "2026-10-02T10:11:18.826Z",
   "events": [],
   "visibility": "private",
   "detail_available": false,
-  "source_status": "unavailable"
+  "source_status": "available"
 }
